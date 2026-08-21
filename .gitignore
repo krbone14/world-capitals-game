@@ -1,0 +1,8 @@
+.DS_Store
+Thumbs.db
+.claude/
+node_modules/
+tools/.cache/
+test-results/
+playwright-report/
+tools/.preview/

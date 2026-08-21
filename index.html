@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les Capitales d'Afrique · Capitals of Africa</title>
+<meta name="description" content="Jeu de géographie : place les 54 capitales et pays d'Afrique sur la carte. / Geography game: drag all 54 African capitals and countries onto the map.">
+<meta name="theme-color" content="#F6E9CD">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Capitales Afrique">
+<script>
+// Register the service worker for offline play (PWA).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+}
+</script>
+<script src="assets/dc-runtime.js"></script>
+</head>
+<body>
+
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<style>/* hebrew */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_3.woff2") format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_4.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_5.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* hebrew */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_3.woff2") format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_4.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_5.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* hebrew */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_3.woff2") format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_4.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_5.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* hebrew */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_3.woff2") format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_4.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("assets/asset_5.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_6.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_7.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_8.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_9.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_10.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_11.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_12.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_13.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_14.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/asset_15.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/asset_11.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/asset_12.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/asset_13.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/asset_14.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/asset_15.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/asset_11.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/asset_12.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/asset_13.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/asset_14.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/asset_15.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/asset_11.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/asset_12.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/asset_13.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/asset_14.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/asset_15.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<script src="assets/africa-geo.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Nunito', system-ui, sans-serif; }
+  @keyframes mapShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(3px)} }
+  @keyframes pinPop { 0%{transform:scale(0) translateY(8px);opacity:0} 60%{transform:scale(1.25) translateY(0);opacity:1} 100%{transform:scale(1) translateY(0);opacity:1} }
+  @keyframes toastIn { 0%{transform:translateY(14px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+  @keyframes cardIn { 0%{transform:translateY(16px) scale(.98);opacity:0} 100%{transform:translateY(0) scale(1);opacity:1} }
+  @keyframes starPop { 0%{transform:scale(0) rotate(-30deg);opacity:0} 70%{transform:scale(1.3) rotate(6deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+  @keyframes confettiFall { 0%{transform:translateY(-30px) rotate(0);opacity:1} 100%{transform:translateY(620px) rotate(540deg);opacity:0} }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  @keyframes badFlash { 0%,100%{opacity:0;transform:translate(-50%,8px)} 15%,75%{opacity:1;transform:translate(-50%,0)} }
+
+  /* Use dynamic viewport height on mobile so the browser URL bar doesn't hide the tray. */
+  @supports (height: 100dvh) {
+    .g-playroot { height: 100dvh !important; }
+  }
+
+  /* Mobile layout: map on top, chip tray at the bottom, compact top bar.
+     Inline styles handle the desktop layout, so overrides need !important. */
+  @media (max-width: 760px) {
+    .g-home { padding: 22px 16px 40px !important; }
+    .g-title { font-size: 33px !important; }
+    .g-subtitle { font-size: 15px !important; }
+    .g-topbar { padding: 7px 8px !important; gap: 7px !important; }
+    .g-region-name { font-size: 16px !important; }
+    .g-badge { padding: 5px 9px !important; }
+    .g-body { flex-direction: column !important; }
+    .g-map { padding: 6px !important; min-height: 0; }
+    .g-tray { width: 100% !important; flex: none !important; height: 33vh; border-left: none !important; border-top: 2px solid #EFE0C1; }
+    .g-tray-head { padding: 8px 12px 2px !important; }
+    .g-tray-title { font-size: 15px !important; }
+    .g-chips { flex-direction: row !important; flex-wrap: wrap; align-content: flex-start; gap: 8px !important; padding: 6px 10px 14px !important; }
+    .g-chip { padding: 8px 11px !important; }
+    .g-chip-cap { font-size: 15px !important; }
+    .g-zoom { left: 12px !important; bottom: 12px !important; }
+    .g-zoom button { width: 38px !important; height: 38px !important; }
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:radial-gradient(120% 120% at 50% 0%, #FCF4E2 0%, #F6E9CD 100%);color:#3B2F27;display:flex;flex-direction:column;">
+
+  <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+  <!-- ===================== HOME ===================== -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div class="g-home" style="max-width:1180px;width:100%;margin:0 auto;padding:46px 32px 60px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+      <div style="animation:cardIn .5s ease both;">
+        <div style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:2px solid #EAD7B0;border-radius:999px;padding:6px 15px 6px 8px;font-weight:800;font-size:13px;letter-spacing:.4px;color:#B07B3A;box-shadow:0 3px 0 #EAD7B0;">
+          <span style="width:22px;height:22px;border-radius:50%;background:#E2A24B;display:inline-block;"></span>
+          {{ t.badge }}
+        </div>
+        <h1 class="g-title" style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:54px;line-height:1.02;margin:16px 0 6px;letter-spacing:-.5px;">{{ homeTitle }}</h1>
+        <p class="g-subtitle" style="font-size:18px;color:#7A6A57;max-width:560px;margin:0;font-weight:600;">{{ homeSubtitle }}</p>
+      </div>
+      <button onclick="{{ onToggleLang }}" style="cursor:pointer;background:#fff;border:2px solid #EAD7B0;border-radius:14px;padding:11px 16px;font-family:'Nunito';font-weight:800;font-size:15px;color:#3B2F27;box-shadow:0 4px 0 #EAD7B0;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">{{ langFlag }}</span>{{ langLabel }}
+      </button>
+    </div>
+
+    <div style="margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;animation:cardIn .5s ease both;">
+      <span style="font-weight:800;font-size:14px;color:#9A7E5C;letter-spacing:.3px;">{{ t.modeQ }}</span>
+      <div style="display:inline-flex;background:#fff;border:2px solid #EAD7B0;border-radius:16px;padding:5px;box-shadow:0 4px 0 #EAD7B0;gap:5px;">
+        <button onclick="{{ onModeCap }}" style="cursor:pointer;border:none;border-radius:11px;padding:10px 20px;font-family:'Nunito';font-weight:800;font-size:15px;background:{{ modeCapBg }};color:{{ modeCapColor }};display:flex;align-items:center;gap:8px;">
+          <span style="width:13px;height:13px;border-radius:50%;background:{{ modeCapDot }};display:inline-block;"></span>{{ t.modeCap }}
+        </button>
+        <button onclick="{{ onModeCountry }}" style="cursor:pointer;border:none;border-radius:11px;padding:10px 20px;font-family:'Nunito';font-weight:800;font-size:15px;background:{{ modeCountryBg }};color:{{ modeCountryColor }};display:flex;align-items:center;gap:8px;">
+          <span style="width:13px;height:13px;border-radius:3px;background:{{ modeCountryDot }};display:inline-block;"></span>{{ t.modeCountry }}
+        </button>
+        <button onclick="{{ onModeFlag }}" style="cursor:pointer;border:none;border-radius:11px;padding:10px 20px;font-family:'Nunito';font-weight:800;font-size:15px;background:{{ modeFlagBg }};color:{{ modeFlagColor }};display:flex;align-items:center;gap:8px;">
+          <span style="width:17px;height:12px;border-radius:2px;background:{{ modeFlagDot }};display:inline-block;"></span>{{ t.modeFlag }}
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">
+      <sc-for list="{{ regionCards }}" as="r" hint-placeholder-count="5">
+        <button onclick="{{ r.onPlay }}" style="text-align:left;cursor:pointer;border:none;background:{{ r.bg }};border-radius:22px;padding:22px 22px 20px;box-shadow:0 6px 0 {{ r.shadow }};position:relative;overflow:hidden;animation:cardIn .5s ease both;font-family:'Nunito';">
+          <div style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);"></div>
+          <div style="position:relative;display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;color:#fff;line-height:1.1;">{{ r.name }}</div>
+              <div style="color:rgba(255,255,255,.9);font-weight:700;font-size:14px;margin-top:3px;">{{ r.countText }}</div>
+            </div>
+            <div style="display:flex;gap:3px;">
+              <sc-for list="{{ r.starArr }}" as="s" hint-placeholder-count="3">
+                <span style="font-size:19px;line-height:1;color:{{ s.color }};text-shadow:0 1px 1px rgba(0,0,0,.15);">★</span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="position:relative;margin-top:16px;display:flex;align-items:center;gap:8px;">
+            <span style="background:rgba(255,255,255,.92);color:{{ r.shadow }};font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.play }} ▸</span>
+            <span style="color:#fff;font-weight:700;font-size:13px;opacity:.92;">{{ r.bestText }}</span>
+          </div>
+        </button>
+      </sc-for>
+
+      <button onclick="{{ onPlayAll }}" style="text-align:left;cursor:pointer;border:2px dashed #C9A86B;background:#FFFBF1;border-radius:22px;padding:22px;box-shadow:0 6px 0 #EAD7B0;animation:cardIn .5s ease both;font-family:'Nunito';">
+        <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;color:#A65A3C;line-height:1.1;">{{ t.allTitle }}</div>
+        <div style="color:#9A7E5C;font-weight:700;font-size:14px;margin-top:3px;">{{ allCountText }}</div>
+        <div style="margin-top:16px;"><span style="background:#A65A3C;color:#fff;font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.challenge }} ⚡</span></div>
+      </button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===================== PLAY ===================== -->
+  <sc-if value="{{ isPlay }}" hint-placeholder-val="{{ true }}">
+  <div class="g-playroot" style="display:flex;flex-direction:column;height:100vh;">
+    <!-- topbar -->
+    <div class="g-topbar" style="display:flex;align-items:center;gap:14px;padding:13px 22px;background:#fff;border-bottom:2px solid #EFE0C1;flex-wrap:wrap;">
+      <button onclick="{{ onBack }}" style="cursor:pointer;background:#F6ECD6;border:none;border-radius:11px;width:40px;height:40px;font-size:19px;font-weight:800;color:#7A6A57;">‹</button>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span style="width:15px;height:15px;border-radius:4px;background:{{ playColor }};display:inline-block;"></span>
+        <span class="g-region-name" style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:21px;">{{ playRegionName }}</span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="g-badge" style="display:flex;align-items:center;gap:9px;background:#F6ECD6;border-radius:12px;padding:7px 14px;font-weight:800;">
+        <span style="color:#9A7E5C;font-size:13px;">{{ t.placed }}</span>
+        <span style="font-family:'Fredoka';font-size:17px;color:#3B2F27;">{{ progressText }}</span>
+      </div>
+      <div class="g-badge" style="display:flex;align-items:center;gap:7px;background:#FCEFD6;border-radius:12px;padding:7px 14px;font-weight:800;">
+        <span style="color:#E2A24B;font-size:15px;">★</span>
+        <span style="font-family:'Fredoka';font-size:17px;color:#3B2F27;">{{ scoreText }}</span>
+      </div>
+      <sc-if value="{{ showNamesBtn }}" hint-placeholder-val="{{ true }}">
+      <button onclick="{{ onToggleNames }}" title="{{ t.showNames }}" style="cursor:pointer;background:{{ namesBtnBg }};border:2px solid #EFE0C1;border-radius:11px;height:40px;padding:0 13px;font-weight:800;font-size:13px;color:{{ namesBtnColor }};">{{ t.namesShort }}</button>
+      </sc-if>
+      <button onclick="{{ onToggleSound }}" style="cursor:pointer;background:#F6ECD6;border:none;border-radius:11px;width:40px;height:40px;font-size:16px;">{{ soundIcon }}</button>
+      <button onclick="{{ onToggleLang }}" style="cursor:pointer;background:#F6ECD6;border:none;border-radius:11px;height:40px;padding:0 13px;font-weight:800;font-size:14px;">{{ langFlag }}</button>
+    </div>
+
+    <!-- body -->
+    <div class="g-body" style="flex:1;display:flex;min-height:0;">
+      <!-- map -->
+      <div class="g-map" style="flex:1;position:relative;display:flex;min-width:0;padding:18px;">
+       <div ref="{{ fitRefObj }}" style="flex:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;">
+        <div data-map-pan="" ref="{{ vpRefObj }}" style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:16px;touch-action:none;animation:{{ shakeAnim }};cursor:{{ mapCursor }};">
+         <div ref="{{ panRefObj }}" style="position:absolute;inset:0;transform:translate({{ panX }}px,{{ panY }}px) scale({{ zoom }});transform-origin:center center;">
+          <!-- Aspect-correct map box, centered by fitMap(); the pan viewport itself
+               fills the whole available area so zooming reveals map, not margins. -->
+          <div ref="{{ mapBoxRefObj }}" style="position:absolute;left:0;top:0;width:100%;height:100%;">
+          <svg ref="{{ svgRefObj }}" viewBox="0 0 1000 957" width="100%" height="100%" style="display:block;overflow:visible;touch-action:none;">
+            <defs>
+              <filter id="landShadow" x="-5%" y="-5%" width="110%" height="115%">
+                <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000" flood-opacity="0.10"></feDropShadow>
+              </filter>
+            </defs>
+            <g filter="url(#landShadow)">
+              <sc-for list="{{ countries }}" as="c" hint-placeholder-count="50">
+                <path data-id="{{ c.id }}" d="{{ c.d }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" stroke-width="1" stroke-linejoin="round"></path>
+              </sc-for>
+            </g>
+            <!-- island target dots -->
+            <sc-for list="{{ islandDots }}" as="i" hint-placeholder-count="0">
+              <circle cx="{{ i.x }}" cy="{{ i.y }}" r="4" fill="{{ i.fill }}" stroke="#fff" stroke-width="1.4"></circle>
+            </sc-for>
+          </svg>
+
+          <!-- HTML overlay: country name labels + placed pins (SVG <text> can't host interpolated text) -->
+          <div style="position:absolute;inset:0;pointer-events:none;">
+            <sc-for list="{{ nameLabels }}" as="n" hint-placeholder-count="0">
+              <div style="position:absolute;left:{{ n.leftPct }}%;top:{{ n.topPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});font-family:'Nunito';font-weight:800;font-size:12px;color:#5A4836;background:rgba(255,253,247,.82);padding:1px 6px;border-radius:7px;white-space:nowrap;line-height:1.3;">{{ n.text }}</div>
+            </sc-for>
+            <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
+              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.topPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
+                <div style="width:13px;height:13px;border-radius:50%;background:{{ p.color }};border:2.5px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.25);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"></div>
+              </div>
+            </sc-for>
+            <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
+              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
+                <div style="display:flex;align-items:center;gap:5px;font-family:'Fredoka';font-weight:600;font-size:13.5px;color:{{ p.color }};background:#fff;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.16);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"><span style="display:{{ p.flagDisplay }};width:19px;height:13px;border-radius:2px;background-image:url('{{ p.flag }}');background-size:cover;background-position:center;box-shadow:0 0 0 1px #EFE0C1;"></span>{{ p.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+          </div>
+         </div>
+
+          <!-- bad flash -->
+          <sc-if value="{{ badOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:50%;top:18px;transform:translateX(-50%);background:#C25A4A;color:#fff;font-weight:800;padding:9px 18px;border-radius:999px;box-shadow:0 6px 16px rgba(0,0,0,.2);animation:badFlash 1.2s ease both;white-space:nowrap;z-index:5;">{{ badText }}</div>
+          </sc-if>
+        </div>
+       </div>
+        <!-- zoom controls -->
+        <div class="g-zoom" style="position:absolute;left:30px;bottom:30px;display:flex;flex-direction:column;gap:8px;z-index:6;">
+          <button data-zoom-ctrl="" onclick="{{ onZoomIn }}" style="cursor:pointer;width:44px;height:44px;border:2px solid #EFE0C1;background:#fff;border-radius:12px;font-size:24px;font-weight:700;color:#5A4836;box-shadow:0 3px 0 #EFE0C1;line-height:1;">+</button>
+          <button data-zoom-ctrl="" onclick="{{ onZoomOut }}" style="cursor:pointer;width:44px;height:44px;border:2px solid #EFE0C1;background:#fff;border-radius:12px;font-size:26px;font-weight:700;color:#5A4836;box-shadow:0 3px 0 #EFE0C1;line-height:1;">−</button>
+          <button data-zoom-ctrl="" onclick="{{ onZoomReset }}" title="{{ t.reset }}" style="cursor:pointer;width:44px;height:44px;border:2px solid #EFE0C1;background:#fff;border-radius:12px;font-size:18px;color:#5A4836;box-shadow:0 3px 0 #EFE0C1;line-height:1;">⤢</button>
+        </div>
+      </div>
+
+      <!-- tray -->
+      <div class="g-tray" style="width:300px;flex:none;background:#fff;border-left:2px solid #EFE0C1;display:flex;flex-direction:column;min-height:0;">
+        <div class="g-tray-head" style="padding:16px 18px 10px;">
+          <div class="g-tray-title" style="font-family:'Fredoka';font-weight:600;font-size:18px;">{{ trayTitle }}</div>
+          <div style="font-size:13px;color:#9A7E5C;font-weight:700;margin-top:2px;">{{ trayHint }}</div>
+        </div>
+        <div class="g-chips" style="flex:1;overflow-y:auto;padding:6px 16px 18px;display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+            <div class="g-chip" data-cap-id="{{ c.id }}" draggable="false" style="cursor:grab;user-select:none;touch-action:pan-y;background:{{ c.bg }};border:2px solid {{ c.border }};border-left:7px solid {{ c.color }};border-radius:14px;padding:11px 14px;opacity:{{ c.opacity }};box-shadow:0 3px 0 {{ c.shadow }};transition:transform .08s;">
+              <div style="display:{{ c.flagDisplay }};width:66px;height:44px;border-radius:6px;border:2px solid #EFE0C1;background-color:#F6ECD6;background-image:url('{{ c.flag }}');background-size:cover;background-position:center;pointer-events:none;"></div>
+              <div class="g-chip-cap" style="display:{{ c.capDisplay }};font-family:'Fredoka';font-weight:600;font-size:17px;line-height:1.15;color:#3B2F27;">{{ c.cap }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ trayEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center;color:#B49A77;font-weight:700;padding:30px 10px;">{{ t.allDone }}</div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- drag ghost -->
+  <div ref="{{ ghostRefObj }}" style="position:fixed;left:0;top:0;z-index:90;pointer-events:none;display:{{ ghostDisplay }};background:#fff;border:2px solid {{ playColor }};border-left:7px solid {{ playColor }};border-radius:14px;padding:11px 14px;box-shadow:0 12px 26px rgba(0,0,0,.22);transform:translate(-9999px,-9999px);">
+    <div style="display:{{ ghostFlagDisplay }};width:66px;height:44px;border-radius:6px;border:2px solid #EFE0C1;background-color:#F6ECD6;background-image:url('{{ ghostFlag }}');background-size:cover;background-position:center;"></div>
+    <div style="display:{{ ghostCapDisplay }};font-family:'Fredoka';font-weight:600;font-size:17px;line-height:1.15;color:#3B2F27;">{{ ghostCap }}</div>
+  </div>
+
+  <!-- fact modal -->
+  <sc-if value="{{ factOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(40,28,18,.34);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="{{ onCloseFact }}">
+      <div style="background:#fff;border-radius:24px;max-width:430px;width:100%;padding:26px 26px 22px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:cardIn .35s ease both;border-top:8px solid {{ factColor }};">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="width:34px;height:34px;flex:none;border-radius:50%;background:{{ factColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;">✓</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Fredoka';font-weight:600;font-size:22px;line-height:1;">{{ factCap }}</div>
+            <div style="font-size:13px;font-weight:800;color:{{ factColor }};letter-spacing:.3px;">{{ factCountry }}</div>
+          </div>
+          <!-- Country flag (background-image so a missing/offline flag degrades to a plain box, no broken-image icon) -->
+          <div title="{{ factCountry }}" style="width:58px;height:40px;flex:none;border-radius:7px;border:2px solid #EFE0C1;box-shadow:0 2px 6px rgba(0,0,0,.14);background-color:#F6ECD6;background-image:url('{{ factFlag }}');background-size:cover;background-position:center;animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"></div>
+        </div>
+        <p style="font-size:16px;line-height:1.5;color:#52453A;font-weight:600;margin:16px 0 20px;">{{ factText }}</p>
+        <button onclick="{{ onCloseFact }}" style="cursor:pointer;width:100%;background:{{ factColor }};color:#fff;border:none;border-radius:13px;padding:13px;font-family:'Nunito';font-weight:800;font-size:16px;">{{ factBtn }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  </sc-if>
+
+  <!-- ===================== RESULT ===================== -->
+  <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;">
+    <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="0">
+      <span style="position:absolute;top:-30px;left:{{ c.left }};width:{{ c.size }};height:{{ c.size }};background:{{ c.color }};border-radius:{{ c.radius }};animation:confettiFall {{ c.dur }} linear {{ c.delay }} forwards;"></span>
+    </sc-for>
+    <div style="background:#fff;border-radius:28px;max-width:460px;width:100%;padding:34px 32px;text-align:center;box-shadow:0 22px 60px rgba(0,0,0,.18);position:relative;z-index:2;animation:cardIn .4s ease both;">
+      <div style="font-family:'Fredoka';font-weight:600;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:{{ playColor }};">{{ resRegionName }}</div>
+      <div style="display:flex;justify-content:center;gap:10px;margin:16px 0 8px;">
+        <sc-for list="{{ resStars }}" as="s" hint-placeholder-count="3">
+          <span style="font-size:54px;line-height:1;color:{{ s.color }};animation:starPop .5s cubic-bezier(.2,1.4,.5,1) {{ s.delay }} both;text-shadow:0 3px 0 rgba(0,0,0,.08);">★</span>
+        </sc-for>
+      </div>
+      <h2 style="font-family:'Fredoka';font-weight:700;font-size:30px;margin:8px 0 4px;">{{ resTitle }}</h2>
+      <p style="font-size:16px;color:#7A6A57;font-weight:700;margin:0 0 6px;">{{ resMsg }}</p>
+      <div style="display:flex;justify-content:center;gap:22px;margin:20px 0 24px;">
+        <div><div style="font-family:'Fredoka';font-size:30px;color:{{ playColor }};">{{ resScore }}</div><div style="font-size:12px;font-weight:800;color:#9A7E5C;text-transform:uppercase;letter-spacing:.5px;">{{ t.points }}</div></div>
+        <div style="width:2px;background:#EFE0C1;"></div>
+        <div><div style="font-family:'Fredoka';font-size:30px;color:{{ playColor }};">{{ resAccuracy }}</div><div style="font-size:12px;font-weight:800;color:#9A7E5C;text-transform:uppercase;letter-spacing:.5px;">{{ t.firstTry }}</div></div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button onclick="{{ onReplay }}" style="cursor:pointer;flex:1;background:{{ playColor }};color:#fff;border:none;border-radius:14px;padding:14px;font-family:'Nunito';font-weight:800;font-size:16px;box-shadow:0 5px 0 rgba(0,0,0,.12);">{{ t.replay }}</button>
+        <button onclick="{{ onHome }}" style="cursor:pointer;flex:1;background:#F6ECD6;color:#7A6A57;border:none;border-radius:14px;padding:14px;font-family:'Nunito';font-weight:800;font-size:16px;">{{ t.home }}</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  </sc-if>
+
+  <!-- loading -->
+  <sc-if value="{{ notReady }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;font-family:'Fredoka';font-size:22px;color:#B49A77;">…</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  svgRef = React.createRef();
+  ghostRef = React.createRef();
+  vpRef = React.createRef();
+  panRef = React.createRef();
+  fitRef = React.createRef();
+  mapBoxRef = React.createRef();
+
+  state = {
+    ready: false,
+    lang: 'fr',
+    mode: 'cap',           // cap (capitals) | country (place the country)
+    screen: 'home',        // home | play | result
+    regionId: null,        // current region id or 'all'
+    queue: [],             // ids to place
+    placed: {},            // id -> true
+    wrong: {},             // id -> wrongCount
+    score: 0,
+    showNames: false,
+    soundOn: true,
+    zoom: 1, panX: 0, panY: 0,
+    dragId: null,
+    selectedId: null,      // chip selected by tap/click (tap-to-place flow)
+    factOpen: false,
+    factId: null,
+    factIdx: 0,            // which anecdote of the country to show
+    badOpen: false,
+    shake: false,
+    progress: {},          // regionId -> {stars,best}
+    confetti: [],
+    resStars: 0, resAcc: 0,
+  };
+
+  TOL = 22;
+
+  REGIONS = [
+    { id:'nord',  fr:'Afrique du Nord',    en:'North Africa',   bg:'#E2A24B', shadow:'#B97E2C', ids:['DZA','EGY','LBY','MAR','TUN','SDN'] },
+    { id:'ouest', fr:"Afrique de l'Ouest", en:'West Africa',    bg:'#DD7A57', shadow:'#B25636', ids:['BEN','BFA','CPV','CIV','GMB','GHA','GIN','GNB','LBR','MLI','MRT','NER','NGA','SEN','SLE','TGO'] },
+    { id:'centre',fr:'Afrique Centrale',   en:'Central Africa', bg:'#3F9E78', shadow:'#2C7A5A', ids:['AGO','CMR','CAF','TCD','COG','COD','GNQ','GAB','STP'] },
+    { id:'est',   fr:"Afrique de l'Est",   en:'East Africa',    bg:'#5B86C4', shadow:'#3E63A0', ids:['BDI','COM','DJI','ERI','ETH','KEN','MDG','MWI','MUS','RWA','SYC','SOM','SSD','TZA','UGA'] },
+    { id:'sud',   fr:'Afrique Australe',   en:'Southern Africa',bg:'#B06A9A', shadow:'#8A4C78', ids:['BWA','SWZ','LSO','MOZ','NAM','ZAF','ZMB','ZWE'] },
+  ];
+
+  C = {
+    DZA:{cf:'Algérie',ce:'Algeria',capFr:'Alger',ff:"Le plus grand pays d'Afrique par sa superficie.",fe:'The largest country in Africa by area.'},
+    EGY:{cf:'Égypte',ce:'Egypt',capFr:'Le Caire',ff:'Les pyramides de Gizeh ont plus de 4 500 ans.',fe:'The Giza pyramids are over 4,500 years old.'},
+    LBY:{cf:'Libye',ce:'Libya',capFr:'Tripoli',ff:'Plus de 90 % du pays est couvert par le Sahara.',fe:'Over 90% of the country is Sahara desert.'},
+    MAR:{cf:'Maroc',ce:'Morocco',capFr:'Rabat',ff:"Fès abrite la plus vieille université du monde encore en activité.",fe:"Fez has the world's oldest still-running university."},
+    TUN:{cf:'Tunisie',ce:'Tunisia',capFr:'Tunis',ff:'Des scènes de Star Wars y furent tournées dans le désert.',fe:'Star Wars desert scenes were filmed here.'},
+    SDN:{cf:'Soudan',ce:'Sudan',capFr:'Khartoum',ff:"Le Soudan compte plus de pyramides que l'Égypte !",fe:'Sudan has more pyramids than Egypt!'},
+    BEN:{cf:'Bénin',ce:'Benin',capFr:'Porto-Novo',ff:'Berceau historique du vaudou.',fe:'The historical birthplace of voodoo.'},
+    BFA:{cf:'Burkina Faso',ce:'Burkina Faso',capFr:'Ouagadougou',ff:'Son nom signifie « pays des hommes intègres ».',fe:"Its name means 'land of honest people'."},
+    CPV:{cf:'Cap-Vert',ce:'Cape Verde',capFr:'Praia',ff:'Un archipel de 10 îles volcaniques dans l\u2019Atlantique.',fe:'An archipelago of 10 volcanic islands in the Atlantic.'},
+    CIV:{cf:"Côte d'Ivoire",ce:'Ivory Coast',capFr:'Yamoussoukro',ff:'Premier producteur mondial de cacao.',fe:"The world's top cocoa producer."},
+    GMB:{cf:'Gambie',ce:'Gambia',capFr:'Banjul',ff:"Le plus petit pays d'Afrique continentale.",fe:'The smallest country in mainland Africa.'},
+    GHA:{cf:'Ghana',ce:'Ghana',capFr:'Accra',ff:'1er pays d\u2019Afrique subsaharienne indépendant (1957).',fe:'First independent sub-Saharan country (1957).'},
+    GIN:{cf:'Guinée',ce:'Guinea',capFr:'Conakry',ff:'Le fleuve Niger y prend sa source.',fe:'The Niger River begins here.'},
+    GNB:{cf:'Guinée-Bissau',ce:'Guinea-Bissau',capFr:'Bissau',ff:'Connu pour ses îles Bijagos.',fe:'Known for the Bijagós islands.'},
+    LBR:{cf:'Libéria',ce:'Liberia',capFr:'Monrovia',ff:'Fondé au 19e siècle par des Afro-Américains affranchis.',fe:'Founded in the 1800s by freed African-Americans.'},
+    MLI:{cf:'Mali',ce:'Mali',capFr:'Bamako',ff:'Tombouctou fut un grand centre de savoir médiéval.',fe:'Timbuktu was a great medieval center of learning.'},
+    MRT:{cf:'Mauritanie',ce:'Mauritania',capFr:'Nouakchott',ff:'Un de ses trains de minerai est parmi les plus longs du monde.',fe:"Home to one of the world's longest trains."},
+    NER:{cf:'Niger',ce:'Niger',capFr:'Niamey',ff:'Plus des deux tiers du pays sont dans le Sahara.',fe:'More than two-thirds lies in the Sahara.'},
+    NGA:{cf:'Nigéria',ce:'Nigeria',capFr:'Abuja',ff:"Pays le plus peuplé d'Afrique.",fe:'The most populous country in Africa.'},
+    SEN:{cf:'Sénégal',ce:'Senegal',capFr:'Dakar',ff:'Le lac Rose doit sa couleur à des micro-algues.',fe:'Lake Retba is pink thanks to micro-algae.'},
+    SLE:{cf:'Sierra Leone',ce:'Sierra Leone',capFr:'Freetown',ff:'Possède un des plus grands ports naturels du monde.',fe:"Has one of the world's largest natural harbors."},
+    TGO:{cf:'Togo',ce:'Togo',capFr:'Lomé',ff:'Une étroite bande de terre, de la côte au nord.',fe:'A narrow strip of land from coast to interior.'},
+    AGO:{cf:'Angola',ce:'Angola',capFr:'Luanda',ff:'Le portugais y est la langue officielle.',fe:'Portuguese is the official language.'},
+    CMR:{cf:'Cameroun',ce:'Cameroon',capFr:'Yaoundé',ff:"Surnommé « l'Afrique en miniature ».",fe:"Nicknamed 'Africa in miniature'."},
+    CAF:{cf:'Centrafrique',ce:'Central African Rep.',capFr:'Bangui',ff:'Pays enclavé au cœur du continent.',fe:"A landlocked country at the continent's heart."},
+    TCD:{cf:'Tchad',ce:'Chad',capFr:"N'Djamena",ff:'Le lac Tchad a beaucoup rétréci en 50 ans.',fe:'Lake Chad has shrunk dramatically in 50 years.'},
+    COG:{cf:'Congo',ce:'Congo',capFr:'Brazzaville',ff:'Traversé par l\u2019équateur.',fe:'The equator runs through it.'},
+    COD:{cf:'RD Congo',ce:'DR Congo',capFr:'Kinshasa',ff:"2e plus grand pays d'Afrique, riche en forêts.",fe:"Africa's 2nd-largest country, rich in rainforest."},
+    GNQ:{cf:'Guinée équat.',ce:'Eq. Guinea',capFr:'Malabo',ff:'Seul pays africain hispanophone.',fe:'The only Spanish-speaking African country.'},
+    GAB:{cf:'Gabon',ce:'Gabon',capFr:'Libreville',ff:'Près de 90 % du territoire est forêt.',fe:'Almost 90% is covered by forest.'},
+    STP:{cf:'Sao Tomé-et-P.',ce:'São Tomé & Príncipe',capFr:'São Tomé',ff:'Deux îles posées sur l\u2019équateur.',fe:'Two islands sitting on the equator.'},
+    BDI:{cf:'Burundi',ce:'Burundi',capFr:'Gitega',ff:'Une des sources les plus lointaines du Nil.',fe:"One of the Nile's most distant sources."},
+    COM:{cf:'Comores',ce:'Comoros',capFr:'Moroni',ff:'Surnommées les « îles de la Lune ».',fe:"Nicknamed the 'islands of the Moon'."},
+    DJI:{cf:'Djibouti',ce:'Djibouti',capFr:'Djibouti',ff:"Le lac Assal est le point le plus bas d'Afrique.",fe:'Lake Assal is the lowest point in Africa.'},
+    ERI:{cf:'Érythrée',ce:'Eritrea',capFr:'Asmara',ff:'Asmara est célèbre pour son architecture Art déco.',fe:'Asmara is famous for its Art Deco architecture.'},
+    ETH:{cf:'Éthiopie',ce:'Ethiopia',capFr:'Addis-Abeba',ff:'Jamais colonisée, elle a son propre calendrier.',fe:'Never colonized, it has its own calendar.'},
+    KEN:{cf:'Kenya',ce:'Kenya',capFr:'Nairobi',ff:'La grande migration du Masai Mara y est célèbre.',fe:"The Masai Mara's great migration is famous here."},
+    MDG:{cf:'Madagascar',ce:'Madagascar',capFr:'Antananarivo',ff:'90 % de sa faune ne vit nulle part ailleurs.',fe:'90% of its wildlife lives nowhere else.'},
+    MWI:{cf:'Malawi',ce:'Malawi',capFr:'Lilongwe',ff:'Le lac Malawi abrite des centaines d\u2019espèces de poissons.',fe:'Lake Malawi holds hundreds of fish species.'},
+    MUS:{cf:'Maurice',ce:'Mauritius',capFr:'Port-Louis',ff:'Le dodo, oiseau disparu, vivait sur cette île.',fe:'The extinct dodo bird lived on this island.'},
+    RWA:{cf:'Rwanda',ce:'Rwanda',capFr:'Kigali',ff:'Surnommé le « pays aux mille collines ».',fe:"Nicknamed the 'land of a thousand hills'."},
+    SYC:{cf:'Seychelles',ce:'Seychelles',capFr:'Victoria',ff:'115 îles dans l\u2019océan Indien.',fe:'115 islands in the Indian Ocean.'},
+    SOM:{cf:'Somalie',ce:'Somalia',capFr:'Mogadiscio',ff:"Le plus long littoral d'Afrique continentale.",fe:'The longest coastline of mainland Africa.'},
+    ZAF:{cf:'Afrique du Sud',ce:'South Africa',capFr:'Pretoria',ff:'Possède trois capitales officielles.',fe:'Has three official capital cities.'},
+    SSD:{cf:'Soudan du Sud',ce:'South Sudan',capFr:'Djouba',ff:'Le plus jeune pays du monde (2011).',fe:"The world's youngest country (2011)."},
+    TZA:{cf:'Tanzanie',ce:'Tanzania',capFr:'Dodoma',ff:'Le Kilimandjaro, plus haut sommet d\u2019Afrique, y est.',fe:"Mt Kilimanjaro, Africa's highest peak, is here."},
+    UGA:{cf:'Ouganda',ce:'Uganda',capFr:'Kampala',ff:'Partage le lac Victoria, le plus grand d\u2019Afrique.',fe:"Shares Lake Victoria, Africa's largest lake."},
+    BWA:{cf:'Botswana',ce:'Botswana',capFr:'Gaborone',ff:'Le delta de l\u2019Okavango est un paradis animalier.',fe:'The Okavango Delta is a wildlife paradise.'},
+    SWZ:{cf:'Eswatini',ce:'Eswatini',capFr:'Mbabané',ff:'Une des dernières monarchies absolues au monde.',fe:"One of the world's last absolute monarchies."},
+    LSO:{cf:'Lesotho',ce:'Lesotho',capFr:'Maseru',ff:'Entièrement situé à plus de 1 000 m d\u2019altitude.',fe:'Entirely above 1,000 m elevation.'},
+    MOZ:{cf:'Mozambique',ce:'Mozambique',capFr:'Maputo',ff:'Son drapeau arbore un fusil AK-47.',fe:'Its flag features an AK-47 rifle.'},
+    NAM:{cf:'Namibie',ce:'Namibia',capFr:'Windhoek',ff:'Les dunes du Namib comptent parmi les plus hautes.',fe:"The Namib's dunes are among Earth's tallest."},
+    ZMB:{cf:'Zambie',ce:'Zambia',capFr:'Lusaka',ff:'Partage les chutes Victoria avec le Zimbabwe.',fe:'Shares Victoria Falls with Zimbabwe.'},
+    ZWE:{cf:'Zimbabwe',ce:'Zimbabwe',capFr:'Harare',ff:'Les ruines du Grand Zimbabwe ont nommé le pays.',fe:'The Great Zimbabwe ruins named the country.'},
+  };
+
+  // ISO 3166-1 alpha-2 codes, used to load flag images from flagcdn.com
+  A2 = {
+    DZA:'dz',EGY:'eg',LBY:'ly',MAR:'ma',TUN:'tn',SDN:'sd',
+    BEN:'bj',BFA:'bf',CPV:'cv',CIV:'ci',GMB:'gm',GHA:'gh',GIN:'gn',GNB:'gw',LBR:'lr',MLI:'ml',MRT:'mr',NER:'ne',NGA:'ng',SEN:'sn',SLE:'sl',TGO:'tg',
+    AGO:'ao',CMR:'cm',CAF:'cf',TCD:'td',COG:'cg',COD:'cd',GNQ:'gq',GAB:'ga',STP:'st',
+    BDI:'bi',COM:'km',DJI:'dj',ERI:'er',ETH:'et',KEN:'ke',MDG:'mg',MWI:'mw',MUS:'mu',RWA:'rw',SYC:'sc',SOM:'so',ZAF:'za',SSD:'ss',TZA:'tz',UGA:'ug',
+    BWA:'bw',SWZ:'sz',LSO:'ls',MOZ:'mz',NAM:'na',ZMB:'zm',ZWE:'zw',
+  };
+
+  // Extra fun facts per country (French / English). Combined with the base fact
+  // from C so the success popup doesn't always show the same anecdote.
+  XF = {
+    DZA:{ff:["Le Sahara couvre environ 80 % de l'Algérie.","Alger est surnommée « Alger la Blanche » pour ses immeubles blancs."],fe:["The Sahara covers about 80% of Algeria.","Algiers is nicknamed 'Algiers the White' for its white buildings."]},
+    EGY:{ff:["Le Nil, qui traverse l'Égypte, est l'un des plus longs fleuves du monde.","L'agglomération du Caire compte plus de 20 millions d'habitants."],fe:["The Nile, flowing through Egypt, is one of the world's longest rivers.","Greater Cairo is home to more than 20 million people."]},
+    LBY:{ff:["La Libye possède les plus grandes réserves de pétrole d'Afrique.","Leptis Magna compte parmi les plus belles ruines romaines du monde."],fe:["Libya has Africa's largest oil reserves.","Leptis Magna is among the world's finest Roman ruins."]},
+    MAR:{ff:["Seuls 14 km de mer séparent le Maroc de l'Europe.","Marrakech est surnommée « la ville rouge »."],fe:["Only 14 km of sea separate Morocco from Europe.","Marrakesh is nicknamed 'the Red City'."]},
+    TUN:{ff:["L'antique cité de Carthage se trouvait tout près de Tunis.","La Tunisie est le pays le plus au nord de l'Afrique."],fe:["The ancient city of Carthage stood right next to Tunis.","Tunisia is Africa's northernmost country."]},
+    SDN:{ff:["Le Nil Bleu et le Nil Blanc se rejoignent à Khartoum.","C'était le plus grand pays d'Afrique avant 2011."],fe:["The Blue Nile and White Nile meet in Khartoum.","It was Africa's largest country until 2011."]},
+    BEN:{ff:["Le village de Ganvié est bâti sur pilotis au milieu d'un lac.","Porto-Novo est la capitale, mais Cotonou est la plus grande ville."],fe:["Ganvié village is built on stilts in the middle of a lake.","Porto-Novo is the capital, but Cotonou is the biggest city."]},
+    BFA:{ff:["Ouagadougou accueille le FESPACO, le plus grand festival de cinéma d'Afrique.","Ses habitants s'appellent les Burkinabè."],fe:["Ouagadougou hosts FESPACO, Africa's biggest film festival.","Its people are called the Burkinabè."]},
+    CPV:{ff:["Les îles étaient désertes avant l'arrivée des navigateurs au 15e siècle.","La morna, sa musique traditionnelle, est classée à l'UNESCO."],fe:["The islands were uninhabited until sailors arrived in the 1400s.","Its traditional morna music is UNESCO-listed."]},
+    CIV:{ff:["La basilique de Yamoussoukro est l'une des plus grandes églises du monde.","Abidjan est la plus grande ville, mais Yamoussoukro est la capitale."],fe:["Yamoussoukro's basilica is one of the largest churches on Earth.","Abidjan is the biggest city, but Yamoussoukro is the capital."]},
+    GMB:{ff:["Le pays suit le fleuve Gambie sur toute sa longueur.","Il est presque entièrement entouré par le Sénégal."],fe:["The country hugs the Gambia River along its whole length.","It is almost completely surrounded by Senegal."]},
+    GHA:{ff:["Le lac Volta est l'un des plus grands lacs artificiels du monde.","Le Ghana s'appelait autrefois la « Côte de l'Or »."],fe:["Lake Volta is one of the world's largest man-made lakes.","Ghana was once known as the 'Gold Coast'."]},
+    GIN:{ff:["Surnommée « le château d'eau de l'Afrique de l'Ouest ».","Son sous-sol regorge de bauxite, le minerai de l'aluminium."],fe:["Nicknamed 'the water tower of West Africa'.","Its ground is rich in bauxite, the ore used to make aluminium."]},
+    GNB:{ff:["Des hippopotames d'eau salée vivent dans l'archipel des Bijagos.","La noix de cajou est sa grande spécialité."],fe:["Saltwater hippos live in the Bijagós archipelago.","Cashew nuts are its big specialty."]},
+    LBR:{ff:["C'est la plus ancienne république d'Afrique (1847).","Son drapeau ressemble beaucoup à celui des États-Unis."],fe:["It is Africa's oldest republic (1847).","Its flag looks a lot like the US flag."]},
+    MLI:{ff:["La grande mosquée de Djenné est le plus grand bâtiment en terre crue du monde.","Le fleuve Niger y forme un immense delta intérieur."],fe:["The Great Mosque of Djenné is the world's largest mud-brick building.","The Niger River forms a huge inland delta here."]},
+    MRT:{ff:["La structure de Richat, « l'œil de l'Afrique », se voit depuis l'espace.","Le désert couvre environ 90 % du pays."],fe:["The Richat Structure, the 'Eye of Africa', is visible from space.","Desert covers about 90% of the country."]},
+    NER:{ff:["Le pays doit son nom au fleuve Niger.","L'arbre du Ténéré fut longtemps l'arbre le plus isolé du monde."],fe:["The country is named after the Niger River.","The Tree of Ténéré was once the loneliest tree on Earth."]},
+    NGA:{ff:["Nollywood, son industrie du cinéma, tourne des centaines de films par an.","Plus de 500 langues y sont parlées."],fe:["Its film industry, Nollywood, shoots hundreds of movies a year.","More than 500 languages are spoken here."]},
+    SEN:{ff:["Dakar est la grande ville la plus à l'ouest de l'Afrique continentale.","L'île de Gorée, face à Dakar, est classée à l'UNESCO."],fe:["Dakar is mainland Africa's westernmost big city.","Gorée Island, facing Dakar, is a UNESCO site."]},
+    SLE:{ff:["Son nom signifie « montagne du lion » en portugais.","Le pays est réputé pour ses diamants."],fe:["Its name means 'lion mountain' in Portuguese.","The country is famous for its diamonds."]},
+    TGO:{ff:["Le pays mesure moins de 60 km de large par endroits.","Les maisons-tours en terre du Koutammakou sont classées à l'UNESCO."],fe:["The country is less than 60 km wide in places.","The mud tower-houses of Koutammakou are UNESCO-listed."]},
+    AGO:{ff:["Les chutes de Kalandula comptent parmi les plus grandes d'Afrique.","L'hippotrague noir géant, très rare, ne vit qu'en Angola."],fe:["Kalandula Falls is among Africa's largest waterfalls.","The rare giant sable antelope lives only in Angola."]},
+    CMR:{ff:["Le mont Cameroun est un volcan actif au bord de l'océan.","Son équipe de football, les Lions Indomptables, est légendaire."],fe:["Mount Cameroon is an active volcano right by the ocean.","Its football team, the Indomitable Lions, is legendary."]},
+    CAF:{ff:["Gorilles et éléphants de forêt vivent dans la réserve de Dzanga-Sangha.","La rivière Oubangui coule le long de Bangui."],fe:["Gorillas and forest elephants live in the Dzanga-Sangha reserve.","The Ubangi River flows past Bangui."]},
+    TCD:{ff:["Les lacs d'Ounianga, en plein Sahara, sont classés à l'UNESCO.","Le massif de l'Ennedi cache des arches de grès spectaculaires."],fe:["The Ounianga lakes, deep in the Sahara, are UNESCO-listed.","The Ennedi massif hides spectacular sandstone arches."]},
+    COG:{ff:["Brazzaville et Kinshasa sont les deux capitales les plus proches du monde.","Des gorilles des plaines vivent dans ses forêts."],fe:["Brazzaville and Kinshasa are the world's two closest capitals.","Lowland gorillas live in its forests."]},
+    COD:{ff:["Le fleuve Congo est le plus profond du monde.","L'okapi, cousin de la girafe, ne vit qu'en RDC."],fe:["The Congo River is the deepest on Earth.","The okapi, a giraffe cousin, lives only in DR Congo."]},
+    GNQ:{ff:["Sa capitale, Malabo, est sur une île, pas sur le continent.","Une nouvelle capitale se construit en pleine forêt."],fe:["Its capital, Malabo, sits on an island, not the mainland.","A brand-new capital is being built in the rainforest."]},
+    GAB:{ff:["Au parc de Loango, hippopotames et éléphants se baladent sur la plage.","L'équateur traverse le pays."],fe:["In Loango park, hippos and elephants stroll on the beach.","The equator crosses the country."]},
+    STP:{ff:["C'est le deuxième plus petit pays d'Afrique.","Le pic Cão Grande est une incroyable aiguille volcanique."],fe:["It is Africa's second-smallest country.","Pico Cão Grande is an amazing volcanic spire."]},
+    BDI:{ff:["Gitega est devenue la capitale en 2019, à la place de Bujumbura.","Le lac Tanganyika, à sa frontière, est le 2e plus profond du monde."],fe:["Gitega became the capital in 2019, replacing Bujumbura.","Lake Tanganyika on its border is the world's 2nd-deepest lake."]},
+    COM:{ff:["Premier producteur mondial d'ylang-ylang, une fleur à parfum.","Le volcan Karthala est l'un des plus actifs du monde."],fe:["The world's top grower of ylang-ylang, a perfume flower.","Karthala volcano is one of the most active on Earth."]},
+    DJI:{ff:["Le lac Assal est bien plus salé que la mer.","Le pays garde l'entrée de la mer Rouge."],fe:["Lake Assal is far saltier than the sea.","The country guards the entrance to the Red Sea."]},
+    ERI:{ff:["Asmara est classée au patrimoine mondial de l'UNESCO.","Son nom vient du mot grec désignant la mer Rouge."],fe:["Asmara is a UNESCO World Heritage city.","Its name comes from the Greek word for the Red Sea."]},
+    ETH:{ff:["Lucy, célèbre fossile d'un ancêtre humain, y fut découverte.","Le café aurait été découvert en Éthiopie."],fe:["Lucy, the famous early-human fossil, was found here.","Coffee is said to have been discovered in Ethiopia."]},
+    KEN:{ff:["Le pays doit son nom au mont Kenya, 2e sommet d'Afrique.","Ses coureurs de fond sont parmi les meilleurs du monde."],fe:["It is named after Mount Kenya, Africa's 2nd-highest peak.","Its long-distance runners are among the world's best."]},
+    MDG:{ff:["C'est la 4e plus grande île du monde.","Des baobabs géants bordent la célèbre allée des Baobabs."],fe:["It is the world's 4th-largest island.","Giant baobabs line the famous Avenue of the Baobabs."]},
+    MWI:{ff:["Le lac Malawi couvre environ un quart du pays.","Surnommé « le cœur chaud de l'Afrique »."],fe:["Lake Malawi covers about a quarter of the country.","Nicknamed 'the warm heart of Africa'."]},
+    MUS:{ff:["L'île est née d'éruptions volcaniques.","Un timbre mauricien de 1847 est l'un des plus rares du monde."],fe:["The island was born from volcanic eruptions.","An 1847 Mauritius stamp is one of the rarest in the world."]},
+    RWA:{ff:["Des gorilles des montagnes vivent dans le parc des Volcans.","Les sacs en plastique y sont interdits depuis 2008."],fe:["Mountain gorillas live in Volcanoes National Park.","Plastic bags have been banned there since 2008."]},
+    SYC:{ff:["C'est le plus petit pays d'Afrique.","Le coco de mer y produit la plus grosse graine du monde."],fe:["It is Africa's smallest country.","The coco de mer palm grows the world's largest seed."]},
+    SOM:{ff:["L'encens et la myrrhe y sont récoltés depuis l'Antiquité.","Le chameau occupe une place essentielle dans sa culture."],fe:["Frankincense and myrrh have been harvested here since ancient times.","Camels hold a special place in its culture."]},
+    ZAF:{ff:["Nelson Mandela devint son premier président élu par tous.","Des manchots se dandinent sur les plages du Cap."],fe:["Nelson Mandela became its first president elected by all.","Penguins waddle on Cape Town's beaches."]},
+    SSD:{ff:["Le Sudd est l'une des plus vastes zones humides du monde.","Il abrite une des plus grandes migrations d'antilopes du monde."],fe:["The Sudd is one of the world's largest wetlands.","Home to one of the biggest antelope migrations on Earth."]},
+    TZA:{ff:["Le cratère du Ngorongoro regorge d'animaux sauvages.","Zanzibar, l'île aux épices, fait partie de la Tanzanie."],fe:["The Ngorongoro Crater teems with wildlife.","Zanzibar, the spice island, is part of Tanzania."]},
+    UGA:{ff:["La moitié des gorilles des montagnes du monde y vit.","Le Nil Blanc jaillit du lac Victoria à Jinja."],fe:["Half of the world's mountain gorillas live here.","The White Nile bursts out of Lake Victoria at Jinja."]},
+    BWA:{ff:["Abrite la plus grande population d'éléphants du monde.","Le désert du Kalahari couvre la majeure partie du pays."],fe:["Home to the world's largest elephant population.","The Kalahari Desert covers most of the country."]},
+    SWZ:{ff:["Le pays a changé de nom en 2018 (ex-Swaziland).","C'est l'un des plus petits pays d'Afrique."],fe:["The country changed its name in 2018 (formerly Swaziland).","It is one of Africa's smallest countries."]},
+    LSO:{ff:["Surnommé « le royaume dans le ciel ».","Il est entièrement entouré par l'Afrique du Sud."],fe:["Nicknamed 'the Kingdom in the Sky'.","It is completely surrounded by South Africa."]},
+    MOZ:{ff:["Son littoral s'étire sur environ 2 500 km.","L'île de Mozambique a donné son nom au pays."],fe:["Its coastline stretches about 2,500 km.","The Island of Mozambique gave the country its name."]},
+    NAM:{ff:["Le Namib serait le plus vieux désert du monde.","C'est l'un des pays les moins densément peuplés du monde."],fe:["The Namib may be the world's oldest desert.","One of the least densely populated countries on Earth."]},
+    ZMB:{ff:["Les locaux appellent les chutes Victoria « la fumée qui gronde ».","Le fleuve Zambèze a donné son nom au pays."],fe:["Locals call Victoria Falls 'the smoke that thunders'.","The Zambezi River gave the country its name."]},
+    ZWE:{ff:["Le lac Kariba est l'un des plus grands lacs artificiels du monde.","Un oiseau sculpté, l'oiseau de Zimbabwe, orne son drapeau."],fe:["Lake Kariba is one of the world's largest man-made lakes.","A carved bird, the Zimbabwe Bird, adorns its flag."]},
+  };
+
+  // All facts for a country in the given language (base fact + extras)
+  factsOf(id, lang){
+    const base = lang==='fr' ? this.C[id].ff : this.C[id].fe;
+    const extra = this.XF[id] ? (lang==='fr' ? this.XF[id].ff : this.XF[id].fe) : [];
+    return [base].concat(extra);
+  }
+  flagUrl(id){ return this.A2[id] ? 'https://flagcdn.com/w160/'+this.A2[id]+'.png' : ''; }
+
+  T = {
+    fr:{ badge:'GÉOGRAPHIE', title:"Les Capitales d'Afrique", titleCap:"Les Capitales d'Afrique", titleCountry:"Les Pays d'Afrique", titleFlag:"Les Drapeaux d'Afrique", allCountCap:'Les 54 capitales · défi ultime', allCountCountry:'Les 54 pays · défi ultime', allCountFlag:'Les 54 drapeaux · défi ultime', subtitle:"Glisse chaque capitale au bon endroit sur la carte. Choisis une région pour commencer !", subtitleCap:"Glisse chaque capitale au bon endroit sur la carte. Choisis une région pour commencer !", subtitleCountry:"Glisse chaque pays à sa place sur la carte. Choisis une région pour commencer !", subtitleFlag:"Glisse chaque drapeau sur son pays. Choisis une région pour commencer !", modeQ:"Que veux-tu apprendre ?", modeCap:'Capitales', modeCountry:'Pays', modeFlag:'Drapeaux', trayTitleCap:'Capitales à placer', trayHintCap:'Glisse ou touche une étiquette, puis la carte', trayTitleCountry:'Pays à placer', trayHintCountry:'Glisse ou touche un pays, puis la carte', trayTitleFlag:'Drapeaux à placer', trayHintFlag:'Glisse ou touche un drapeau, puis la carte', tapPlace:'Maintenant, touche le bon endroit sur la carte !', play:'Jouer', allTitle:'Tout le continent', allCount:'Les 54 capitales · défi ultime', challenge:'Défi', placed:'Placées', showNames:'Afficher les noms des pays', namesShort:'Pays', trayTitle:'Capitales à placer', trayHint:'Fais glisser une étiquette sur la carte', allDone:'Toutes placées ! 🎉', points:'points', firstTry:'du 1er coup', replay:'Rejouer', home:'Accueil', factBtn:'Continuer', reset:'Réinitialiser le zoom', good:['Bravo !','Super !','Excellent !','Parfait !','Génial !'], bad:['Presque !','Réessaie !','Pas tout à fait…','Encore un essai !'], resPerfect:'Sans-faute !', resGreat:'Très bien joué !', resGood:'Bien joué !' },
+    en:{ badge:'GEOGRAPHY', title:'Capitals of Africa', titleCap:'Capitals of Africa', titleCountry:'Countries of Africa', titleFlag:'Flags of Africa', allCountCap:'All 54 capitals · ultimate challenge', allCountCountry:'All 54 countries · ultimate challenge', allCountFlag:'All 54 flags · ultimate challenge', subtitle:'Drag each capital to the right spot on the map. Pick a region to start!', subtitleCap:'Drag each capital to the right spot on the map. Pick a region to start!', subtitleCountry:'Drag each country to its place on the map. Pick a region to start!', subtitleFlag:'Drag each flag onto its country. Pick a region to start!', modeQ:'What do you want to learn?', modeCap:'Capitals', modeCountry:'Countries', modeFlag:'Flags', trayTitleCap:'Capitals to place', trayHintCap:'Drag a label, or tap it then tap the map', trayTitleCountry:'Countries to place', trayHintCountry:'Drag a country, or tap it then tap the map', trayTitleFlag:'Flags to place', trayHintFlag:'Drag a flag, or tap it then tap the map', tapPlace:'Now tap the right spot on the map!', play:'Play', allTitle:'The whole continent', allCount:'All 54 capitals · ultimate challenge', challenge:'Challenge', placed:'Placed', showNames:'Show country names', namesShort:'Names', trayTitle:'Capitals to place', trayHint:'Drag a label onto the map', allDone:'All placed! 🎉', points:'points', firstTry:'first try', replay:'Play again', home:'Home', factBtn:'Continue', reset:'Reset zoom', good:['Nice!','Great!','Excellent!','Perfect!','Awesome!'], bad:['Almost!','Try again!','Not quite…','One more try!'], resPerfect:'Flawless!', resGreat:'Really well played!', resGood:'Well done!' },
+  };
+
+  componentDidMount(){
+    let tries = 0;
+    const check = () => {
+      if (window.AFRICA_GEO) {
+        let prog = {};
+        try { prog = JSON.parse(localStorage.getItem('africapitales_v2')||'{}'); } catch(e){}
+        this.setState({ ready:true, progress:prog });
+      } else if (tries++ < 60) { setTimeout(check, 60); }
+    };
+    check();
+    // Robust native pointer delegation (works in dev + bundled).
+    // Mouse/pen: drag & drop. Touch: tap a chip to select it, then tap the map
+    // to place it — this keeps the tray scrollable and works well on phones.
+    this._docDown = (e) => {
+      if (this.state.screen !== 'play' || this.dragId) return;
+      const t = e.target;
+      if (!t || !t.closest) return;
+      const onMap = t.closest('[data-map-pan]') && !t.closest('[data-zoom-ctrl]');
+      // While a map gesture is in progress, additional touch pointers feed the
+      // pinch — they must NOT be swallowed, or two-finger zoom never starts.
+      if (this._panning) { if (onMap && e.pointerType === 'touch') this.startMapGesture(e); return; }
+      const chip = t.closest('[data-cap-id]');
+      if (chip) {
+        const id = chip.getAttribute('data-cap-id');
+        if (!id) return;
+        if (e.pointerType === 'touch') this.trackTap(id, e);
+        else this.startDrag(id, e);
+        return;
+      }
+      if (onMap) {
+        if (this.state.selectedId) {
+          e.preventDefault();
+          if (e.pointerType === 'touch') {
+            // Defer placement to a clean tap (decided on pointerup) so a
+            // two-finger pinch or a pan still works with a chip selected.
+            this._placeCand = { id:this.state.selectedId, x:e.clientX, y:e.clientY, moved:false };
+            this.startMapGesture(e);
+          } else {
+            this.tryPlace(this.state.selectedId, e.clientX, e.clientY);
+          }
+          return;
+        }
+        this.startMapGesture(e);
+      }
+    };
+    document.addEventListener('pointerdown', this._docDown, { passive:false });
+    this._wheel = (e) => {
+      if (this.state.screen !== 'play') return;
+      const t = e.target;
+      if (t && t.closest && t.closest('[data-map-pan]')) {
+        e.preventDefault();
+        this.setZoom(this.state.zoom * (e.deltaY < 0 ? 1.18 : 1/1.18));
+      }
+    };
+    document.addEventListener('wheel', this._wheel, { passive:false });
+    this._resize = () => this.fitMap();
+    window.addEventListener('resize', this._resize);
+    // Unlock/resume audio on every user gesture (iOS suspends the context
+    // until a gesture, and may re-suspend it when the tab is backgrounded).
+    this._unlock = () => this.unlockAudio();
+    document.addEventListener('pointerdown', this._unlock, { passive:true });
+  }
+  componentWillUnmount(){
+    if (this._docDown) document.removeEventListener('pointerdown', this._docDown);
+    if (this._wheel) document.removeEventListener('wheel', this._wheel);
+    if (this._resize) window.removeEventListener('resize', this._resize);
+    if (this._ro) this._ro.disconnect();
+    window.removeEventListener('pointermove', this._move);
+    window.removeEventListener('pointerup', this._up);
+    if (this._mapMove) window.removeEventListener('pointermove', this._mapMove);
+    if (this._mapUp) { window.removeEventListener('pointerup', this._mapUp); window.removeEventListener('pointercancel', this._mapUp); }
+    if (this._unlock) document.removeEventListener('pointerdown', this._unlock);
+  }
+
+  // ---- zoom & pan ----
+  clampPan(px, py, zoom){
+    // Panning is allowed only once the scaled map exceeds the viewport on that
+    // axis, and never further than bringing a map edge to the viewport edge.
+    const fit = this._fit;
+    if (fit){
+      const mx = Math.max(0, (fit.w*zoom - fit.vw)/2), my = Math.max(0, (fit.h*zoom - fit.vh)/2);
+      return { panX: Math.max(-mx, Math.min(mx, px)), panY: Math.max(-my, Math.min(my, py)) };
+    }
+    const vp = this.vpRef.current;
+    if (!vp) return { panX:px, panY:py };
+    const r = vp.getBoundingClientRect();
+    const mx = (zoom-1)*r.width/2, my = (zoom-1)*r.height/2;
+    return { panX: Math.max(-mx, Math.min(mx, px)), panY: Math.max(-my, Math.min(my, py)) };
+  }
+  setZoom(z){
+    z = Math.max(1, Math.min(5, z));
+    let c = this.clampPan(this.state.panX, this.state.panY, z);
+    if (z === 1) { c = { panX:0, panY:0 }; }
+    this.setState({ zoom:z, panX:c.panX, panY:c.panY });
+  }
+  // Map gestures: one pointer pans (when zoomed in), two touch pointers pinch-zoom.
+  // Live updates go straight to the transform; state commits once on release.
+  startMapGesture(e){
+    const isTouch = e.pointerType === 'touch';
+    if (!isTouch && this.state.zoom <= 1) return;
+    e.preventDefault();
+    if (!this._mapPts) this._mapPts = new Map();
+    if (!this._gest) this._gest = { zoom:this.state.zoom, panX:this.state.panX, panY:this.state.panY };
+    if (isTouch) this._mapPts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (isTouch && this._mapPts.size >= 2) {
+      const [a,b] = [...this._mapPts.values()];
+      this._pinch = { d0: Math.max(20, Math.hypot(a.x-b.x, a.y-b.y)), z0: this._gest.zoom };
+      this._hadPinch = true;
+      this._panStart = null;
+    } else {
+      this._panStart = { x:e.clientX, y:e.clientY, px:this._gest.panX, py:this._gest.panY };
+    }
+    this._panning = true;
+    if (this.vpRef.current) this.vpRef.current.style.cursor = 'grabbing';
+    if (this._mapBound) return;
+    this._mapBound = true;
+    this._mapMove = (ev) => {
+      if (this._mapPts.has(ev.pointerId)) this._mapPts.set(ev.pointerId, { x:ev.clientX, y:ev.clientY });
+      if (this._placeCand && Math.hypot(ev.clientX-this._placeCand.x, ev.clientY-this._placeCand.y) > 10) this._placeCand.moved = true;
+      if (this._pinch && this._mapPts.size >= 2) {
+        const [a,b] = [...this._mapPts.values()];
+        const z = Math.max(1, Math.min(5, this._pinch.z0 * Math.hypot(a.x-b.x, a.y-b.y) / this._pinch.d0));
+        const c = this.clampPan(this._gest.panX, this._gest.panY, z);
+        this._gest = { zoom:z, panX:c.panX, panY:c.panY };
+      } else if (this._panStart) {
+        const c = this.clampPan(this._panStart.px + (ev.clientX-this._panStart.x), this._panStart.py + (ev.clientY-this._panStart.y), this._gest.zoom);
+        this._gest.panX = c.panX; this._gest.panY = c.panY;
+      }
+      if (this.panRef.current) this.panRef.current.style.transform = `translate(${this._gest.panX}px,${this._gest.panY}px) scale(${this._gest.zoom})`;
+    };
+    this._mapUp = (ev) => {
+      this._mapPts.delete(ev.pointerId);
+      if (this._mapPts.size < 2 && this._pinch) {
+        this._pinch = null;
+        // One finger remains after a pinch: continue as a pan from where it is.
+        const rest = [...this._mapPts.values()][0];
+        if (rest) this._panStart = { x:rest.x, y:rest.y, px:this._gest.panX, py:this._gest.panY };
+      }
+      if (this._mapPts.size === 0) {
+        window.removeEventListener('pointermove', this._mapMove);
+        window.removeEventListener('pointerup', this._mapUp);
+        window.removeEventListener('pointercancel', this._mapUp);
+        this._mapBound = false; this._panning = false; this._panStart = null;
+        if (this.vpRef.current) this.vpRef.current.style.cursor = this._gest.zoom>1?'grab':'default';
+        this.setState({ zoom:this._gest.zoom, panX:this._gest.panX, panY:this._gest.panY });
+        this._gest = null;
+        // A clean tap (no movement, no pinch) with a selected chip places it
+        // at the lift point.
+        const cand = this._placeCand; this._placeCand = null;
+        const pinched = this._hadPinch; this._hadPinch = false;
+        if (cand && !cand.moved && !pinched) this.tryPlace(cand.id, ev.clientX, ev.clientY);
+      }
+    };
+    window.addEventListener('pointermove', this._mapMove);
+    window.addEventListener('pointerup', this._mapUp);
+    window.addEventListener('pointercancel', this._mapUp);
+  }
+
+  // Touch on a chip: select it on a clean tap. If the finger moves (tray scroll)
+  // or the browser takes over the gesture, nothing happens.
+  trackTap(id, e){
+    const sx = e.clientX, sy = e.clientY;
+    let moved = false;
+    const mv = (ev) => { if (Math.hypot(ev.clientX-sx, ev.clientY-sy) > 10) moved = true; };
+    const done = (ok) => {
+      window.removeEventListener('pointermove', mv);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+      if (ok && !moved) this.toggleSelect(id);
+    };
+    const up = () => done(true);
+    const cancel = () => done(false);
+    window.addEventListener('pointermove', mv);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', cancel);
+  }
+  toggleSelect(id){
+    if (this.state.placed[id]) return;
+    this.setState({ selectedId: this.state.selectedId === id ? null : id });
+  }
+
+  // ---- audio ----
+  ac(){ if(!this._ac){ try{ this._ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return this._ac; }
+  beep(freq, t0, dur, type, vol){
+    const ac=this.ac(); if(!ac) return;
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type=type||'sine'; o.frequency.value=freq;
+    o.connect(g); g.connect(ac.destination);
+    const t=ac.currentTime+t0;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol||0.18,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.02);
+  }
+  // iOS/Safari keeps the AudioContext suspended until it is resumed during a
+  // real user gesture; a silent buffer play completes the unlock on older iOS.
+  // Called from a document-level pointerdown listener.
+  unlockAudio(){
+    const ac=this.ac(); if(!ac) return;
+    if(ac.state==='suspended' && ac.resume){ try{ ac.resume(); }catch(e){} }
+    if(!this._audioUnlocked){
+      try{
+        const b=ac.createBuffer(1,1,22050);
+        const s=ac.createBufferSource();
+        s.buffer=b; s.connect(ac.destination); s.start(0);
+        this._audioUnlocked=true;
+      }catch(e){}
+    }
+  }
+  // resume() is async: scheduling beeps while still suspended computes times
+  // from a frozen currentTime and nothing is heard. Run fn once audio is live.
+  withAudio(fn){
+    const ac=this.ac(); if(!ac) return;
+    if(ac.state==='suspended' && ac.resume){ ac.resume().then(fn).catch(()=>{}); }
+    else fn();
+  }
+  playGood(){ if(!this.state.soundOn)return; this.withAudio(()=>{ this.beep(660,0,0.13,'triangle',0.2); this.beep(990,0.1,0.18,'triangle',0.2); }); }
+  playBad(){ if(!this.state.soundOn)return; this.withAudio(()=>{ this.beep(220,0,0.16,'sawtooth',0.12); this.beep(170,0.08,0.18,'sawtooth',0.1); }); }
+  playWin(){ if(!this.state.soundOn)return; this.withAudio(()=>{ [523,659,784,1047].forEach((f,i)=>this.beep(f,i*0.12,0.22,'triangle',0.2)); }); }
+
+  // ---- helpers ----
+  centers(){
+    if (this._centers) return this._centers;
+    const m = {}; const G = window.AFRICA_GEO;
+    if (!G) return {};
+    for (const c of G.countries){
+      const nums = c.d.match(/-?\d+(?:\.\d+)?/g);
+      if (!nums) continue;
+      let minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+      for (let i=0;i+1<nums.length;i+=2){ const x=+nums[i], y=+nums[i+1]; if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; }
+      m[c.id] = { x:(minX+maxX)/2, y:(minY+maxY)/2 };
+    }
+    this._centers = m; return m;
+  }
+  // Compute a representative interior point for each country (guaranteed inside the shape,
+  // deep in the largest landmass) so name labels sit in the middle of the country.
+  computeLabelPoints(){
+    const svg = this.svgRef.current; if (!svg) return;
+    const paths = svg.querySelectorAll('path[data-id]'); if (!paths.length) return;
+    const res = {};
+    paths.forEach(path => {
+      const id = path.dataset.id;
+      let bb; try { bb = path.getBBox(); } catch(e){ return; }
+      if (!bb || !bb.width) return;
+      const N = 18, sx = bb.width/N, sy = bb.height/N;
+      const pin = (x,y) => { try { return path.isPointInFill(new DOMPoint(x,y)); } catch(e){ return false; } };
+      const inside = [];
+      for (let i=1;i<N;i++) for (let j=1;j<N;j++){ const x=bb.x+sx*i, y=bb.y+sy*j; if (pin(x,y)) inside.push([x,y]); }
+      if (!inside.length){ res[id] = { x:bb.x+bb.width/2, y:bb.y+bb.height/2 }; return; }
+      let mx=0,my=0; inside.forEach(p=>{mx+=p[0];my+=p[1];}); mx/=inside.length; my/=inside.length;
+      let best=inside[0], bestScore=-1e9;
+      inside.forEach(p=>{
+        let c=0;
+        for (let a=0;a<8;a++){ const ang=a*Math.PI/4; if (pin(p[0]+Math.cos(ang)*sx, p[1]+Math.sin(ang)*sy)) c++; }
+        const score = c*1000 - Math.hypot(p[0]-mx, p[1]-my);
+        if (score>bestScore){ bestScore=score; best=p; }
+      });
+      res[id] = { x:best[0], y:best[1] };
+    });
+    this._labelPts = res;
+    this.forceUpdate();
+  }
+  componentDidUpdate(){
+    if (this.state.screen==='play'){
+      if (!this._labelPts) requestAnimationFrame(()=>this.computeLabelPoints());
+      this.fitMap();
+      if (!this._ro && window.ResizeObserver && this.fitRef.current){
+        this._ro = new ResizeObserver(()=>this.fitMap());
+        this._ro.observe(this.fitRef.current);
+      }
+    }
+  }
+  // The pan viewport fills the whole available area; the aspect-correct
+  // (1000:957) map box is centered inside it. Zooming therefore reveals more
+  // map instead of empty margins, while the HTML overlay (pins/labels) stays
+  // aligned with the SVG because both live in the exact fitted box.
+  fitMap(){
+    const f = this.fitRef.current, vp = this.vpRef.current, box = this.mapBoxRef.current;
+    if (!f || !vp || !box) return;
+    const aw = f.clientWidth, ah = f.clientHeight;
+    if (!aw || !ah) return;
+    const R = 1000/957;
+    let w = aw, h = aw/R;
+    if (h > ah){ h = ah; w = ah*R; }
+    box.style.width = w.toFixed(2)+'px';
+    box.style.height = h.toFixed(2)+'px';
+    box.style.left = ((aw-w)/2).toFixed(2)+'px';
+    box.style.top = ((ah-h)/2).toFixed(2)+'px';
+    this._fit = { w, h, vw:aw, vh:ah };
+  }
+  regionById(id){ return this.REGIONS.find(r=>r.id===id); }
+  idColor(id){ const r=this.REGIONS.find(rg=>rg.ids.includes(id)); return r?r.bg:'#C9A86B'; }
+  idShadow(id){ const r=this.REGIONS.find(rg=>rg.ids.includes(id)); return r?r.shadow:'#A98A5B'; }
+  hexA(hex,a){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+  taskIds(){ const id=this.state.regionId; if(id==='all'){ return Object.keys(this.C); } const r=this.regionById(id); return r?r.ids:[]; }
+  playColor(){ const id=this.state.regionId; return id==='all'?'#A65A3C':(this.regionById(id)||{}).bg||'#A65A3C'; }
+  progKey(){ return this.state.mode+':'+this.state.regionId; }
+
+  shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  startLevel(id){
+    const ids = id==='all' ? Object.keys(this.C) : this.regionById(id).ids;
+    this.setState({ screen:'play', regionId:id, queue:this.shuffle(ids), placed:{}, wrong:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
+  }
+
+  // ---- drag ----
+  startDrag(id, e){
+    if(this.state.placed[id]) return;
+    e.preventDefault();
+    this.dragId = id;
+    this._dragStart = { x:e.clientX, y:e.clientY };
+    this.setState({ dragId:id });
+    const g = this.ghostRef.current;
+    if(g){ g.style.display='block'; g.style.transform=`translate(${e.clientX-70}px, ${e.clientY-24}px)`; }
+    this._move = (ev)=>{ const gg=this.ghostRef.current; if(gg) gg.style.transform=`translate(${ev.clientX-70}px, ${ev.clientY-24}px)`; };
+    this._up = (ev)=>this.endDrag(ev);
+    window.addEventListener('pointermove', this._move);
+    window.addEventListener('pointerup', this._up);
+  }
+  endDrag(e){
+    window.removeEventListener('pointermove', this._move);
+    window.removeEventListener('pointerup', this._up);
+    const g=this.ghostRef.current; if(g) g.style.display='none';
+    const id=this.dragId; this.dragId=null;
+    if(!id) return;
+    // A click without a real drag toggles selection (click the chip, then click the map).
+    if(this._dragStart && Math.hypot(e.clientX-this._dragStart.x, e.clientY-this._dragStart.y) < 6){
+      this.setState({ dragId:null });
+      this.toggleSelect(id);
+      return;
+    }
+    this.tryPlace(id, e.clientX, e.clientY);
+  }
+
+  // Shared placement test for drag-drop and tap-to-place.
+  tryPlace(id, cx, cy){
+    // A point outside the visible drawn map (viewport ∩ map box) is a silent
+    // cancel — dropping in the margins shouldn't count as a mistake.
+    const vp=this.vpRef.current, box=this.mapBoxRef.current;
+    if(vp && box){
+      const r=vp.getBoundingClientRect(), b=box.getBoundingClientRect();
+      const L=Math.max(r.left,b.left), R=Math.min(r.right,b.right), T=Math.max(r.top,b.top), B=Math.min(r.bottom,b.bottom);
+      if(cx<L || cx>R || cy<T || cy>B){ this.setState({ dragId:null }); return; }
+    }
+    const svg=this.svgRef.current;
+    let correct=false, sx=0, sy=0;
+    if(svg && id){
+      // Client point -> SVG user coords via the map box rect. Unlike
+      // getScreenCTM(), getBoundingClientRect() reflects the zoom/pan CSS
+      // transform in every browser — Safari (iPad) ignores ancestor CSS
+      // transforms in the CTM, which broke placement after zooming.
+      const rect=(this.mapBoxRef.current||svg).getBoundingClientRect();
+      sx=(cx-rect.left)/rect.width*1000; sy=(cy-rect.top)/rect.height*957;
+      const cap=window.AFRICA_GEO.caps[id];
+      if(this.state.mode==='country' || this.state.mode==='flag'){
+        // Country & flag modes: drop anywhere inside the country shape; islands fall back to a point hit.
+        const path=svg.querySelector('path[data-id="'+id+'"]');
+        if(path && path.isPointInFill){ try{ if(path.isPointInFill(new DOMPoint(sx,sy))) correct=true; }catch(err){} }
+        if(!correct && cap){ const d=Math.hypot(sx-cap.x, sy-cap.y); if(d<this.TOL+6) correct=true; }
+      } else if(cap){
+        const d=Math.hypot(sx-cap.x, sy-cap.y);
+        if(d<this.TOL) correct=true;
+        if(!correct){
+          const path=svg.querySelector('path[data-id="'+id+'"]');
+          if(path && path.isPointInFill){ try{ if(path.isPointInFill(new DOMPoint(sx,sy))) correct=true; }catch(err){} }
+        }
+      }
+    }
+    if(correct){ this.resolveCorrect(id); }
+    else { this.resolveWrong(id); this.setState({ dragId:null }); }
+  }
+  resolveCorrect(id){
+    this.playGood();
+    const placed={...this.state.placed, [id]:true};
+    const firstTry = !this.state.wrong[id];
+    const score = this.state.score + (firstTry?10:5);
+    // Pick a random anecdote for this country (index is language-independent,
+    // so switching language inside the popup keeps the same fact).
+    const nFacts = this.factsOf(id, this.state.lang).length;
+    this._factAt = Date.now();
+    this.setState({ placed, score, dragId:null, selectedId:null, factOpen:true, factId:id, factIdx: Math.floor(Math.random()*nFacts) });
+  }
+  resolveWrong(id){
+    this.playBad();
+    const wrong={...this.state.wrong, [id]:(this.state.wrong[id]||0)+1};
+    const t=this.T[this.state.lang].bad;
+    this.setState({ wrong, badOpen:true, badText:t[Math.floor(Math.random()*t.length)], shake:true });
+    clearTimeout(this._badTo); this._badTo=setTimeout(()=>this.setState({badOpen:false}),1200);
+    clearTimeout(this._shTo); this._shTo=setTimeout(()=>this.setState({shake:false}),500);
+  }
+  closeFact(){
+    // Mobile browsers fire a ghost "click" right after the placement tap; it
+    // lands on the freshly opened popup overlay and would close it instantly.
+    if (this._factAt && Date.now() - this._factAt < 400) return;
+    const done = this.taskIds().every(id=>this.state.placed[id]);
+    if(done){ this.finishLevel(); }
+    else { this.setState({ factOpen:false, factId:null }); }
+  }
+  finishLevel(){
+    const ids=this.taskIds();
+    const total=ids.length;
+    const firstTry=ids.filter(id=>!this.state.wrong[id]).length;
+    const ratio=firstTry/total;
+    const stars = ratio>=0.9?3 : ratio>=0.6?2 : 1;
+    const acc=Math.round(ratio*100);
+    const prog={...this.state.progress};
+    const pk=this.progKey();
+    const prev=prog[pk]||{stars:0,best:0};
+    prog[pk]={ stars:Math.max(prev.stars,stars), best:Math.max(prev.best,this.state.score) };
+    try{ localStorage.setItem('africapitales_v2', JSON.stringify(prog)); }catch(e){}
+    this.playWin();
+    const confetti=Array.from({length:60},()=>({
+      left:(Math.random()*100)+'%',
+      size:(6+Math.random()*8)+'px',
+      color:['#E2A24B','#DD7A57','#3F9E78','#5B86C4','#B06A9A'][Math.floor(Math.random()*5)],
+      radius:Math.random()>0.5?'50%':'2px',
+      dur:(1.6+Math.random()*1.4)+'s',
+      delay:(Math.random()*0.6)+'s',
+    }));
+    this.setState({ screen:'result', factOpen:false, resStars:stars, resAcc:acc, confetti, progress:prog });
+  }
+
+  renderVals(){
+    const S=this.state, lang=S.lang, t=this.T[lang];
+    if(!S.ready){ return { ready:false, notReady:true }; }
+    const GEO=window.AFRICA_GEO;
+    const base={
+      ready:true, notReady:false, t,
+      isHome:S.screen==='home', isPlay:S.screen==='play', isResult:S.screen==='result',
+      langLabel: lang==='fr'?'Français':'English',
+      langFlag: lang==='fr'?'🇫🇷':'🇬🇧',
+      onToggleLang: ()=>this.setState({lang:lang==='fr'?'en':'fr'}),
+    };
+
+    // ---- HOME ----
+    if(S.screen==='home'){
+      const m = S.mode;
+      base.homeTitle = m==='country' ? t.titleCountry : m==='flag' ? t.titleFlag : t.titleCap;
+      base.allCountText = m==='country' ? t.allCountCountry : m==='flag' ? t.allCountFlag : t.allCountCap;
+      base.homeSubtitle = m==='country' ? t.subtitleCountry : m==='flag' ? t.subtitleFlag : t.subtitleCap;
+      base.modeCapBg = m==='cap'?'#E2A24B':'transparent';
+      base.modeCapColor = m==='cap'?'#fff':'#9A7E5C';
+      base.modeCapDot = m==='cap'?'#fff':'#E2A24B';
+      base.modeCountryBg = m==='country'?'#3F9E78':'transparent';
+      base.modeCountryColor = m==='country'?'#fff':'#9A7E5C';
+      base.modeCountryDot = m==='country'?'#fff':'#3F9E78';
+      base.modeFlagBg = m==='flag'?'#B06A9A':'transparent';
+      base.modeFlagColor = m==='flag'?'#fff':'#9A7E5C';
+      base.modeFlagDot = m==='flag'?'#fff':'#B06A9A';
+      base.onModeCap = ()=>this.setState({mode:'cap'});
+      base.onModeCountry = ()=>this.setState({mode:'country'});
+      base.onModeFlag = ()=>this.setState({mode:'flag'});
+      const unit = m==='country' ? (lang==='fr'?'pays':'countries') : m==='flag' ? (lang==='fr'?'drapeaux':'flags') : (lang==='fr'?'capitales':'capitals');
+      base.regionCards = this.REGIONS.map(r=>{
+        const pr=S.progress[S.mode+':'+r.id]||{stars:0,best:0};
+        return {
+          name: lang==='fr'?r.fr:r.en,
+          countText: r.ids.length+' '+unit,
+          bg:r.bg, shadow:r.shadow,
+          starArr:[0,1,2].map(i=>({color: i<pr.stars?'#FFE08A':'rgba(255,255,255,.35)'})),
+          bestText: pr.best? (pr.best+' '+t.points) : '',
+          onPlay: ()=>this.startLevel(r.id),
+        };
+      });
+      base.onPlayAll = ()=>this.startLevel('all');
+      return base;
+    }
+
+    // ---- PLAY ----
+    if(S.screen==='play'){
+      const taskIds=this.taskIds();
+      const activeSet=new Set(taskIds);
+      const placed=S.placed;
+      const color=this.playColor();
+      base.playColor=color;
+      base.playRegionName = S.regionId==='all' ? (lang==='fr'?'Tout le continent':'Whole continent') : (lang==='fr'?this.regionById(S.regionId).fr:this.regionById(S.regionId).en);
+      const nPlaced=taskIds.filter(id=>placed[id]).length;
+      base.progressText = nPlaced+' / '+taskIds.length;
+      base.scoreText = String(S.score);
+      base.onBack = ()=>this.setState({screen:'home'});
+      const isCountry = S.mode==='country';
+      const isFlag = S.mode==='flag';
+      base.showNamesBtn = !isCountry;   // country names on the map would be the answer in country mode; in flag mode they are only a partial hint
+      base.trayTitle = isCountry ? t.trayTitleCountry : isFlag ? t.trayTitleFlag : t.trayTitleCap;
+      base.trayHint = S.selectedId ? t.tapPlace : (isCountry ? t.trayHintCountry : isFlag ? t.trayHintFlag : t.trayHintCap);
+      base.onToggleNames = ()=>this.setState({showNames:!S.showNames});
+      base.showNames=S.showNames;
+      base.namesBtnBg = S.showNames? color : '#F6ECD6';
+      base.namesBtnColor = S.showNames? '#fff' : '#9A7E5C';
+      base.onToggleSound = ()=>this.setState({soundOn:!S.soundOn});
+      base.soundIcon = S.soundOn?'🔊':'🔇';
+      base.shakeAnim = S.shake? 'mapShake .45s ease' : 'none';
+      base.zoom=S.zoom; base.panX=S.panX; base.panY=S.panY; base.invZoom=1/S.zoom;
+      base.mapCursor = S.zoom>1 ? 'grab' : 'default';
+      base.vpRefObj=this.vpRef; base.panRefObj=this.panRef; base.fitRefObj=this.fitRef; base.mapBoxRefObj=this.mapBoxRef;
+      base.onZoomIn=()=>this.setZoom(this.state.zoom*1.4);
+      base.onZoomOut=()=>this.setZoom(this.state.zoom/1.4);
+      base.onZoomReset=()=>this.setState({zoom:1,panX:0,panY:0});
+
+      base.countries = GEO.countries.map(c=>{
+        const isPlaced=!!placed[c.id];
+        const isActive=activeSet.has(c.id);
+        let fill, stroke;
+        if(isPlaced){ fill=this.hexA(this.idColor(c.id),0.9); stroke=this.idShadow(c.id); }
+        else if(isActive){ fill=this.hexA(this.idColor(c.id),0.30); stroke=this.hexA(this.idShadow(c.id),0.55); }
+        else { fill='#E8D8B4'; stroke='#CBB988'; }
+        return { id:c.id, d:c.d, fill, stroke };
+      });
+
+      // island target dots for islands in this task
+      base.islandDots = taskIds.filter(id=>GEO.caps[id]&&GEO.caps[id].island).map(id=>{
+        const cap=GEO.caps[id];
+        return { x:cap.x, y:cap.y, fill: placed[id]? this.idColor(id) : this.hexA(this.idColor(id),0.5) };
+      });
+
+      const ctrs=this.centers();
+      const lp = this._labelPts;
+      const ctrOf = (id)=>{ const cap=GEO.caps[id]; return cap.island ? {x:cap.x, y:cap.y-10} : ((lp && lp[id]) || ctrs[id] || {x:cap.x, y:cap.y}); };
+      base.nameLabels = (S.showNames && !isCountry) ? taskIds.filter(id=>!placed[id]&&GEO.caps[id]).map(id=>{
+        const ctr = ctrOf(id);
+        return { leftPct: ctr.x/1000*100, topPct: ctr.y/957*100, text: lang==='fr'?this.C[id].cf:this.C[id].ce };
+      }) : [];
+
+      base.pins = taskIds.filter(id=>placed[id]&&GEO.caps[id]).map(id=>{
+        const cap=GEO.caps[id];
+        if(isCountry || isFlag){
+          const ctr = ctrOf(id);
+          return { leftPct: ctr.x/1000*100, topPct: ctr.y/957*100, labelTopPct: (ctr.y-15)/957*100, color:this.idColor(id), label: lang==='fr'?this.C[id].cf:this.C[id].ce,
+                   flag: isFlag ? this.flagUrl(id) : 'data:,', flagDisplay: isFlag ? 'inline-block' : 'none' };
+        }
+        return { leftPct: cap.x/1000*100, topPct: cap.y/957*100, labelTopPct: (cap.y-15)/957*100, color:this.idColor(id), label: lang==='fr'?this.C[id].capFr:cap.n,
+                 flag:'data:,', flagDisplay:'none' };
+      });
+
+      const neutralChips = S.regionId==='all';
+      base.chips = this.shuffleStable(taskIds).filter(id=>!placed[id]).map(id=>({
+        id,
+        cap: isCountry ? (lang==='fr'?this.C[id].cf:this.C[id].ce) : isFlag ? '' : (lang==='fr'?this.C[id].capFr:GEO.caps[id].n),
+        capDisplay: isFlag ? 'none' : 'block',
+        flag: isFlag ? this.flagUrl(id) : 'data:,',
+        flagDisplay: isFlag ? 'block' : 'none',
+        country: lang==='fr'?this.C[id].cf:this.C[id].ce,
+        color: neutralChips ? '#BBA37E' : this.idColor(id),
+        shadow: neutralChips ? '#A98A5B' : this.idShadow(id),
+        bg: (S.dragId===id || S.selectedId===id)?'#F3E7CF':'#FFFDF7',
+        border: S.selectedId===id ? (neutralChips?'#BBA37E':this.idColor(id)) : '#EFE0C1',
+        opacity: S.dragId===id?0.4:1,
+        onDown:(e)=>this.startDrag(id,e),
+      }));
+      base.trayEmpty = base.chips.length===0;
+
+      // ghost
+      base.ghostDisplay = S.dragId ? 'block' : 'none';
+      base.ghostCap = S.dragId? (isCountry ? (lang==='fr'?this.C[S.dragId].cf:this.C[S.dragId].ce) : isFlag ? '' : (lang==='fr'?this.C[S.dragId].capFr:GEO.caps[S.dragId].n)) : '';
+      base.ghostCapDisplay = isFlag ? 'none' : 'block';
+      base.ghostFlag = (S.dragId && isFlag) ? this.flagUrl(S.dragId) : 'data:,';
+      base.ghostFlagDisplay = isFlag ? 'block' : 'none';
+      base.ghostCountry = S.dragId? (lang==='fr'?this.C[S.dragId].cf:this.C[S.dragId].ce) : '';
+
+      // fact
+      base.factOpen=S.factOpen;
+      if(S.factId){
+        base.factCap = lang==='fr'?this.C[S.factId].capFr:GEO.caps[S.factId].n;
+        base.factCountry = lang==='fr'?this.C[S.factId].cf:this.C[S.factId].ce;
+        const facts = this.factsOf(S.factId, lang);
+        base.factText = facts[Math.min(S.factIdx||0, facts.length-1)];
+        base.factFlag = this.flagUrl(S.factId);
+        base.factColor = this.idColor(S.factId);
+        base.factBtn = t.factBtn;
+      } else { base.factCap=''; base.factCountry=''; base.factText=''; base.factFlag=''; base.factColor=color; base.factBtn=t.factBtn; }
+      base.onCloseFact = ()=>this.closeFact();
+
+      base.badOpen=S.badOpen; base.badText=S.badText||'';
+      base.svgRefObj=this.svgRef; base.ghostRefObj=this.ghostRef;
+      return base;
+    }
+
+    // ---- RESULT ----
+    if(S.screen==='result'){
+      const color=this.playColor();
+      base.playColor=color;
+      base.resRegionName = S.regionId==='all' ? (lang==='fr'?'Tout le continent':'Whole continent') : (lang==='fr'?this.regionById(S.regionId).fr:this.regionById(S.regionId).en);
+      base.resStars=[0,1,2].map(i=>({ color: i<S.resStars?'#F2B33D':'#EDE0C6', delay:(i*0.12)+'s' }));
+      base.resScore=String(S.score);
+      base.resAccuracy=S.resAcc+'%';
+      base.resTitle = S.resStars>=3? t.resPerfect : S.resStars>=2? t.resGreat : t.resGood;
+      base.resMsg = S.mode==='country'
+        ? (lang==='fr'?'Tu as placé tous les pays.':'You placed every country.')
+        : S.mode==='flag'
+        ? (lang==='fr'?'Tu as placé tous les drapeaux.':'You placed every flag.')
+        : (lang==='fr'?'Tu as placé toutes les capitales.':'You placed every capital.');
+      base.confetti=S.confetti;
+      base.onReplay=()=>this.startLevel(S.regionId);
+      base.onHome=()=>this.setState({screen:'home'});
+      return base;
+    }
+    return base;
+  }
+
+  // keep chip order stable per level
+  shuffleStable(ids){
+    if(!this._chipOrderKey || this._chipOrderKey!==this.state.regionId){
+      this._chipOrderKey=this.state.regionId;
+      this._chipOrder=this.shuffle(ids);
+    }
+    // ensure any missing ids appended
+    return this._chipOrder.filter(id=>ids.includes(id));
+  }
+}
+</script>
+
+
+</body></html>
