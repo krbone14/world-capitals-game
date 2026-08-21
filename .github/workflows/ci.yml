@@ -1,13 +1,14 @@
-# Two checks, deliberately split so a data regression is reported in seconds
-# rather than after a browser download.
+# Two checks and a deploy.
 #
 #   validate — the generated files against each other. No dependencies at all,
 #              so it needs neither npm install nor a browser.
 #   smoke    — the real thing in a real Chromium: every map paints, every
 #              capital is reachable, a round can be won in all three modes.
+#   deploy   — publishes the page to GitHub Pages.
 #
-# They run in parallel: when both break, seeing both failures at once beats
-# gating one on the other.
+# The two checks run in parallel: when both break, seeing both failures at once
+# beats gating one on the other. The deploy waits for both, so a push that fails
+# them updates nothing that a player can reach.
 
 name: CI
 
@@ -76,3 +77,31 @@ jobs:
           name: screenshots
           path: tests/.shots/
           if-no-files-found: ignore
+
+  # The site is served straight from the repository root — there is no build
+  # step — so the deploy is just "upload the checkout and publish it". What it
+  # adds over the branch-based Pages build it replaces is the `needs:` below:
+  # the live game is only ever replaced by a commit that passed both checks.
+  deploy:
+    name: deploy to Pages
+    needs: [validate, smoke]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write      # deploy-pages authenticates to Pages with OIDC
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+      # The whole checkout, exactly as the branch-based build served it. tools/
+      # and tests/ ride along unused; excluding them would risk dropping a file
+      # index.html or the service worker actually asks for.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v5
