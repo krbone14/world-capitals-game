@@ -1,0 +1,79 @@
+# Two checks, deliberately split so a data regression is reported in seconds
+# rather than after a browser download.
+#
+#   validate — the generated files against each other. No dependencies at all,
+#              so it needs neither npm install nor a browser.
+#   smoke    — the real thing in a real Chromium: every map paints, every
+#              capital is reachable, a round can be won in all three modes.
+#
+# They run in parallel: when both break, seeing both failures at once beats
+# gating one on the other.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A push that supersedes an in-flight run makes that run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node tools/validate-data.mjs
+
+  smoke:
+    name: end-to-end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tools/package-lock.json
+
+      - name: Install build/test dependencies
+        run: npm ci
+        working-directory: tools
+
+      # ~170 MB, and it only changes when playwright does — so key the cache on
+      # the lockfile that pins it.
+      - name: Restore Chromium
+        id: chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: chromium-${{ runner.os }}-${{ hashFiles('tools/package-lock.json') }}
+
+      # --with-deps installs the system libraries Chromium needs on a bare
+      # runner; those live outside the cached directory, so this runs either way
+      # and is a no-op download when the cache hit.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: tools
+
+      # --shots always: the screenshots cost nothing to take during a run that
+      # already navigates every screen, and re-running a failed test to collect
+      # them would just as likely fail somewhere else.
+      - run: node tests/smoke.mjs --shots
+
+      # On a red run they are usually the fastest way to see what the map did.
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: tests/.shots/
+          if-no-files-found: ignore

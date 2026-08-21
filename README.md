@@ -1,5 +1,7 @@
 # 🌍 Les Capitales du Monde · Capitals of the World
 
+[![CI](https://github.com/krbone14/world-capitals-game/actions/workflows/ci.yml/badge.svg)](https://github.com/krbone14/world-capitals-game/actions/workflows/ci.yml)
+
 An educational geography game: drag (or tap) each capital — or country, or flag —
 onto the right spot of the map. Seven maps, 195 countries, playable on desktop and
 mobile, installable and playable offline.
@@ -109,6 +111,11 @@ node tests/smoke.mjs            # end-to-end; --shots also saves screenshots
 The smoke test opens every continent, checks all seven maps for missing,
 offscreen or untargetable capitals, and plays a full region to three stars in
 each of the three modes.
+
+Both run on every push and pull request
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), as two parallel jobs
+so a data regression is reported without waiting for a browser download. The
+smoke job uploads its screenshots as an artifact when it fails.
 
 ## Contributing
 
