@@ -1,14 +1,31 @@
 // Service worker: offline support for the PWA.
-// Same-origin requests are network-first (updates arrive immediately, cache is
-// the offline fallback), flag images are cache-first (they never change).
-const CACHE = 'africapitales-v1';
+//
+// Two caching postures, by what the resource is:
+//   - everything same-origin : network-first, so an update lands immediately
+//     and the cache is only the offline fallback. React ships from
+//     assets/vendor/, so this covers all of the app;
+//   - flags from flagcdn     : cache-first, warmed in the background after
+//     activation rather than during install — 195 images is too much to make a
+//     player wait for, or pay mobile data for, before the game will start.
+const CACHE = 'worldcapitals-v1';
 
 const PRECACHE = [
   './',
   './index.html',
   './manifest.json',
-  './assets/africa-geo.js',
   './assets/dc-runtime.js',
+  './assets/vendor/react.production.min.js',
+  './assets/vendor/react-dom.production.min.js',
+  './assets/data/countries.js',
+  './assets/data/regions.js',
+  './assets/data/facts.js',
+  './assets/geo/africa.js',
+  './assets/geo/europe.js',
+  './assets/geo/asia.js',
+  './assets/geo/north-america.js',
+  './assets/geo/south-america.js',
+  './assets/geo/oceania.js',
+  './assets/geo/world.js',
   './assets/asset_3.woff2',
   './assets/asset_4.woff2',
   './assets/asset_5.woff2',
@@ -26,23 +43,12 @@ const PRECACHE = [
   './icons/icon-512.png',
 ];
 
-// All 54 flags, pre-cached so flag mode works offline too.
-const FLAG_CODES = ['dz','eg','ly','ma','tn','sd','bj','bf','cv','ci','gm','gh','gn','gw','lr','ml','mr','ne','ng','sn','sl','tg','ao','cm','cf','td','cg','cd','gq','ga','st','bi','km','dj','er','et','ke','mg','mw','mu','rw','sc','so','za','ss','tz','ug','bw','sz','ls','mz','na','zm','zw'];
-const FLAG_URLS = FLAG_CODES.map(c => 'https://flagcdn.com/w160/' + c + '.png');
+const CACHE_FIRST_HOSTS = ['flagcdn.com'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
     await c.addAll(PRECACHE);
-    // Flags are cross-origin opaque responses (status 0): cache.add() rejects
-    // those, so fetch + put manually, individually, so one failure doesn't
-    // abort the whole install.
-    await Promise.all(FLAG_URLS.map(async (u) => {
-      try {
-        const res = await fetch(u, { mode: 'no-cors' });
-        await c.put(u, res);
-      } catch (err) {}
-    }));
     await self.skipWaiting();
   })());
 });
@@ -50,8 +56,11 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
     await self.clients.claim();
+    // Warm the flags in the background: the page is already usable, this only
+    // decides whether flag mode works the next time the player is offline.
+    warmFlags();
   })());
 });
 
@@ -59,8 +68,8 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
 
-  // Flags never change: cache-first.
-  if (url.hostname === 'flagcdn.com') {
+  // Flag images never change: cache-first.
+  if (CACHE_FIRST_HOSTS.includes(url.hostname)) {
     e.respondWith((async () => {
       const c = await caches.open(CACHE);
       const hit = await c.match(e.request, { ignoreVary: true });
@@ -92,3 +101,27 @@ self.addEventListener('fetch', (e) => {
     })());
   }
 });
+
+async function putOpaque(cache, url) {
+  try {
+    const res = await fetch(url, { mode: 'no-cors' });
+    await cache.put(url, res);
+  } catch (err) { /* offline, or the CDN is down: the runtime fetch retries */ }
+}
+
+// Flag codes are read out of the generated country data rather than duplicated
+// here, so adding a country never means remembering to edit this file too.
+async function warmFlags() {
+  try {
+    const cache = await caches.open(CACHE);
+    const res = (await cache.match('./assets/data/countries.js')) || (await fetch('./assets/data/countries.js'));
+    const sandbox = { window: {} };
+    new Function('window', await res.text()).call(sandbox, sandbox.window);
+    const countries = sandbox.window.WORLD_DATA.countries;
+    for (const id of Object.keys(countries)) {
+      const url = 'https://flagcdn.com/w160/' + countries[id].i2 + '.png';
+      if (await cache.match(url, { ignoreVary: true })) continue;
+      await putOpaque(cache, url);
+    }
+  } catch (err) { /* best effort: the fetch handler still caches flags on sight */ }
+}

@@ -2,8 +2,8 @@
 <html lang="fr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Les Capitales d'Afrique · Capitals of Africa</title>
-<meta name="description" content="Jeu de géographie : place les 54 capitales et pays d'Afrique sur la carte. / Geography game: drag all 54 African capitals and countries onto the map.">
+<title>Les Capitales du Monde · Capitals of the World</title>
+<meta name="description" content="Jeu de géographie bilingue : place les capitales, les pays et les drapeaux du monde sur la carte. / Bilingual geography game: drag the world's capitals, countries and flags onto the map.">
 <meta name="theme-color" content="#F6E9CD">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
 <link rel="manifest" href="manifest.json">
@@ -11,13 +11,20 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Capitales Afrique">
+<meta name="apple-mobile-web-app-title" content="Capitales Monde">
 <script>
 // Register the service worker for offline play (PWA).
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
 }
 </script>
+<!-- React, served from this origin rather than a CDN. dc-runtime.js skips its
+     own unpkg fetch when window.React and window.ReactDOM already exist, so the
+     game boots with no third-party request at all — which is what makes the
+     offline PWA claim actually true. Both files match the SHA-384 hashes
+     dc-runtime.js pins for them. -->
+<script src="assets/vendor/react.production.min.js"></script>
+<script src="assets/vendor/react-dom.production.min.js"></script>
 <script src="assets/dc-runtime.js"></script>
 </head>
 <body>
@@ -372,7 +379,11 @@ if ('serviceWorker' in navigator) {
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 </style>
-<script src="assets/africa-geo.js"></script>
+<!-- Country roster, region layout and anecdotes. Map geometry is fetched per
+     continent at play time by loadGeo(), not up front. -->
+<script src="assets/data/countries.js"></script>
+<script src="assets/data/regions.js"></script>
+<script src="assets/data/facts.js"></script>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -418,7 +429,7 @@ if ('serviceWorker' in navigator) {
 
   <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
 
-  <!-- ===================== HOME ===================== -->
+  <!-- ===================== HOME: pick a continent ===================== -->
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div class="g-home" style="max-width:1180px;width:100%;margin:0 auto;padding:46px 32px 60px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
@@ -434,7 +445,6 @@ if ('serviceWorker' in navigator) {
         <span style="font-size:18px;">{{ langFlag }}</span>{{ langLabel }}
       </button>
     </div>
-
     <div style="margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;animation:cardIn .5s ease both;">
       <span style="font-weight:800;font-size:14px;color:#9A7E5C;letter-spacing:.3px;">{{ t.modeQ }}</span>
       <div style="display:inline-flex;background:#fff;border:2px solid #EAD7B0;border-radius:16px;padding:5px;box-shadow:0 4px 0 #EAD7B0;gap:5px;">
@@ -451,6 +461,69 @@ if ('serviceWorker' in navigator) {
     </div>
 
     <div style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">
+      <sc-for list="{{ continentCards }}" as="c" hint-placeholder-count="6">
+        <button onclick="{{ c.onOpen }}" style="text-align:left;cursor:pointer;border:none;background:{{ c.bg }};border-radius:22px;padding:22px 22px 20px;box-shadow:0 6px 0 {{ c.shadow }};position:relative;overflow:hidden;animation:cardIn .5s ease both;font-family:'Nunito';">
+          <div style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);"></div>
+          <div style="position:relative;display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;color:#fff;line-height:1.1;">{{ c.emoji }} {{ c.name }}</div>
+              <div style="color:rgba(255,255,255,.9);font-weight:700;font-size:14px;margin-top:3px;">{{ c.countText }}</div>
+            </div>
+            <div style="color:#FFE08A;font-weight:800;font-size:14px;white-space:nowrap;">{{ c.starText }}</div>
+          </div>
+          <div style="position:relative;margin-top:16px;">
+            <span style="background:rgba(255,255,255,.92);color:{{ c.shadow }};font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.play }} &#9656;</span>
+          </div>
+        </button>
+      </sc-for>
+
+      <button onclick="{{ onOpenWorld }}" style="text-align:left;cursor:pointer;border:2px dashed #C9A86B;background:#FFFBF1;border-radius:22px;padding:22px;box-shadow:0 6px 0 #EAD7B0;animation:cardIn .5s ease both;font-family:'Nunito';">
+        <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;color:#7A5CB0;line-height:1.1;">{{ worldEmoji }} {{ worldTitle }}</div>
+        <div style="color:#9A7E5C;font-weight:700;font-size:14px;margin-top:3px;">{{ worldCountText }}</div>
+        <div style="margin-top:16px;"><span style="background:#7A5CB0;color:#fff;font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.challenge }} &#9889;</span></div>
+      </button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= CONTINENT: pick a region ================= -->
+  <sc-if value="{{ isContinent }}" hint-placeholder-val="{{ false }}">
+  <div class="g-home" style="max-width:1180px;width:100%;margin:0 auto;padding:34px 32px 60px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
+      <button onclick="{{ onBackHome }}" style="cursor:pointer;background:#fff;border:2px solid #EAD7B0;border-radius:14px;padding:10px 16px;font-family:'Nunito';font-weight:800;font-size:15px;color:#7A6A57;box-shadow:0 4px 0 #EAD7B0;">&#8249; {{ t.backHome }}</button>
+      <button onclick="{{ onToggleLang }}" style="cursor:pointer;background:#fff;border:2px solid #EAD7B0;border-radius:14px;padding:10px 16px;font-family:'Nunito';font-weight:800;font-size:15px;color:#3B2F27;box-shadow:0 4px 0 #EAD7B0;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">{{ langFlag }}</span>{{ langLabel }}
+      </button>
+    </div>
+
+    <h1 class="g-title" style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:46px;line-height:1.05;margin:22px 0 6px;letter-spacing:-.5px;color:{{ contShadow }};">{{ contEmoji }} {{ contName }}</h1>
+    <p class="g-subtitle" style="font-size:17px;color:#7A6A57;max-width:560px;margin:0;font-weight:600;">{{ t.pickRegion }}</p>
+    <div style="margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;animation:cardIn .5s ease both;">
+      <span style="font-weight:800;font-size:14px;color:#9A7E5C;letter-spacing:.3px;">{{ t.modeQ }}</span>
+      <div style="display:inline-flex;background:#fff;border:2px solid #EAD7B0;border-radius:16px;padding:5px;box-shadow:0 4px 0 #EAD7B0;gap:5px;">
+        <button onclick="{{ onModeCap }}" style="cursor:pointer;border:none;border-radius:11px;padding:10px 20px;font-family:'Nunito';font-weight:800;font-size:15px;background:{{ modeCapBg }};color:{{ modeCapColor }};display:flex;align-items:center;gap:8px;">
+          <span style="width:13px;height:13px;border-radius:50%;background:{{ modeCapDot }};display:inline-block;"></span>{{ t.modeCap }}
+        </button>
+        <button onclick="{{ onModeCountry }}" style="cursor:pointer;border:none;border-radius:11px;padding:10px 20px;font-family:'Nunito';font-weight:800;font-size:15px;background:{{ modeCountryBg }};color:{{ modeCountryColor }};display:flex;align-items:center;gap:8px;">
+          <span style="width:13px;height:13px;border-radius:3px;background:{{ modeCountryDot }};display:inline-block;"></span>{{ t.modeCountry }}
+        </button>
+        <button onclick="{{ onModeFlag }}" style="cursor:pointer;border:none;border-radius:11px;padding:10px 20px;font-family:'Nunito';font-weight:800;font-size:15px;background:{{ modeFlagBg }};color:{{ modeFlagColor }};display:flex;align-items:center;gap:8px;">
+          <span style="width:17px;height:12px;border-radius:2px;background:{{ modeFlagDot }};display:inline-block;"></span>{{ t.modeFlag }}
+        </button>
+      </div>
+    </div>
+
+    <sc-if value="{{ mapLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22px;padding:16px 20px;background:#FFFBF1;border:2px dashed #C9A86B;border-radius:16px;color:#9A7E5C;font-weight:700;">{{ t.loadingMap }}</div>
+    </sc-if>
+    <sc-if value="{{ mapError }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22px;padding:16px 20px;background:#FDECE8;border:2px solid #E0A99A;border-radius:16px;color:#A9503C;font-weight:700;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        {{ t.mapFailed }}
+        <button onclick="{{ onRetryMap }}" style="cursor:pointer;background:#C25A4A;color:#fff;border:none;border-radius:11px;padding:8px 16px;font-family:'Nunito';font-weight:800;font-size:14px;">{{ t.retry }}</button>
+      </div>
+    </sc-if>
+
+    <div style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">
       <sc-for list="{{ regionCards }}" as="r" hint-placeholder-count="5">
         <button onclick="{{ r.onPlay }}" style="text-align:left;cursor:pointer;border:none;background:{{ r.bg }};border-radius:22px;padding:22px 22px 20px;box-shadow:0 6px 0 {{ r.shadow }};position:relative;overflow:hidden;animation:cardIn .5s ease both;font-family:'Nunito';">
           <div style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);"></div>
@@ -461,21 +534,21 @@ if ('serviceWorker' in navigator) {
             </div>
             <div style="display:flex;gap:3px;">
               <sc-for list="{{ r.starArr }}" as="s" hint-placeholder-count="3">
-                <span style="font-size:19px;line-height:1;color:{{ s.color }};text-shadow:0 1px 1px rgba(0,0,0,.15);">★</span>
+                <span style="font-size:19px;line-height:1;color:{{ s.color }};text-shadow:0 1px 1px rgba(0,0,0,.15);">&#9733;</span>
               </sc-for>
             </div>
           </div>
           <div style="position:relative;margin-top:16px;display:flex;align-items:center;gap:8px;">
-            <span style="background:rgba(255,255,255,.92);color:{{ r.shadow }};font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.play }} ▸</span>
+            <span style="background:rgba(255,255,255,.92);color:{{ r.shadow }};font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.play }} &#9656;</span>
             <span style="color:#fff;font-weight:700;font-size:13px;opacity:.92;">{{ r.bestText }}</span>
           </div>
         </button>
       </sc-for>
 
       <button onclick="{{ onPlayAll }}" style="text-align:left;cursor:pointer;border:2px dashed #C9A86B;background:#FFFBF1;border-radius:22px;padding:22px;box-shadow:0 6px 0 #EAD7B0;animation:cardIn .5s ease both;font-family:'Nunito';">
-        <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;color:#A65A3C;line-height:1.1;">{{ t.allTitle }}</div>
+        <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;color:{{ contShadow }};line-height:1.1;">{{ allTitle }}</div>
         <div style="color:#9A7E5C;font-weight:700;font-size:14px;margin-top:3px;">{{ allCountText }}</div>
-        <div style="margin-top:16px;"><span style="background:#A65A3C;color:#fff;font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.challenge }} ⚡</span></div>
+        <div style="margin-top:16px;"><span style="background:{{ contColor }};color:#fff;font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.challenge }} &#9889;</span></div>
       </button>
     </div>
   </div>
@@ -517,7 +590,7 @@ if ('serviceWorker' in navigator) {
           <!-- Aspect-correct map box, centered by fitMap(); the pan viewport itself
                fills the whole available area so zooming reveals map, not margins. -->
           <div ref="{{ mapBoxRefObj }}" style="position:absolute;left:0;top:0;width:100%;height:100%;">
-          <svg ref="{{ svgRefObj }}" viewBox="0 0 1000 957" width="100%" height="100%" style="display:block;overflow:visible;touch-action:none;">
+          <svg ref="{{ svgRefObj }}" viewBox="{{ mapViewBox }}" width="100%" height="100%" style="display:block;overflow:visible;touch-action:none;">
             <defs>
               <filter id="landShadow" x="-5%" y="-5%" width="110%" height="115%">
                 <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000" flood-opacity="0.10"></feDropShadow>
@@ -570,7 +643,7 @@ if ('serviceWorker' in navigator) {
       <!-- tray -->
       <div class="g-tray" style="width:300px;flex:none;background:#fff;border-left:2px solid #EFE0C1;display:flex;flex-direction:column;min-height:0;">
         <div class="g-tray-head" style="padding:16px 18px 10px;">
-          <div class="g-tray-title" style="font-family:'Fredoka';font-weight:600;font-size:18px;">{{ trayTitle }}</div>
+          <div class="g-tray-title" style="font-family:'Fredoka';font-weight:600;font-size:18px;display:flex;align-items:baseline;gap:8px;">{{ trayTitle }}<span style="font-family:'Nunito';font-size:13px;font-weight:800;color:#9A7E5C;">{{ trayRemaining }}</span></div>
           <div style="font-size:13px;color:#9A7E5C;font-weight:700;margin-top:2px;">{{ trayHint }}</div>
         </div>
         <div class="g-chips" style="flex:1;overflow-y:auto;padding:6px 16px 18px;display:flex;flex-direction:column;gap:10px;">
@@ -665,7 +738,9 @@ class Component extends DCLogic {
     ready: false,
     lang: 'fr',
     mode: 'cap',           // cap (capitals) | country (place the country)
-    screen: 'home',        // home | play | result
+    screen: 'home',        // home | continent | play | result
+    continentId: null,     // which continent (or 'monde') is open
+    mapError: false,       // its map file failed to load
     regionId: null,        // current region id or 'all'
     queue: [],             // ids to place
     placed: {},            // id -> true
@@ -681,166 +756,217 @@ class Component extends DCLogic {
     factIdx: 0,            // which anecdote of the country to show
     badOpen: false,
     shake: false,
-    progress: {},          // regionId -> {stars,best}
+    progress: {},          // mode:continent:region -> {stars,best}
     confetti: [],
     resStars: 0, resAcc: 0,
   };
 
-  TOL = 22;
-
-  REGIONS = [
-    { id:'nord',  fr:'Afrique du Nord',    en:'North Africa',   bg:'#E2A24B', shadow:'#B97E2C', ids:['DZA','EGY','LBY','MAR','TUN','SDN'] },
-    { id:'ouest', fr:"Afrique de l'Ouest", en:'West Africa',    bg:'#DD7A57', shadow:'#B25636', ids:['BEN','BFA','CPV','CIV','GMB','GHA','GIN','GNB','LBR','MLI','MRT','NER','NGA','SEN','SLE','TGO'] },
-    { id:'centre',fr:'Afrique Centrale',   en:'Central Africa', bg:'#3F9E78', shadow:'#2C7A5A', ids:['AGO','CMR','CAF','TCD','COG','COD','GNQ','GAB','STP'] },
-    { id:'est',   fr:"Afrique de l'Est",   en:'East Africa',    bg:'#5B86C4', shadow:'#3E63A0', ids:['BDI','COM','DJI','ERI','ETH','KEN','MDG','MWI','MUS','RWA','SYC','SOM','SSD','TZA','UGA'] },
-    { id:'sud',   fr:'Afrique Australe',   en:'Southern Africa',bg:'#B06A9A', shadow:'#8A4C78', ids:['BWA','SWZ','LSO','MOZ','NAM','ZAF','ZMB','ZWE'] },
-  ];
-
-  C = {
-    DZA:{cf:'Algérie',ce:'Algeria',capFr:'Alger',ff:"Le plus grand pays d'Afrique par sa superficie.",fe:'The largest country in Africa by area.'},
-    EGY:{cf:'Égypte',ce:'Egypt',capFr:'Le Caire',ff:'Les pyramides de Gizeh ont plus de 4 500 ans.',fe:'The Giza pyramids are over 4,500 years old.'},
-    LBY:{cf:'Libye',ce:'Libya',capFr:'Tripoli',ff:'Plus de 90 % du pays est couvert par le Sahara.',fe:'Over 90% of the country is Sahara desert.'},
-    MAR:{cf:'Maroc',ce:'Morocco',capFr:'Rabat',ff:"Fès abrite la plus vieille université du monde encore en activité.",fe:"Fez has the world's oldest still-running university."},
-    TUN:{cf:'Tunisie',ce:'Tunisia',capFr:'Tunis',ff:'Des scènes de Star Wars y furent tournées dans le désert.',fe:'Star Wars desert scenes were filmed here.'},
-    SDN:{cf:'Soudan',ce:'Sudan',capFr:'Khartoum',ff:"Le Soudan compte plus de pyramides que l'Égypte !",fe:'Sudan has more pyramids than Egypt!'},
-    BEN:{cf:'Bénin',ce:'Benin',capFr:'Porto-Novo',ff:'Berceau historique du vaudou.',fe:'The historical birthplace of voodoo.'},
-    BFA:{cf:'Burkina Faso',ce:'Burkina Faso',capFr:'Ouagadougou',ff:'Son nom signifie « pays des hommes intègres ».',fe:"Its name means 'land of honest people'."},
-    CPV:{cf:'Cap-Vert',ce:'Cape Verde',capFr:'Praia',ff:'Un archipel de 10 îles volcaniques dans l\u2019Atlantique.',fe:'An archipelago of 10 volcanic islands in the Atlantic.'},
-    CIV:{cf:"Côte d'Ivoire",ce:'Ivory Coast',capFr:'Yamoussoukro',ff:'Premier producteur mondial de cacao.',fe:"The world's top cocoa producer."},
-    GMB:{cf:'Gambie',ce:'Gambia',capFr:'Banjul',ff:"Le plus petit pays d'Afrique continentale.",fe:'The smallest country in mainland Africa.'},
-    GHA:{cf:'Ghana',ce:'Ghana',capFr:'Accra',ff:'1er pays d\u2019Afrique subsaharienne indépendant (1957).',fe:'First independent sub-Saharan country (1957).'},
-    GIN:{cf:'Guinée',ce:'Guinea',capFr:'Conakry',ff:'Le fleuve Niger y prend sa source.',fe:'The Niger River begins here.'},
-    GNB:{cf:'Guinée-Bissau',ce:'Guinea-Bissau',capFr:'Bissau',ff:'Connu pour ses îles Bijagos.',fe:'Known for the Bijagós islands.'},
-    LBR:{cf:'Libéria',ce:'Liberia',capFr:'Monrovia',ff:'Fondé au 19e siècle par des Afro-Américains affranchis.',fe:'Founded in the 1800s by freed African-Americans.'},
-    MLI:{cf:'Mali',ce:'Mali',capFr:'Bamako',ff:'Tombouctou fut un grand centre de savoir médiéval.',fe:'Timbuktu was a great medieval center of learning.'},
-    MRT:{cf:'Mauritanie',ce:'Mauritania',capFr:'Nouakchott',ff:'Un de ses trains de minerai est parmi les plus longs du monde.',fe:"Home to one of the world's longest trains."},
-    NER:{cf:'Niger',ce:'Niger',capFr:'Niamey',ff:'Plus des deux tiers du pays sont dans le Sahara.',fe:'More than two-thirds lies in the Sahara.'},
-    NGA:{cf:'Nigéria',ce:'Nigeria',capFr:'Abuja',ff:"Pays le plus peuplé d'Afrique.",fe:'The most populous country in Africa.'},
-    SEN:{cf:'Sénégal',ce:'Senegal',capFr:'Dakar',ff:'Le lac Rose doit sa couleur à des micro-algues.',fe:'Lake Retba is pink thanks to micro-algae.'},
-    SLE:{cf:'Sierra Leone',ce:'Sierra Leone',capFr:'Freetown',ff:'Possède un des plus grands ports naturels du monde.',fe:"Has one of the world's largest natural harbors."},
-    TGO:{cf:'Togo',ce:'Togo',capFr:'Lomé',ff:'Une étroite bande de terre, de la côte au nord.',fe:'A narrow strip of land from coast to interior.'},
-    AGO:{cf:'Angola',ce:'Angola',capFr:'Luanda',ff:'Le portugais y est la langue officielle.',fe:'Portuguese is the official language.'},
-    CMR:{cf:'Cameroun',ce:'Cameroon',capFr:'Yaoundé',ff:"Surnommé « l'Afrique en miniature ».",fe:"Nicknamed 'Africa in miniature'."},
-    CAF:{cf:'Centrafrique',ce:'Central African Rep.',capFr:'Bangui',ff:'Pays enclavé au cœur du continent.',fe:"A landlocked country at the continent's heart."},
-    TCD:{cf:'Tchad',ce:'Chad',capFr:"N'Djamena",ff:'Le lac Tchad a beaucoup rétréci en 50 ans.',fe:'Lake Chad has shrunk dramatically in 50 years.'},
-    COG:{cf:'Congo',ce:'Congo',capFr:'Brazzaville',ff:'Traversé par l\u2019équateur.',fe:'The equator runs through it.'},
-    COD:{cf:'RD Congo',ce:'DR Congo',capFr:'Kinshasa',ff:"2e plus grand pays d'Afrique, riche en forêts.",fe:"Africa's 2nd-largest country, rich in rainforest."},
-    GNQ:{cf:'Guinée équat.',ce:'Eq. Guinea',capFr:'Malabo',ff:'Seul pays africain hispanophone.',fe:'The only Spanish-speaking African country.'},
-    GAB:{cf:'Gabon',ce:'Gabon',capFr:'Libreville',ff:'Près de 90 % du territoire est forêt.',fe:'Almost 90% is covered by forest.'},
-    STP:{cf:'Sao Tomé-et-P.',ce:'São Tomé & Príncipe',capFr:'São Tomé',ff:'Deux îles posées sur l\u2019équateur.',fe:'Two islands sitting on the equator.'},
-    BDI:{cf:'Burundi',ce:'Burundi',capFr:'Gitega',ff:'Une des sources les plus lointaines du Nil.',fe:"One of the Nile's most distant sources."},
-    COM:{cf:'Comores',ce:'Comoros',capFr:'Moroni',ff:'Surnommées les « îles de la Lune ».',fe:"Nicknamed the 'islands of the Moon'."},
-    DJI:{cf:'Djibouti',ce:'Djibouti',capFr:'Djibouti',ff:"Le lac Assal est le point le plus bas d'Afrique.",fe:'Lake Assal is the lowest point in Africa.'},
-    ERI:{cf:'Érythrée',ce:'Eritrea',capFr:'Asmara',ff:'Asmara est célèbre pour son architecture Art déco.',fe:'Asmara is famous for its Art Deco architecture.'},
-    ETH:{cf:'Éthiopie',ce:'Ethiopia',capFr:'Addis-Abeba',ff:'Jamais colonisée, elle a son propre calendrier.',fe:'Never colonized, it has its own calendar.'},
-    KEN:{cf:'Kenya',ce:'Kenya',capFr:'Nairobi',ff:'La grande migration du Masai Mara y est célèbre.',fe:"The Masai Mara's great migration is famous here."},
-    MDG:{cf:'Madagascar',ce:'Madagascar',capFr:'Antananarivo',ff:'90 % de sa faune ne vit nulle part ailleurs.',fe:'90% of its wildlife lives nowhere else.'},
-    MWI:{cf:'Malawi',ce:'Malawi',capFr:'Lilongwe',ff:'Le lac Malawi abrite des centaines d\u2019espèces de poissons.',fe:'Lake Malawi holds hundreds of fish species.'},
-    MUS:{cf:'Maurice',ce:'Mauritius',capFr:'Port-Louis',ff:'Le dodo, oiseau disparu, vivait sur cette île.',fe:'The extinct dodo bird lived on this island.'},
-    RWA:{cf:'Rwanda',ce:'Rwanda',capFr:'Kigali',ff:'Surnommé le « pays aux mille collines ».',fe:"Nicknamed the 'land of a thousand hills'."},
-    SYC:{cf:'Seychelles',ce:'Seychelles',capFr:'Victoria',ff:'115 îles dans l\u2019océan Indien.',fe:'115 islands in the Indian Ocean.'},
-    SOM:{cf:'Somalie',ce:'Somalia',capFr:'Mogadiscio',ff:"Le plus long littoral d'Afrique continentale.",fe:'The longest coastline of mainland Africa.'},
-    ZAF:{cf:'Afrique du Sud',ce:'South Africa',capFr:'Pretoria',ff:'Possède trois capitales officielles.',fe:'Has three official capital cities.'},
-    SSD:{cf:'Soudan du Sud',ce:'South Sudan',capFr:'Djouba',ff:'Le plus jeune pays du monde (2011).',fe:"The world's youngest country (2011)."},
-    TZA:{cf:'Tanzanie',ce:'Tanzania',capFr:'Dodoma',ff:'Le Kilimandjaro, plus haut sommet d\u2019Afrique, y est.',fe:"Mt Kilimanjaro, Africa's highest peak, is here."},
-    UGA:{cf:'Ouganda',ce:'Uganda',capFr:'Kampala',ff:'Partage le lac Victoria, le plus grand d\u2019Afrique.',fe:"Shares Lake Victoria, Africa's largest lake."},
-    BWA:{cf:'Botswana',ce:'Botswana',capFr:'Gaborone',ff:'Le delta de l\u2019Okavango est un paradis animalier.',fe:'The Okavango Delta is a wildlife paradise.'},
-    SWZ:{cf:'Eswatini',ce:'Eswatini',capFr:'Mbabané',ff:'Une des dernières monarchies absolues au monde.',fe:"One of the world's last absolute monarchies."},
-    LSO:{cf:'Lesotho',ce:'Lesotho',capFr:'Maseru',ff:'Entièrement situé à plus de 1 000 m d\u2019altitude.',fe:'Entirely above 1,000 m elevation.'},
-    MOZ:{cf:'Mozambique',ce:'Mozambique',capFr:'Maputo',ff:'Son drapeau arbore un fusil AK-47.',fe:'Its flag features an AK-47 rifle.'},
-    NAM:{cf:'Namibie',ce:'Namibia',capFr:'Windhoek',ff:'Les dunes du Namib comptent parmi les plus hautes.',fe:"The Namib's dunes are among Earth's tallest."},
-    ZMB:{cf:'Zambie',ce:'Zambia',capFr:'Lusaka',ff:'Partage les chutes Victoria avec le Zimbabwe.',fe:'Shares Victoria Falls with Zimbabwe.'},
-    ZWE:{cf:'Zimbabwe',ce:'Zimbabwe',capFr:'Harare',ff:'Les ruines du Grand Zimbabwe ont nommé le pays.',fe:'The Great Zimbabwe ruins named the country.'},
-  };
-
-  // ISO 3166-1 alpha-2 codes, used to load flag images from flagcdn.com
-  A2 = {
-    DZA:'dz',EGY:'eg',LBY:'ly',MAR:'ma',TUN:'tn',SDN:'sd',
-    BEN:'bj',BFA:'bf',CPV:'cv',CIV:'ci',GMB:'gm',GHA:'gh',GIN:'gn',GNB:'gw',LBR:'lr',MLI:'ml',MRT:'mr',NER:'ne',NGA:'ng',SEN:'sn',SLE:'sl',TGO:'tg',
-    AGO:'ao',CMR:'cm',CAF:'cf',TCD:'td',COG:'cg',COD:'cd',GNQ:'gq',GAB:'ga',STP:'st',
-    BDI:'bi',COM:'km',DJI:'dj',ERI:'er',ETH:'et',KEN:'ke',MDG:'mg',MWI:'mw',MUS:'mu',RWA:'rw',SYC:'sc',SOM:'so',ZAF:'za',SSD:'ss',TZA:'tz',UGA:'ug',
-    BWA:'bw',SWZ:'sz',LSO:'ls',MOZ:'mz',NAM:'na',ZMB:'zm',ZWE:'zw',
-  };
-
-  // Extra fun facts per country (French / English). Combined with the base fact
-  // from C so the success popup doesn't always show the same anecdote.
-  XF = {
-    DZA:{ff:["Le Sahara couvre environ 80 % de l'Algérie.","Alger est surnommée « Alger la Blanche » pour ses immeubles blancs."],fe:["The Sahara covers about 80% of Algeria.","Algiers is nicknamed 'Algiers the White' for its white buildings."]},
-    EGY:{ff:["Le Nil, qui traverse l'Égypte, est l'un des plus longs fleuves du monde.","L'agglomération du Caire compte plus de 20 millions d'habitants."],fe:["The Nile, flowing through Egypt, is one of the world's longest rivers.","Greater Cairo is home to more than 20 million people."]},
-    LBY:{ff:["La Libye possède les plus grandes réserves de pétrole d'Afrique.","Leptis Magna compte parmi les plus belles ruines romaines du monde."],fe:["Libya has Africa's largest oil reserves.","Leptis Magna is among the world's finest Roman ruins."]},
-    MAR:{ff:["Seuls 14 km de mer séparent le Maroc de l'Europe.","Marrakech est surnommée « la ville rouge »."],fe:["Only 14 km of sea separate Morocco from Europe.","Marrakesh is nicknamed 'the Red City'."]},
-    TUN:{ff:["L'antique cité de Carthage se trouvait tout près de Tunis.","La Tunisie est le pays le plus au nord de l'Afrique."],fe:["The ancient city of Carthage stood right next to Tunis.","Tunisia is Africa's northernmost country."]},
-    SDN:{ff:["Le Nil Bleu et le Nil Blanc se rejoignent à Khartoum.","C'était le plus grand pays d'Afrique avant 2011."],fe:["The Blue Nile and White Nile meet in Khartoum.","It was Africa's largest country until 2011."]},
-    BEN:{ff:["Le village de Ganvié est bâti sur pilotis au milieu d'un lac.","Porto-Novo est la capitale, mais Cotonou est la plus grande ville."],fe:["Ganvié village is built on stilts in the middle of a lake.","Porto-Novo is the capital, but Cotonou is the biggest city."]},
-    BFA:{ff:["Ouagadougou accueille le FESPACO, le plus grand festival de cinéma d'Afrique.","Ses habitants s'appellent les Burkinabè."],fe:["Ouagadougou hosts FESPACO, Africa's biggest film festival.","Its people are called the Burkinabè."]},
-    CPV:{ff:["Les îles étaient désertes avant l'arrivée des navigateurs au 15e siècle.","La morna, sa musique traditionnelle, est classée à l'UNESCO."],fe:["The islands were uninhabited until sailors arrived in the 1400s.","Its traditional morna music is UNESCO-listed."]},
-    CIV:{ff:["La basilique de Yamoussoukro est l'une des plus grandes églises du monde.","Abidjan est la plus grande ville, mais Yamoussoukro est la capitale."],fe:["Yamoussoukro's basilica is one of the largest churches on Earth.","Abidjan is the biggest city, but Yamoussoukro is the capital."]},
-    GMB:{ff:["Le pays suit le fleuve Gambie sur toute sa longueur.","Il est presque entièrement entouré par le Sénégal."],fe:["The country hugs the Gambia River along its whole length.","It is almost completely surrounded by Senegal."]},
-    GHA:{ff:["Le lac Volta est l'un des plus grands lacs artificiels du monde.","Le Ghana s'appelait autrefois la « Côte de l'Or »."],fe:["Lake Volta is one of the world's largest man-made lakes.","Ghana was once known as the 'Gold Coast'."]},
-    GIN:{ff:["Surnommée « le château d'eau de l'Afrique de l'Ouest ».","Son sous-sol regorge de bauxite, le minerai de l'aluminium."],fe:["Nicknamed 'the water tower of West Africa'.","Its ground is rich in bauxite, the ore used to make aluminium."]},
-    GNB:{ff:["Des hippopotames d'eau salée vivent dans l'archipel des Bijagos.","La noix de cajou est sa grande spécialité."],fe:["Saltwater hippos live in the Bijagós archipelago.","Cashew nuts are its big specialty."]},
-    LBR:{ff:["C'est la plus ancienne république d'Afrique (1847).","Son drapeau ressemble beaucoup à celui des États-Unis."],fe:["It is Africa's oldest republic (1847).","Its flag looks a lot like the US flag."]},
-    MLI:{ff:["La grande mosquée de Djenné est le plus grand bâtiment en terre crue du monde.","Le fleuve Niger y forme un immense delta intérieur."],fe:["The Great Mosque of Djenné is the world's largest mud-brick building.","The Niger River forms a huge inland delta here."]},
-    MRT:{ff:["La structure de Richat, « l'œil de l'Afrique », se voit depuis l'espace.","Le désert couvre environ 90 % du pays."],fe:["The Richat Structure, the 'Eye of Africa', is visible from space.","Desert covers about 90% of the country."]},
-    NER:{ff:["Le pays doit son nom au fleuve Niger.","L'arbre du Ténéré fut longtemps l'arbre le plus isolé du monde."],fe:["The country is named after the Niger River.","The Tree of Ténéré was once the loneliest tree on Earth."]},
-    NGA:{ff:["Nollywood, son industrie du cinéma, tourne des centaines de films par an.","Plus de 500 langues y sont parlées."],fe:["Its film industry, Nollywood, shoots hundreds of movies a year.","More than 500 languages are spoken here."]},
-    SEN:{ff:["Dakar est la grande ville la plus à l'ouest de l'Afrique continentale.","L'île de Gorée, face à Dakar, est classée à l'UNESCO."],fe:["Dakar is mainland Africa's westernmost big city.","Gorée Island, facing Dakar, is a UNESCO site."]},
-    SLE:{ff:["Son nom signifie « montagne du lion » en portugais.","Le pays est réputé pour ses diamants."],fe:["Its name means 'lion mountain' in Portuguese.","The country is famous for its diamonds."]},
-    TGO:{ff:["Le pays mesure moins de 60 km de large par endroits.","Les maisons-tours en terre du Koutammakou sont classées à l'UNESCO."],fe:["The country is less than 60 km wide in places.","The mud tower-houses of Koutammakou are UNESCO-listed."]},
-    AGO:{ff:["Les chutes de Kalandula comptent parmi les plus grandes d'Afrique.","L'hippotrague noir géant, très rare, ne vit qu'en Angola."],fe:["Kalandula Falls is among Africa's largest waterfalls.","The rare giant sable antelope lives only in Angola."]},
-    CMR:{ff:["Le mont Cameroun est un volcan actif au bord de l'océan.","Son équipe de football, les Lions Indomptables, est légendaire."],fe:["Mount Cameroon is an active volcano right by the ocean.","Its football team, the Indomitable Lions, is legendary."]},
-    CAF:{ff:["Gorilles et éléphants de forêt vivent dans la réserve de Dzanga-Sangha.","La rivière Oubangui coule le long de Bangui."],fe:["Gorillas and forest elephants live in the Dzanga-Sangha reserve.","The Ubangi River flows past Bangui."]},
-    TCD:{ff:["Les lacs d'Ounianga, en plein Sahara, sont classés à l'UNESCO.","Le massif de l'Ennedi cache des arches de grès spectaculaires."],fe:["The Ounianga lakes, deep in the Sahara, are UNESCO-listed.","The Ennedi massif hides spectacular sandstone arches."]},
-    COG:{ff:["Brazzaville et Kinshasa sont les deux capitales les plus proches du monde.","Des gorilles des plaines vivent dans ses forêts."],fe:["Brazzaville and Kinshasa are the world's two closest capitals.","Lowland gorillas live in its forests."]},
-    COD:{ff:["Le fleuve Congo est le plus profond du monde.","L'okapi, cousin de la girafe, ne vit qu'en RDC."],fe:["The Congo River is the deepest on Earth.","The okapi, a giraffe cousin, lives only in DR Congo."]},
-    GNQ:{ff:["Sa capitale, Malabo, est sur une île, pas sur le continent.","Une nouvelle capitale se construit en pleine forêt."],fe:["Its capital, Malabo, sits on an island, not the mainland.","A brand-new capital is being built in the rainforest."]},
-    GAB:{ff:["Au parc de Loango, hippopotames et éléphants se baladent sur la plage.","L'équateur traverse le pays."],fe:["In Loango park, hippos and elephants stroll on the beach.","The equator crosses the country."]},
-    STP:{ff:["C'est le deuxième plus petit pays d'Afrique.","Le pic Cão Grande est une incroyable aiguille volcanique."],fe:["It is Africa's second-smallest country.","Pico Cão Grande is an amazing volcanic spire."]},
-    BDI:{ff:["Gitega est devenue la capitale en 2019, à la place de Bujumbura.","Le lac Tanganyika, à sa frontière, est le 2e plus profond du monde."],fe:["Gitega became the capital in 2019, replacing Bujumbura.","Lake Tanganyika on its border is the world's 2nd-deepest lake."]},
-    COM:{ff:["Premier producteur mondial d'ylang-ylang, une fleur à parfum.","Le volcan Karthala est l'un des plus actifs du monde."],fe:["The world's top grower of ylang-ylang, a perfume flower.","Karthala volcano is one of the most active on Earth."]},
-    DJI:{ff:["Le lac Assal est bien plus salé que la mer.","Le pays garde l'entrée de la mer Rouge."],fe:["Lake Assal is far saltier than the sea.","The country guards the entrance to the Red Sea."]},
-    ERI:{ff:["Asmara est classée au patrimoine mondial de l'UNESCO.","Son nom vient du mot grec désignant la mer Rouge."],fe:["Asmara is a UNESCO World Heritage city.","Its name comes from the Greek word for the Red Sea."]},
-    ETH:{ff:["Lucy, célèbre fossile d'un ancêtre humain, y fut découverte.","Le café aurait été découvert en Éthiopie."],fe:["Lucy, the famous early-human fossil, was found here.","Coffee is said to have been discovered in Ethiopia."]},
-    KEN:{ff:["Le pays doit son nom au mont Kenya, 2e sommet d'Afrique.","Ses coureurs de fond sont parmi les meilleurs du monde."],fe:["It is named after Mount Kenya, Africa's 2nd-highest peak.","Its long-distance runners are among the world's best."]},
-    MDG:{ff:["C'est la 4e plus grande île du monde.","Des baobabs géants bordent la célèbre allée des Baobabs."],fe:["It is the world's 4th-largest island.","Giant baobabs line the famous Avenue of the Baobabs."]},
-    MWI:{ff:["Le lac Malawi couvre environ un quart du pays.","Surnommé « le cœur chaud de l'Afrique »."],fe:["Lake Malawi covers about a quarter of the country.","Nicknamed 'the warm heart of Africa'."]},
-    MUS:{ff:["L'île est née d'éruptions volcaniques.","Un timbre mauricien de 1847 est l'un des plus rares du monde."],fe:["The island was born from volcanic eruptions.","An 1847 Mauritius stamp is one of the rarest in the world."]},
-    RWA:{ff:["Des gorilles des montagnes vivent dans le parc des Volcans.","Les sacs en plastique y sont interdits depuis 2008."],fe:["Mountain gorillas live in Volcanoes National Park.","Plastic bags have been banned there since 2008."]},
-    SYC:{ff:["C'est le plus petit pays d'Afrique.","Le coco de mer y produit la plus grosse graine du monde."],fe:["It is Africa's smallest country.","The coco de mer palm grows the world's largest seed."]},
-    SOM:{ff:["L'encens et la myrrhe y sont récoltés depuis l'Antiquité.","Le chameau occupe une place essentielle dans sa culture."],fe:["Frankincense and myrrh have been harvested here since ancient times.","Camels hold a special place in its culture."]},
-    ZAF:{ff:["Nelson Mandela devint son premier président élu par tous.","Des manchots se dandinent sur les plages du Cap."],fe:["Nelson Mandela became its first president elected by all.","Penguins waddle on Cape Town's beaches."]},
-    SSD:{ff:["Le Sudd est l'une des plus vastes zones humides du monde.","Il abrite une des plus grandes migrations d'antilopes du monde."],fe:["The Sudd is one of the world's largest wetlands.","Home to one of the biggest antelope migrations on Earth."]},
-    TZA:{ff:["Le cratère du Ngorongoro regorge d'animaux sauvages.","Zanzibar, l'île aux épices, fait partie de la Tanzanie."],fe:["The Ngorongoro Crater teems with wildlife.","Zanzibar, the spice island, is part of Tanzania."]},
-    UGA:{ff:["La moitié des gorilles des montagnes du monde y vit.","Le Nil Blanc jaillit du lac Victoria à Jinja."],fe:["Half of the world's mountain gorillas live here.","The White Nile bursts out of Lake Victoria at Jinja."]},
-    BWA:{ff:["Abrite la plus grande population d'éléphants du monde.","Le désert du Kalahari couvre la majeure partie du pays."],fe:["Home to the world's largest elephant population.","The Kalahari Desert covers most of the country."]},
-    SWZ:{ff:["Le pays a changé de nom en 2018 (ex-Swaziland).","C'est l'un des plus petits pays d'Afrique."],fe:["The country changed its name in 2018 (formerly Swaziland).","It is one of Africa's smallest countries."]},
-    LSO:{ff:["Surnommé « le royaume dans le ciel ».","Il est entièrement entouré par l'Afrique du Sud."],fe:["Nicknamed 'the Kingdom in the Sky'.","It is completely surrounded by South Africa."]},
-    MOZ:{ff:["Son littoral s'étire sur environ 2 500 km.","L'île de Mozambique a donné son nom au pays."],fe:["Its coastline stretches about 2,500 km.","The Island of Mozambique gave the country its name."]},
-    NAM:{ff:["Le Namib serait le plus vieux désert du monde.","C'est l'un des pays les moins densément peuplés du monde."],fe:["The Namib may be the world's oldest desert.","One of the least densely populated countries on Earth."]},
-    ZMB:{ff:["Les locaux appellent les chutes Victoria « la fumée qui gronde ».","Le fleuve Zambèze a donné son nom au pays."],fe:["Locals call Victoria Falls 'the smoke that thunders'.","The Zambezi River gave the country its name."]},
-    ZWE:{ff:["Le lac Kariba est l'un des plus grands lacs artificiels du monde.","Un oiseau sculpté, l'oiseau de Zimbabwe, orne son drapeau."],fe:["Lake Kariba is one of the world's largest man-made lakes.","A carved bird, the Zimbabwe Bird, adorns its flag."]},
-  };
-
-  // All facts for a country in the given language (base fact + extras)
-  factsOf(id, lang){
-    const base = lang==='fr' ? this.C[id].ff : this.C[id].fe;
-    const extra = this.XF[id] ? (lang==='fr' ? this.XF[id].ff : this.XF[id].fe) : [];
-    return [base].concat(extra);
+  // Hit-test radius, in viewBox units. Each map declares its own (a world map
+  // and a South America map are not the same scale), and in capital mode it
+  // shrinks with the zoom, so zooming in really does demand more precision.
+  tol(){
+    const g = this.GEO;
+    const base = g && g.tol ? g.tol : 20;
+    return this.state.mode==='cap' ? base/Math.max(1, this.state.zoom) : base;
   }
-  flagUrl(id){ return this.A2[id] ? 'https://flagcdn.com/w160/'+this.A2[id]+'.png' : ''; }
 
+  // ---- data ----
+  // Countries, regions and anecdotes live in assets/data/*.js so this file stays
+  // about the game, and the 195-country roster stays editable on its own.
+  get C(){ return window.WORLD_DATA.countries; }
+  get CONTINENTS(){ return window.WORLD_DATA.continents; }
+  get WORLD_ID(){ return window.WORLD_DATA.worldId; }
+
+  // The continent being played, and the map file it draws on.
+  cont(){ return this.CONTINENTS[this.state.continentId] || null; }
+  mapId(){ const c=this.cont(); return c ? c.geo : null; }
+  get GEO(){ const m=this.mapId(); return m ? (window.WORLD_GEO||{})[m] : null; }
+
+  // Regions of the current continent. On the world map these are the six
+  // continents themselves, so the region-card screen is reused unchanged.
+  regions(){ const c=this.cont(); return c ? c.regions : []; }
+  regionById(id){ return this.regions().find(r=>r.id===id); }
+  isWorld(){ return this.state.continentId===this.WORLD_ID; }
+
+  // Every country a region deals. Each country's `reg` field is the only record
+  // of membership, so a region can never drift out of sync with the roster.
+  // tier 2 (micro-states) are present in the data but never dealt.
+  idsOfRegion(contId, regionId){
+    const C=this.C, out=[], world=contId===this.WORLD_ID;
+    for(const id in C){
+      const c=C[id];
+      if(c.tier!==1) continue;
+      // On the world map a "region" is a continent id; elsewhere, a region id.
+      if(regionId==='all'){ if(world || c.cont===contId) out.push(id); }
+      else if(world ? c.cont===regionId : c.reg===regionId) out.push(id);
+    }
+    return out;
+  }
+
+  // The palette entry a country takes its colours from: its region normally,
+  // its continent on the world map so the six blocks read apart.
+  paletteOf(id){
+    const c=this.C[id]; if(!c) return null;
+    return this.isWorld() ? (this.CONTINENTS[c.cont]||null) : (this.regionById(c.reg)||null);
+  }
+
+  // All anecdotes for a country in the given language. fr[i] and en[i] are the
+  // same fact, so the popup keeps its place if the language is switched.
+  factsOf(id, lang){
+    const f = window.WORLD_DATA.facts[id];
+    return f ? (lang==='fr' ? f.fr : f.en) : [];
+  }
+  flagUrl(id){ const c=this.C[id]; return c && c.i2 ? 'https://flagcdn.com/w160/'+c.i2+'.png' : ''; }
+
+  // Map files are fetched only when their continent is opened: loading all
+  // seven up front would be half a megabyte for a player who wants Europe.
+  loadGeo(mapId){
+    this._geoLoads = this._geoLoads || {};
+    if (this._geoLoads[mapId]) return this._geoLoads[mapId];
+    this._geoLoads[mapId] = new Promise((resolve, reject) => {
+      if ((window.WORLD_GEO||{})[mapId]) { resolve(); return; }
+      const s = document.createElement('script');
+      s.src = 'assets/geo/' + mapId + '.js';
+      s.onload = () => resolve();
+      s.onerror = () => { delete this._geoLoads[mapId]; reject(new Error(mapId)); };
+      document.head.appendChild(s);
+    });
+    return this._geoLoads[mapId];
+  }
+
+  // Opening a continent: fetch its map, then show the region cards. The map is
+  // needed before play, and prefetching it here means Play never stalls.
+  openContinent(contId){
+    const c = this.CONTINENTS[contId];
+    if (!c) return;
+    this.setState({ continentId: contId, screen: 'continent', mapError: false });
+    this.loadGeo(c.geo).then(() => this.forceUpdate()).catch(() => this.setState({ mapError: true }));
+  }
+
+  // Every user-facing string. Country, capital and anecdote text lives in
+  // assets/data/ instead — this is only the UI chrome.
   T = {
-    fr:{ badge:'GÉOGRAPHIE', title:"Les Capitales d'Afrique", titleCap:"Les Capitales d'Afrique", titleCountry:"Les Pays d'Afrique", titleFlag:"Les Drapeaux d'Afrique", allCountCap:'Les 54 capitales · défi ultime', allCountCountry:'Les 54 pays · défi ultime', allCountFlag:'Les 54 drapeaux · défi ultime', subtitle:"Glisse chaque capitale au bon endroit sur la carte. Choisis une région pour commencer !", subtitleCap:"Glisse chaque capitale au bon endroit sur la carte. Choisis une région pour commencer !", subtitleCountry:"Glisse chaque pays à sa place sur la carte. Choisis une région pour commencer !", subtitleFlag:"Glisse chaque drapeau sur son pays. Choisis une région pour commencer !", modeQ:"Que veux-tu apprendre ?", modeCap:'Capitales', modeCountry:'Pays', modeFlag:'Drapeaux', trayTitleCap:'Capitales à placer', trayHintCap:'Glisse ou touche une étiquette, puis la carte', trayTitleCountry:'Pays à placer', trayHintCountry:'Glisse ou touche un pays, puis la carte', trayTitleFlag:'Drapeaux à placer', trayHintFlag:'Glisse ou touche un drapeau, puis la carte', tapPlace:'Maintenant, touche le bon endroit sur la carte !', play:'Jouer', allTitle:'Tout le continent', allCount:'Les 54 capitales · défi ultime', challenge:'Défi', placed:'Placées', showNames:'Afficher les noms des pays', namesShort:'Pays', trayTitle:'Capitales à placer', trayHint:'Fais glisser une étiquette sur la carte', allDone:'Toutes placées ! 🎉', points:'points', firstTry:'du 1er coup', replay:'Rejouer', home:'Accueil', factBtn:'Continuer', reset:'Réinitialiser le zoom', good:['Bravo !','Super !','Excellent !','Parfait !','Génial !'], bad:['Presque !','Réessaie !','Pas tout à fait…','Encore un essai !'], resPerfect:'Sans-faute !', resGreat:'Très bien joué !', resGood:'Bien joué !' },
-    en:{ badge:'GEOGRAPHY', title:'Capitals of Africa', titleCap:'Capitals of Africa', titleCountry:'Countries of Africa', titleFlag:'Flags of Africa', allCountCap:'All 54 capitals · ultimate challenge', allCountCountry:'All 54 countries · ultimate challenge', allCountFlag:'All 54 flags · ultimate challenge', subtitle:'Drag each capital to the right spot on the map. Pick a region to start!', subtitleCap:'Drag each capital to the right spot on the map. Pick a region to start!', subtitleCountry:'Drag each country to its place on the map. Pick a region to start!', subtitleFlag:'Drag each flag onto its country. Pick a region to start!', modeQ:'What do you want to learn?', modeCap:'Capitals', modeCountry:'Countries', modeFlag:'Flags', trayTitleCap:'Capitals to place', trayHintCap:'Drag a label, or tap it then tap the map', trayTitleCountry:'Countries to place', trayHintCountry:'Drag a country, or tap it then tap the map', trayTitleFlag:'Flags to place', trayHintFlag:'Drag a flag, or tap it then tap the map', tapPlace:'Now tap the right spot on the map!', play:'Play', allTitle:'The whole continent', allCount:'All 54 capitals · ultimate challenge', challenge:'Challenge', placed:'Placed', showNames:'Show country names', namesShort:'Names', trayTitle:'Capitals to place', trayHint:'Drag a label onto the map', allDone:'All placed! 🎉', points:'points', firstTry:'first try', replay:'Play again', home:'Home', factBtn:'Continue', reset:'Reset zoom', good:['Nice!','Great!','Excellent!','Perfect!','Awesome!'], bad:['Almost!','Try again!','Not quite…','One more try!'], resPerfect:'Flawless!', resGreat:'Really well played!', resGood:'Well done!' },
+    fr:{
+      badge: "GÉOGRAPHIE",
+      titleCap: "Les Capitales du Monde",
+      titleCountry: "Les Pays du Monde",
+      titleFlag: "Les Drapeaux du Monde",
+      subtitleHomeCap: "Glisse chaque capitale au bon endroit sur la carte. Choisis un continent pour commencer !",
+      subtitleHomeCountry: "Glisse chaque pays à sa place sur la carte. Choisis un continent pour commencer !",
+      subtitleHomeFlag: "Glisse chaque drapeau sur son pays. Choisis un continent pour commencer !",
+      pickRegion: "Choisis une région, ou lance-toi dans le défi entier.",
+      modeQ: "Que veux-tu apprendre ?",
+      modeCap: "Capitales",
+      modeCountry: "Pays",
+      modeFlag: "Drapeaux",
+      unitCap: "capitales",
+      unitCountry: "pays",
+      unitFlag: "drapeaux",
+      allTitle: "Tout le continent",
+      allWorldTitle: "Le monde entier",
+      ultimate: "défi ultime",
+      loadingMap: "Chargement de la carte…",
+      mapFailed: "La carte n'a pas pu être chargée.",
+      retry: "Réessayer",
+      backHome: "Continents",
+      trayTitleCap: "Capitales à placer",
+      trayHintCap: "Glisse ou touche une étiquette, puis la carte",
+      trayTitleCountry: "Pays à placer",
+      trayHintCountry: "Glisse ou touche un pays, puis la carte",
+      trayTitleFlag: "Drapeaux à placer",
+      trayHintFlag: "Glisse ou touche un drapeau, puis la carte",
+      tapPlace: "Maintenant, touche le bon endroit sur la carte !",
+      play: "Jouer",
+      challenge: "Défi",
+      placed: "Placées",
+      remaining: "restants",
+      showNames: "Afficher les noms des pays",
+      namesShort: "Pays",
+      allDone: "Toutes placées ! 🎉",
+      points: "points",
+      firstTry: "du 1er coup",
+      replay: "Rejouer",
+      home: "Accueil",
+      factBtn: "Continuer",
+      reset: "Réinitialiser le zoom",
+      good: ["Bravo !", "Super !", "Excellent !", "Parfait !", "Génial !"],
+      bad: ["Presque !", "Réessaie !", "Pas tout à fait…", "Encore un essai !"],
+      resPerfect: "Sans-faute !",
+      resGreat: "Très bien joué !",
+      resGood: "Bien joué !",
+      resMsgCap: "Tu as placé toutes les capitales.",
+      resMsgCountry: "Tu as placé tous les pays.",
+      resMsgFlag: "Tu as placé tous les drapeaux.",
+    },
+    en:{
+      badge: "GEOGRAPHY",
+      titleCap: "Capitals of the World",
+      titleCountry: "Countries of the World",
+      titleFlag: "Flags of the World",
+      subtitleHomeCap: "Drag each capital to the right spot on the map. Pick a continent to start!",
+      subtitleHomeCountry: "Drag each country to its place on the map. Pick a continent to start!",
+      subtitleHomeFlag: "Drag each flag onto its country. Pick a continent to start!",
+      pickRegion: "Pick a region, or take on the whole thing.",
+      modeQ: "What do you want to learn?",
+      modeCap: "Capitals",
+      modeCountry: "Countries",
+      modeFlag: "Flags",
+      unitCap: "capitals",
+      unitCountry: "countries",
+      unitFlag: "flags",
+      allTitle: "The whole continent",
+      allWorldTitle: "The whole world",
+      ultimate: "ultimate challenge",
+      loadingMap: "Loading the map…",
+      mapFailed: "The map could not be loaded.",
+      retry: "Try again",
+      backHome: "Continents",
+      trayTitleCap: "Capitals to place",
+      trayHintCap: "Drag a label, or tap it then tap the map",
+      trayTitleCountry: "Countries to place",
+      trayHintCountry: "Drag a country, or tap it then tap the map",
+      trayTitleFlag: "Flags to place",
+      trayHintFlag: "Drag a flag, or tap it then tap the map",
+      tapPlace: "Now tap the right spot on the map!",
+      play: "Play",
+      challenge: "Challenge",
+      placed: "Placed",
+      remaining: "left",
+      showNames: "Show country names",
+      namesShort: "Names",
+      allDone: "All placed! 🎉",
+      points: "points",
+      firstTry: "first try",
+      replay: "Play again",
+      home: "Home",
+      factBtn: "Continue",
+      reset: "Reset zoom",
+      good: ["Nice!", "Great!", "Excellent!", "Perfect!", "Awesome!"],
+      bad: ["Almost!", "Try again!", "Not quite…", "One more try!"],
+      resPerfect: "Flawless!",
+      resGreat: "Really well played!",
+      resGood: "Well done!",
+      resMsgCap: "You placed every capital.",
+      resMsgCountry: "You placed every country.",
+      resMsgFlag: "You placed every flag.",
+    },
   };
 
   componentDidMount(){
+    // Handle for tests/smoke.mjs, which plays real rounds through the same
+    // methods the UI calls. Inert in normal use, and the only way to exercise
+    // placement without synthesising pointer events.
+    window.__dc = this;
     let tries = 0;
     const check = () => {
-      if (window.AFRICA_GEO) {
-        let prog = {};
-        try { prog = JSON.parse(localStorage.getItem('africapitales_v2')||'{}'); } catch(e){}
-        this.setState({ ready:true, progress:prog });
+      // Map files load on demand; only the country data has to be here to draw
+      // the home screen.
+      const d = window.WORLD_DATA;
+      if (d && d.countries && d.continents && d.facts) {
+        let prog = {}, lang = 'fr';
+        try { prog = JSON.parse(localStorage.getItem('worldcapitals_v1')||'{}'); } catch(e){}
+        try { const l = localStorage.getItem('worldcapitals_lang'); if (l==='fr'||l==='en') lang = l; } catch(e){}
+        this.setState({ ready:true, progress:prog, lang });
       } else if (tries++ < 60) { setTimeout(check, 60); }
     };
     check();
@@ -1057,7 +1183,7 @@ class Component extends DCLogic {
   // ---- helpers ----
   centers(){
     if (this._centers) return this._centers;
-    const m = {}; const G = window.AFRICA_GEO;
+    const m = {}; const G = this.GEO;
     if (!G) return {};
     for (const c of G.countries){
       const nums = c.d.match(/-?\d+(?:\.\d+)?/g);
@@ -1115,7 +1241,8 @@ class Component extends DCLogic {
     if (!f || !vp || !box) return;
     const aw = f.clientWidth, ah = f.clientHeight;
     if (!aw || !ah) return;
-    const R = 1000/957;
+    const G = this.GEO; if (!G) return;
+    const R = G.W/G.H;
     let w = aw, h = aw/R;
     if (h > ah){ h = ah; w = ah*R; }
     box.style.width = w.toFixed(2)+'px';
@@ -1124,18 +1251,25 @@ class Component extends DCLogic {
     box.style.top = ((ah-h)/2).toFixed(2)+'px';
     this._fit = { w, h, vw:aw, vh:ah };
   }
-  regionById(id){ return this.REGIONS.find(r=>r.id===id); }
-  idColor(id){ const r=this.REGIONS.find(rg=>rg.ids.includes(id)); return r?r.bg:'#C9A86B'; }
-  idShadow(id){ const r=this.REGIONS.find(rg=>rg.ids.includes(id)); return r?r.shadow:'#A98A5B'; }
+  idColor(id){ const p=this.paletteOf(id); return p?p.bg:'#C9A86B'; }
+  idShadow(id){ const p=this.paletteOf(id); return p?p.shadow:'#A98A5B'; }
   hexA(hex,a){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
-  taskIds(){ const id=this.state.regionId; if(id==='all'){ return Object.keys(this.C); } const r=this.regionById(id); return r?r.ids:[]; }
-  playColor(){ const id=this.state.regionId; return id==='all'?'#A65A3C':(this.regionById(id)||{}).bg||'#A65A3C'; }
-  progKey(){ return this.state.mode+':'+this.state.regionId; }
+  taskIds(){ return this.idsOfRegion(this.state.continentId, this.state.regionId); }
+  playColor(){
+    const id=this.state.regionId;
+    if(id==='all'){ const c=this.cont(); return c?c.bg:'#A65A3C'; }
+    return (this.regionById(id)||{}).bg||'#A65A3C';
+  }
+  // Progress is filed per mode, per continent, per region — "all of Europe" and
+  // "all of Asia" are different levels and keep separate stars.
+  progKey(){ return this.state.mode+':'+this.state.continentId+':'+this.state.regionId; }
 
   shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
   startLevel(id){
-    const ids = id==='all' ? Object.keys(this.C) : this.regionById(id).ids;
+    const ids = this.idsOfRegion(this.state.continentId, id);
+    // Label points are per-map, so drop the cache when a new level starts.
+    this._labelPts = null; this._centers = null;
     this.setState({ screen:'play', regionId:id, queue:this.shuffle(ids), placed:{}, wrong:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
   }
 
@@ -1179,23 +1313,25 @@ class Component extends DCLogic {
       if(cx<L || cx>R || cy<T || cy>B){ this.setState({ dragId:null }); return; }
     }
     const svg=this.svgRef.current;
+    const G=this.GEO;
     let correct=false, sx=0, sy=0;
-    if(svg && id){
+    if(svg && id && G){
       // Client point -> SVG user coords via the map box rect. Unlike
       // getScreenCTM(), getBoundingClientRect() reflects the zoom/pan CSS
       // transform in every browser — Safari (iPad) ignores ancestor CSS
       // transforms in the CTM, which broke placement after zooming.
       const rect=(this.mapBoxRef.current||svg).getBoundingClientRect();
-      sx=(cx-rect.left)/rect.width*1000; sy=(cy-rect.top)/rect.height*957;
-      const cap=window.AFRICA_GEO.caps[id];
+      sx=(cx-rect.left)/rect.width*G.W; sy=(cy-rect.top)/rect.height*G.H;
+      const cap=G.caps[id];
+      const tol=this.tol();
       if(this.state.mode==='country' || this.state.mode==='flag'){
         // Country & flag modes: drop anywhere inside the country shape; islands fall back to a point hit.
         const path=svg.querySelector('path[data-id="'+id+'"]');
         if(path && path.isPointInFill){ try{ if(path.isPointInFill(new DOMPoint(sx,sy))) correct=true; }catch(err){} }
-        if(!correct && cap){ const d=Math.hypot(sx-cap.x, sy-cap.y); if(d<this.TOL+6) correct=true; }
+        if(!correct && cap){ const d=Math.hypot(sx-cap.x, sy-cap.y); if(d<tol+6) correct=true; }
       } else if(cap){
         const d=Math.hypot(sx-cap.x, sy-cap.y);
-        if(d<this.TOL) correct=true;
+        if(d<tol) correct=true;
         if(!correct){
           const path=svg.querySelector('path[data-id="'+id+'"]');
           if(path && path.isPointInFill){ try{ if(path.isPointInFill(new DOMPoint(sx,sy))) correct=true; }catch(err){} }
@@ -1243,7 +1379,7 @@ class Component extends DCLogic {
     const pk=this.progKey();
     const prev=prog[pk]||{stars:0,best:0};
     prog[pk]={ stars:Math.max(prev.stars,stars), best:Math.max(prev.best,this.state.score) };
-    try{ localStorage.setItem('africapitales_v2', JSON.stringify(prog)); }catch(e){}
+    try{ localStorage.setItem('worldcapitals_v1', JSON.stringify(prog)); }catch(e){}
     this.playWin();
     const confetti=Array.from({length:60},()=>({
       left:(Math.random()*100)+'%',
@@ -1256,48 +1392,119 @@ class Component extends DCLogic {
     this.setState({ screen:'result', factOpen:false, resStars:stars, resAcc:acc, confetti, progress:prog });
   }
 
+  // "capitales" / "pays" / "drapeaux": the noun the current mode counts in.
+  unitWord(t, mode){ return mode==='country' ? t.unitCountry : mode==='flag' ? t.unitFlag : t.unitCap; }
+
+  // The mode segmented control, identical on the home and continent screens.
+  modeVals(){
+    const m=this.state.mode;
+    return {
+      modeCapBg: m==='cap'?'#E2A24B':'transparent',
+      modeCapColor: m==='cap'?'#fff':'#9A7E5C',
+      modeCapDot: m==='cap'?'#fff':'#E2A24B',
+      modeCountryBg: m==='country'?'#3F9E78':'transparent',
+      modeCountryColor: m==='country'?'#fff':'#9A7E5C',
+      modeCountryDot: m==='country'?'#fff':'#3F9E78',
+      modeFlagBg: m==='flag'?'#B06A9A':'transparent',
+      modeFlagColor: m==='flag'?'#fff':'#9A7E5C',
+      modeFlagDot: m==='flag'?'#fff':'#B06A9A',
+      onModeCap: ()=>this.setState({mode:'cap'}),
+      onModeCountry: ()=>this.setState({mode:'country'}),
+      onModeFlag: ()=>this.setState({mode:'flag'}),
+    };
+  }
+
+  // The name of the level being played: a region, or the whole continent —
+  // which on the world map means the whole world.
+  levelName(t, lang){
+    if(this.state.regionId!=='all'){
+      const r=this.regionById(this.state.regionId);
+      return r ? (lang==='fr'?r.fr:r.en) : '';
+    }
+    return this.isWorld() ? t.allWorldTitle : t.allTitle;
+  }
+
+  // "★ 3/6" — how many of a continent's regions are three-starred in this mode,
+  // so the home screen shows progress without opening every continent.
+  continentStars(contId){
+    const c=this.CONTINENTS[contId]; if(!c) return '';
+    const done=c.regions.filter(r=>{
+      const pr=this.state.progress[this.state.mode+':'+contId+':'+r.id];
+      return pr && pr.stars>=3;
+    }).length;
+    return done ? '★ '+done+'/'+c.regions.length : '';
+  }
+
   renderVals(){
     const S=this.state, lang=S.lang, t=this.T[lang];
     if(!S.ready){ return { ready:false, notReady:true }; }
-    const GEO=window.AFRICA_GEO;
+    const GEO=this.GEO;
+    // Per-mode string picker: m3(t,'flag','title') -> t.titleFlag
+    const m3=(tt,mode,key)=> tt[key + (mode==='country'?'Country':mode==='flag'?'Flag':'Cap')];
     const base={
       ready:true, notReady:false, t,
-      isHome:S.screen==='home', isPlay:S.screen==='play', isResult:S.screen==='result',
+      isHome:S.screen==='home', isContinent:S.screen==='continent',
+      isPlay:S.screen==='play', isResult:S.screen==='result',
       langLabel: lang==='fr'?'Français':'English',
       langFlag: lang==='fr'?'🇫🇷':'🇬🇧',
-      onToggleLang: ()=>this.setState({lang:lang==='fr'?'en':'fr'}),
+      onToggleLang: ()=>{
+        const next = lang==='fr'?'en':'fr';
+        try{ localStorage.setItem('worldcapitals_lang', next); }catch(e){}
+        this.setState({lang:next});
+      },
     };
 
-    // ---- HOME ----
+    // ---- HOME: pick a continent ----
     if(S.screen==='home'){
-      const m = S.mode;
-      base.homeTitle = m==='country' ? t.titleCountry : m==='flag' ? t.titleFlag : t.titleCap;
-      base.allCountText = m==='country' ? t.allCountCountry : m==='flag' ? t.allCountFlag : t.allCountCap;
-      base.homeSubtitle = m==='country' ? t.subtitleCountry : m==='flag' ? t.subtitleFlag : t.subtitleCap;
-      base.modeCapBg = m==='cap'?'#E2A24B':'transparent';
-      base.modeCapColor = m==='cap'?'#fff':'#9A7E5C';
-      base.modeCapDot = m==='cap'?'#fff':'#E2A24B';
-      base.modeCountryBg = m==='country'?'#3F9E78':'transparent';
-      base.modeCountryColor = m==='country'?'#fff':'#9A7E5C';
-      base.modeCountryDot = m==='country'?'#fff':'#3F9E78';
-      base.modeFlagBg = m==='flag'?'#B06A9A':'transparent';
-      base.modeFlagColor = m==='flag'?'#fff':'#9A7E5C';
-      base.modeFlagDot = m==='flag'?'#fff':'#B06A9A';
-      base.onModeCap = ()=>this.setState({mode:'cap'});
-      base.onModeCountry = ()=>this.setState({mode:'country'});
-      base.onModeFlag = ()=>this.setState({mode:'flag'});
-      const unit = m==='country' ? (lang==='fr'?'pays':'countries') : m==='flag' ? (lang==='fr'?'drapeaux':'flags') : (lang==='fr'?'capitales':'capitals');
-      base.regionCards = this.REGIONS.map(r=>{
-        const pr=S.progress[S.mode+':'+r.id]||{stars:0,best:0};
+      Object.assign(base, this.modeVals());
+      base.homeTitle = m3(t, S.mode, 'title');
+      base.homeSubtitle = m3(t, S.mode, 'subtitleHome');
+      base.continentCards = window.WORLD_DATA.continentOrder.map(id=>{
+        const c=this.CONTINENTS[id];
+        const n=this.idsOfRegion(id, 'all').length;
+        return {
+          name: lang==='fr'?c.fr:c.en, emoji:c.emoji, bg:c.bg, shadow:c.shadow,
+          countText: n+' '+this.unitWord(t, S.mode),
+          starText: this.continentStars(id),
+          onOpen: ()=>this.openContinent(id),
+        };
+      });
+      const w=this.CONTINENTS[this.WORLD_ID];
+      base.worldTitle = lang==='fr'?w.fr:w.en;
+      base.worldEmoji = w.emoji;
+      base.worldCountText = this.idsOfRegion(this.WORLD_ID,'all').length+' '+this.unitWord(t, S.mode);
+      base.onOpenWorld = ()=>this.openContinent(this.WORLD_ID);
+      return base;
+    }
+
+    // ---- CONTINENT: pick a region ----
+    if(S.screen==='continent'){
+      const c=this.cont();
+      Object.assign(base, this.modeVals());
+      base.contName = lang==='fr'?c.fr:c.en;
+      base.contEmoji = c.emoji;
+      base.contColor = c.bg;
+      base.contShadow = c.shadow;
+      base.homeTitle = m3(t, S.mode, 'title');
+      base.mapLoading = !this.GEO && !S.mapError;
+      base.mapError = S.mapError;
+      base.onRetryMap = ()=>this.openContinent(S.continentId);
+      base.onBackHome = ()=>this.setState({screen:'home', continentId:null});
+      const unit=this.unitWord(t, S.mode);
+      base.regionCards = this.regions().map(r=>{
+        const ids=this.idsOfRegion(S.continentId, r.id);
+        const pr=S.progress[S.mode+':'+S.continentId+':'+r.id]||{stars:0,best:0};
         return {
           name: lang==='fr'?r.fr:r.en,
-          countText: r.ids.length+' '+unit,
+          countText: ids.length+' '+unit,
           bg:r.bg, shadow:r.shadow,
           starArr:[0,1,2].map(i=>({color: i<pr.stars?'#FFE08A':'rgba(255,255,255,.35)'})),
           bestText: pr.best? (pr.best+' '+t.points) : '',
           onPlay: ()=>this.startLevel(r.id),
         };
       });
+      base.allTitle = this.isWorld() ? t.allWorldTitle : t.allTitle;
+      base.allCountText = this.idsOfRegion(S.continentId,'all').length+' '+unit+' · '+t.ultimate;
       base.onPlayAll = ()=>this.startLevel('all');
       return base;
     }
@@ -1309,14 +1516,17 @@ class Component extends DCLogic {
       const placed=S.placed;
       const color=this.playColor();
       base.playColor=color;
-      base.playRegionName = S.regionId==='all' ? (lang==='fr'?'Tout le continent':'Whole continent') : (lang==='fr'?this.regionById(S.regionId).fr:this.regionById(S.regionId).en);
+      base.playRegionName = this.levelName(t, lang);
+      base.playContName = lang==='fr'?this.cont().fr:this.cont().en;
       const nPlaced=taskIds.filter(id=>placed[id]).length;
       base.progressText = nPlaced+' / '+taskIds.length;
       base.scoreText = String(S.score);
-      base.onBack = ()=>this.setState({screen:'home'});
+      base.onBack = ()=>this.setState({screen:'continent'});
       const isCountry = S.mode==='country';
       const isFlag = S.mode==='flag';
       base.showNamesBtn = !isCountry;   // country names on the map would be the answer in country mode; in flag mode they are only a partial hint
+      base.mapViewBox = '0 0 '+GEO.W+' '+GEO.H;
+      base.trayRemaining = (taskIds.length-nPlaced)+' '+t.remaining;
       base.trayTitle = isCountry ? t.trayTitleCountry : isFlag ? t.trayTitleFlag : t.trayTitleCap;
       base.trayHint = S.selectedId ? t.tapPlace : (isCountry ? t.trayHintCountry : isFlag ? t.trayHintFlag : t.trayHintCap);
       base.onToggleNames = ()=>this.setState({showNames:!S.showNames});
@@ -1354,17 +1564,17 @@ class Component extends DCLogic {
       const ctrOf = (id)=>{ const cap=GEO.caps[id]; return cap.island ? {x:cap.x, y:cap.y-10} : ((lp && lp[id]) || ctrs[id] || {x:cap.x, y:cap.y}); };
       base.nameLabels = (S.showNames && !isCountry) ? taskIds.filter(id=>!placed[id]&&GEO.caps[id]).map(id=>{
         const ctr = ctrOf(id);
-        return { leftPct: ctr.x/1000*100, topPct: ctr.y/957*100, text: lang==='fr'?this.C[id].cf:this.C[id].ce };
+        return { leftPct: ctr.x/GEO.W*100, topPct: ctr.y/GEO.H*100, text: lang==='fr'?this.C[id].cf:this.C[id].ce };
       }) : [];
 
       base.pins = taskIds.filter(id=>placed[id]&&GEO.caps[id]).map(id=>{
         const cap=GEO.caps[id];
         if(isCountry || isFlag){
           const ctr = ctrOf(id);
-          return { leftPct: ctr.x/1000*100, topPct: ctr.y/957*100, labelTopPct: (ctr.y-15)/957*100, color:this.idColor(id), label: lang==='fr'?this.C[id].cf:this.C[id].ce,
+          return { leftPct: ctr.x/GEO.W*100, topPct: ctr.y/GEO.H*100, labelTopPct: (ctr.y-15)/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].cf:this.C[id].ce,
                    flag: isFlag ? this.flagUrl(id) : 'data:,', flagDisplay: isFlag ? 'inline-block' : 'none' };
         }
-        return { leftPct: cap.x/1000*100, topPct: cap.y/957*100, labelTopPct: (cap.y-15)/957*100, color:this.idColor(id), label: lang==='fr'?this.C[id].capFr:cap.n,
+        return { leftPct: cap.x/GEO.W*100, topPct: cap.y/GEO.H*100, labelTopPct: (cap.y-15)/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].capFr:this.C[id].capEn,
                  flag:'data:,', flagDisplay:'none' };
       });
 
@@ -1396,7 +1606,7 @@ class Component extends DCLogic {
       // fact
       base.factOpen=S.factOpen;
       if(S.factId){
-        base.factCap = lang==='fr'?this.C[S.factId].capFr:GEO.caps[S.factId].n;
+        base.factCap = lang==='fr'?this.C[S.factId].capFr:this.C[S.factId].capEn;
         base.factCountry = lang==='fr'?this.C[S.factId].cf:this.C[S.factId].ce;
         const facts = this.factsOf(S.factId, lang);
         base.factText = facts[Math.min(S.factIdx||0, facts.length-1)];
@@ -1415,19 +1625,15 @@ class Component extends DCLogic {
     if(S.screen==='result'){
       const color=this.playColor();
       base.playColor=color;
-      base.resRegionName = S.regionId==='all' ? (lang==='fr'?'Tout le continent':'Whole continent') : (lang==='fr'?this.regionById(S.regionId).fr:this.regionById(S.regionId).en);
+      base.resRegionName = this.levelName(t, lang);
       base.resStars=[0,1,2].map(i=>({ color: i<S.resStars?'#F2B33D':'#EDE0C6', delay:(i*0.12)+'s' }));
       base.resScore=String(S.score);
       base.resAccuracy=S.resAcc+'%';
       base.resTitle = S.resStars>=3? t.resPerfect : S.resStars>=2? t.resGreat : t.resGood;
-      base.resMsg = S.mode==='country'
-        ? (lang==='fr'?'Tu as placé tous les pays.':'You placed every country.')
-        : S.mode==='flag'
-        ? (lang==='fr'?'Tu as placé tous les drapeaux.':'You placed every flag.')
-        : (lang==='fr'?'Tu as placé toutes les capitales.':'You placed every capital.');
+      base.resMsg = m3(t, S.mode, 'resMsg');
       base.confetti=S.confetti;
       base.onReplay=()=>this.startLevel(S.regionId);
-      base.onHome=()=>this.setState({screen:'home'});
+      base.onHome=()=>this.setState({screen:'continent'});
       return base;
     }
     return base;
@@ -1435,8 +1641,9 @@ class Component extends DCLogic {
 
   // keep chip order stable per level
   shuffleStable(ids){
-    if(!this._chipOrderKey || this._chipOrderKey!==this.state.regionId){
-      this._chipOrderKey=this.state.regionId;
+    const key=this.state.mode+':'+this.state.continentId+':'+this.state.regionId;
+    if(this._chipOrderKey!==key){
+      this._chipOrderKey=key;
       this._chipOrder=this.shuffle(ids);
     }
     // ensure any missing ids appended

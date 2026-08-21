@@ -6,3 +6,4 @@ tools/.cache/
 test-results/
 playwright-report/
 tools/.preview/
+tests/.shots/
