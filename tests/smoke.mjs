@@ -164,6 +164,84 @@ for (const mode of ['cap', 'country', 'flag']) {
   check(res.saved && res.saved.stars === 3, `${mode}: progress written to localStorage`);
 }
 
+// ---- the review round ----
+// The rounds above are flawless, so they never reach it. This one misses on
+// purpose, then checks the invariant that makes a review round safe: it deals
+// a subset of the region, so its result must not touch the region's stars.
+console.log('\nreview round');
+const rev = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const key = 'cap:amerique-sud:sa-cone-sud';
+  localStorage.removeItem('worldcapitals_v1');
+  c.setState({ mode: 'cap', continentId: 'amerique-sud', screen: 'continent', progress: {} });
+  await sleep(50);
+
+  // Drops `id`'s label either on its own capital, or on another country's —
+  // which is a genuine miss, since tryPlace only ever tests the dragged id.
+  const play = async (ids, missing) => {
+    for (const id of ids) {
+      const g = c.GEO;
+      const target = missing.includes(id) ? g.caps[ids.find((x) => x !== id)] : g.caps[id];
+      const b = c.mapBoxRef.current.getBoundingClientRect();
+      c.tryPlace(id, b.left + (target.x / g.W) * b.width, b.top + (target.y / g.H) * b.height);
+      await sleep(20);
+      if (missing.includes(id)) {   // now place it properly, so the round can end
+        const cap = c.GEO.caps[id], bb = c.mapBoxRef.current.getBoundingClientRect();
+        c.tryPlace(id, bb.left + (cap.x / c.GEO.W) * bb.width, bb.top + (cap.y / c.GEO.H) * bb.height);
+        await sleep(20);
+      }
+      c._factAt = 0; c.closeFact();
+      await sleep(20);
+    }
+  };
+
+  c.startLevel('sa-cone-sud');
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 120)));
+  const all = c.taskIds();
+  const missed = all.slice(0, 2);
+  await play(all, missed);
+
+  const afterFirst = {
+    total: all.length,
+    stars: c.state.resStars,
+    reported: c.state.resMissed.slice().sort(),
+    expected: missed.slice().sort(),
+    saved: JSON.parse(localStorage.getItem('worldcapitals_v1') || '{}')[key],
+  };
+
+  // Now the review round, played clean: three stars on two countries.
+  c.startLevel('sa-cone-sud', c.state.resMissed);
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 120)));
+  const dealt = c.taskIds().slice().sort();
+  await play(c.taskIds(), []);
+  const afterReview = {
+    dealt,
+    stars: c.state.resStars,
+    saved: JSON.parse(localStorage.getItem('worldcapitals_v1') || '{}')[key],
+  };
+
+  // Back to the whole region: every chip must be dealt again, not just the two
+  // the review left in the cached chip order.
+  c.startLevel('sa-cone-sud');
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 120)));
+  const backToFull = { dealt: c.taskIds().length, chips: c.shuffleStable(c.taskIds()).length };
+
+  return { afterFirst, afterReview, backToFull };
+});
+
+check(JSON.stringify(rev.afterFirst.reported) === JSON.stringify(rev.afterFirst.expected),
+  `the two missed countries are reported for review (${rev.afterFirst.reported.join(' ')})`);
+check(rev.afterFirst.stars === 2, `3 of 5 first try scores 2 stars (got ${rev.afterFirst.stars})`);
+check(rev.afterFirst.saved && rev.afterFirst.saved.stars === 2, 'the region is saved at 2 stars');
+check(JSON.stringify(rev.afterReview.dealt) === JSON.stringify(rev.afterFirst.expected),
+  'the review round deals exactly the missed countries');
+check(rev.afterReview.stars === 3, `a clean review round scores 3 stars (got ${rev.afterReview.stars})`);
+check(rev.afterReview.saved && rev.afterReview.saved.stars === 2,
+  `the review leaves the region at 2 stars (got ${rev.afterReview.saved && rev.afterReview.saved.stars})`);
+check(rev.backToFull.dealt === 5 && rev.backToFull.chips === 5,
+  `replaying the whole region deals all 5 again (${rev.backToFull.dealt} ids, ${rev.backToFull.chips} chips)`);
+
 // ---- both languages, on every screen ----
 console.log('\nlanguages');
 for (const lang of ['fr', 'en']) {

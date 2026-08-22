@@ -708,6 +708,13 @@ if ('serviceWorker' in navigator) {
         <div style="width:2px;background:#EFE0C1;"></div>
         <div><div style="font-family:'Fredoka';font-size:30px;color:{{ playColor }};">{{ resAccuracy }}</div><div style="font-size:12px;font-weight:800;color:#9A7E5C;text-transform:uppercase;letter-spacing:.5px;">{{ t.firstTry }}</div></div>
       </div>
+      <!-- Only rendered when the round actually had mistakes; it is the most
+           useful thing to do next, so it sits above Play again. -->
+      <sc-if value="{{ hasMissed }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-bottom:12px;">
+        <button onclick="{{ onReview }}" style="cursor:pointer;width:100%;background:#E2A24B;color:#fff;border:none;border-radius:14px;padding:14px;font-family:'Nunito';font-weight:800;font-size:16px;box-shadow:0 5px 0 #B97E2C;">&#8635; {{ reviewText }}</button>
+      </div>
+      </sc-if>
       <div style="display:flex;gap:12px;">
         <button onclick="{{ onReplay }}" style="cursor:pointer;flex:1;background:{{ playColor }};color:#fff;border:none;border-radius:14px;padding:14px;font-family:'Nunito';font-weight:800;font-size:16px;box-shadow:0 5px 0 rgba(0,0,0,.12);">{{ t.replay }}</button>
         <button onclick="{{ onHome }}" style="cursor:pointer;flex:1;background:#F6ECD6;color:#7A6A57;border:none;border-radius:14px;padding:14px;font-family:'Nunito';font-weight:800;font-size:16px;">{{ t.home }}</button>
@@ -759,6 +766,8 @@ class Component extends DCLogic {
     progress: {},          // mode:continent:region -> {stars,best}
     confetti: [],
     resStars: 0, resAcc: 0,
+    reviewIds: null,       // review round: the subset of the region it deals
+    resMissed: [],         // countries missed in the round just finished
   };
 
   // Hit-test radius, in viewBox units. Each map declares its own (a world map
@@ -888,6 +897,8 @@ class Component extends DCLogic {
       replay: "Rejouer",
       home: "Accueil",
       factBtn: "Continuer",
+      review: "Revoir mes erreurs",
+      reviewTitle: "Révision",
       reset: "Réinitialiser le zoom",
       good: ["Bravo !", "Super !", "Excellent !", "Parfait !", "Génial !"],
       bad: ["Presque !", "Réessaie !", "Pas tout à fait…", "Encore un essai !"],
@@ -940,6 +951,8 @@ class Component extends DCLogic {
       replay: "Play again",
       home: "Home",
       factBtn: "Continue",
+      review: "Review my mistakes",
+      reviewTitle: "Review",
       reset: "Reset zoom",
       good: ["Nice!", "Great!", "Excellent!", "Perfect!", "Awesome!"],
       bad: ["Almost!", "Try again!", "Not quite…", "One more try!"],
@@ -1254,7 +1267,9 @@ class Component extends DCLogic {
   idColor(id){ const p=this.paletteOf(id); return p?p.bg:'#C9A86B'; }
   idShadow(id){ const p=this.paletteOf(id); return p?p.shadow:'#A98A5B'; }
   hexA(hex,a){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
-  taskIds(){ return this.idsOfRegion(this.state.continentId, this.state.regionId); }
+  // What the current round deals: the whole region, or — in a review round —
+  // only the countries missed in the round just played.
+  taskIds(){ return this.state.reviewIds || this.idsOfRegion(this.state.continentId, this.state.regionId); }
   playColor(){
     const id=this.state.regionId;
     if(id==='all'){ const c=this.cont(); return c?c.bg:'#A65A3C'; }
@@ -1266,11 +1281,13 @@ class Component extends DCLogic {
 
   shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
-  startLevel(id){
-    const ids = this.idsOfRegion(this.state.continentId, id);
+  // Passing `reviewIds` deals exactly those countries instead of the whole
+  // region — the "review my mistakes" round.
+  startLevel(id, reviewIds){
+    const ids = reviewIds || this.idsOfRegion(this.state.continentId, id);
     // Label points are per-map, so drop the cache when a new level starts.
     this._labelPts = null; this._centers = null;
-    this.setState({ screen:'play', regionId:id, queue:this.shuffle(ids), placed:{}, wrong:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
+    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
   }
 
   // ---- drag ----
@@ -1371,15 +1388,23 @@ class Component extends DCLogic {
   finishLevel(){
     const ids=this.taskIds();
     const total=ids.length;
-    const firstTry=ids.filter(id=>!this.state.wrong[id]).length;
+    // Kept in the round's own order so the review round deals them predictably.
+    const missed=ids.filter(id=>this.state.wrong[id]);
+    const firstTry=total-missed.length;
     const ratio=firstTry/total;
     const stars = ratio>=0.9?3 : ratio>=0.6?2 : 1;
     const acc=Math.round(ratio*100);
-    const prog={...this.state.progress};
-    const pk=this.progKey();
-    const prev=prog[pk]||{stars:0,best:0};
-    prog[pk]={ stars:Math.max(prev.stars,stars), best:Math.max(prev.best,this.state.score) };
-    try{ localStorage.setItem('worldcapitals_v1', JSON.stringify(prog)); }catch(e){}
+    let prog=this.state.progress;
+    // A review round deals only part of the region, so its result says nothing
+    // about the region: three stars on the four countries you missed are not
+    // three stars on all twelve. It leaves the saved progress untouched.
+    if(!this.state.reviewIds){
+      prog={...prog};
+      const pk=this.progKey();
+      const prev=prog[pk]||{stars:0,best:0};
+      prog[pk]={ stars:Math.max(prev.stars,stars), best:Math.max(prev.best,this.state.score) };
+      try{ localStorage.setItem('worldcapitals_v1', JSON.stringify(prog)); }catch(e){}
+    }
     this.playWin();
     const confetti=Array.from({length:60},()=>({
       left:(Math.random()*100)+'%',
@@ -1389,7 +1414,7 @@ class Component extends DCLogic {
       dur:(1.6+Math.random()*1.4)+'s',
       delay:(Math.random()*0.6)+'s',
     }));
-    this.setState({ screen:'result', factOpen:false, resStars:stars, resAcc:acc, confetti, progress:prog });
+    this.setState({ screen:'result', factOpen:false, resStars:stars, resAcc:acc, resMissed:missed, confetti, progress:prog });
   }
 
   // "capitales" / "pays" / "drapeaux": the noun the current mode counts in.
@@ -1417,6 +1442,7 @@ class Component extends DCLogic {
   // The name of the level being played: a region, or the whole continent —
   // which on the world map means the whole world.
   levelName(t, lang){
+    if(this.state.reviewIds) return t.reviewTitle;
     if(this.state.regionId!=='all'){
       const r=this.regionById(this.state.regionId);
       return r ? (lang==='fr'?r.fr:r.en) : '';
@@ -1632,22 +1658,33 @@ class Component extends DCLogic {
       base.resTitle = S.resStars>=3? t.resPerfect : S.resStars>=2? t.resGreat : t.resGood;
       base.resMsg = m3(t, S.mode, 'resMsg');
       base.confetti=S.confetti;
-      base.onReplay=()=>this.startLevel(S.regionId);
-      base.onHome=()=>this.setState({screen:'continent'});
+      // "Play again" means the level just played — the review subset if that is
+      // what it was, not silently the whole region.
+      base.onReplay=()=>this.startLevel(S.regionId, S.reviewIds);
+      base.onHome=()=>this.setState({screen:'continent', reviewIds:null});
+      // Offered only when there is something to review, so a clean run never
+      // shows a button that would deal an empty round.
+      base.hasMissed = S.resMissed.length > 0;
+      base.reviewText = t.review + ' (' + S.resMissed.length + ')';
+      base.onReview = ()=>this.startLevel(S.regionId, S.resMissed);
       return base;
     }
     return base;
   }
 
-  // keep chip order stable per level
+  // Keep chip order stable per level. A review round deals a subset of the same
+  // region, so it needs its own key — otherwise going back to the full region
+  // would reuse the subset's order and the chips missing from it would vanish.
   shuffleStable(ids){
-    const key=this.state.mode+':'+this.state.continentId+':'+this.state.regionId;
+    const key=this.state.mode+':'+this.state.continentId+':'+this.state.regionId+(this.state.reviewIds?':review':'');
     if(this._chipOrderKey!==key){
       this._chipOrderKey=key;
       this._chipOrder=this.shuffle(ids);
     }
-    // ensure any missing ids appended
-    return this._chipOrder.filter(id=>ids.includes(id));
+    const kept=this._chipOrder.filter(id=>ids.includes(id));
+    // Belt and braces: whatever the key did, every id asked for must come back.
+    const missing=ids.filter(id=>!kept.includes(id));
+    return missing.length ? kept.concat(this.shuffle(missing)) : kept;
   }
 }
 </script>
