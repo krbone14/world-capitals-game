@@ -375,6 +375,51 @@ check(facts.beside.screen === 'result', 'long level: the round finishes with not
 check(!facts.off.sawPopup && !facts.off.sawCard, 'switched off: no anecdote of either kind');
 check(facts.off.screen === 'result', 'switched off: the round still finishes');
 
+// ---- preferences and the reset ----
+console.log('\npreferences');
+const prefs = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // Sound is a preference like the language, not a per-session default. Its
+  // button lives in the play bar, so the round has to be open to reach it.
+  c.setState({ mode: 'cap', continentId: 'amerique-sud', screen: 'continent' });
+  await sleep(50);
+  c.startLevel('sa-cone-sud');
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 150)));
+  c.renderVals().onToggleSound();
+  await sleep(40);
+  const soundWritten = localStorage.getItem('worldcapitals_sound');
+  const soundState = c.state.soundOn;
+
+  // The reset control only exists once there is progress to erase.
+  c.setState({ screen: 'home', continentId: null, progress: {} });
+  await sleep(40);
+  const emptyHidesIt = c.renderVals().canReset === false;
+
+  c.setState({ progress: { 'cap:europe:eu-nord': { stars: 3, best: 90 },
+                           'cap:europe:eu-sud': { stars: 2, best: 70 } } });
+  localStorage.setItem('worldcapitals_v1', JSON.stringify(c.state.progress));
+  await sleep(40);
+  const v = c.renderVals();
+  const offered = { canReset: v.canReset, body: v.resetBody };
+
+  v.onConfirmReset();
+  await sleep(60);
+  return {
+    soundWritten, soundState, emptyHidesIt, offered,
+    after: Object.keys(c.state.progress).length,
+    storage: localStorage.getItem('worldcapitals_v1'),
+  };
+});
+
+check(prefs.soundWritten === 'off' && prefs.soundState === false,
+  `muting is remembered (worldcapitals_sound = "${prefs.soundWritten}")`);
+check(prefs.emptyHidesIt, 'no reset control when there is nothing to erase');
+check(prefs.offered.canReset, 'the reset control appears once levels have results');
+check(/2/.test(prefs.offered.body), `the confirmation counts what is at stake ("${prefs.offered.body}")`);
+check(prefs.after === 0 && prefs.storage === null,
+  `resetting clears both the state and localStorage (${prefs.after} left, storage ${prefs.storage})`);
+
 // ---- the social preview ----
 // The tags ship relative and the deploy stamps them absolute. Both halves have
 // to agree: these are the exact values tools/stamp-social-url.mjs matches on,

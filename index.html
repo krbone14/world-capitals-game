@@ -503,7 +503,28 @@ if ('serviceWorker' in navigator) {
         <div style="margin-top:16px;"><span style="background:#7A5CB0;color:#fff;font-weight:800;font-size:14px;padding:8px 16px;border-radius:11px;">{{ t.challenge }} &#9889;</span></div>
       </button>
     </div>
+
+    <!-- Deliberately plain and last on the page: findable by an adult who wants
+         a clean slate, not something a child clicks on the way to a continent. -->
+    <sc-if value="{{ canReset }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:34px;text-align:center;">
+      <button onclick="{{ onAskReset }}" style="cursor:pointer;background:none;border:none;font-family:'Nunito';font-weight:800;font-size:13px;color:#B49A77;text-decoration:underline;padding:6px 10px;">{{ t.resetBtn }}</button>
+    </div>
+    </sc-if>
   </div>
+
+  <sc-if value="{{ resetOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:120;background:rgba(40,28,18,.34);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="{{ onCancelReset }}">
+      <div onclick="{{ onKeepDialog }}" style="background:#fff;border-radius:24px;max-width:400px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:cardIn .3s ease both;border-top:8px solid #C25A4A;">
+        <div style="font-family:'Fredoka';font-weight:600;font-size:21px;line-height:1.15;">{{ t.resetTitle }}</div>
+        <p style="font-size:15px;line-height:1.5;color:#52453A;font-weight:600;margin:11px 0 20px;">{{ resetBody }}</p>
+        <div style="display:flex;gap:10px;">
+          <button onclick="{{ onCancelReset }}" style="cursor:pointer;flex:1;background:#F6ECD6;color:#7A6A57;border:none;border-radius:13px;padding:13px;font-family:'Nunito';font-weight:800;font-size:15px;">{{ t.resetCancel }}</button>
+          <button onclick="{{ onConfirmReset }}" style="cursor:pointer;flex:none;background:#C25A4A;color:#fff;border:none;border-radius:13px;padding:13px 20px;font-family:'Nunito';font-weight:800;font-size:15px;box-shadow:0 5px 0 rgba(0,0,0,.12);">{{ t.resetConfirm }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
   </sc-if>
 
   <!-- ================= CONTINENT: pick a region ================= -->
@@ -839,6 +860,7 @@ class Component extends DCLogic {
     quitOpen: false,       // the "leave the level?" confirmation
     factsOn: true,         // anecdotes at all — the top-bar 📖 toggle
     factCardId: null,      // anecdote shown beside the map, on long levels
+    resetOpen: false,      // the "erase all progress?" confirmation
   };
 
   // Above this many countries a level stops interrupting for each anecdote and
@@ -984,6 +1006,11 @@ class Component extends DCLogic {
       review: "Revoir mes erreurs",
       reviewTitle: "Révision",
       factsToggle: "Anecdotes",
+      resetBtn: "Réinitialiser la progression",
+      resetTitle: "Tout effacer ?",
+      resetBody: "Tu perdras toutes tes étoiles et tes meilleurs scores ({n} niveaux). C'est définitif.",
+      resetCancel: "Annuler",
+      resetConfirm: "Effacer",
       quitTitle: "Quitter le niveau ?",
       // "{n}" is the "6 / 12" already shown in the top bar. Counting that way
       // rather than "6 capitales" keeps one sentence for all three modes, with
@@ -1049,6 +1076,11 @@ class Component extends DCLogic {
       review: "Review my mistakes",
       reviewTitle: "Review",
       factsToggle: "Fun facts",
+      resetBtn: "Reset progress",
+      resetTitle: "Erase everything?",
+      resetBody: "You will lose every star and best score ({n} levels). This cannot be undone.",
+      resetCancel: "Cancel",
+      resetConfirm: "Erase",
       quitTitle: "Leave the level?",
       quitBody: "You have already placed {n}. Leaving now starts this level over.",
       quitStay: "Keep playing",
@@ -1086,7 +1118,9 @@ class Component extends DCLogic {
         // not want them should not have to say so again every session.
         let factsOn = true;
         try { factsOn = localStorage.getItem('worldcapitals_facts') !== 'off'; } catch(e){}
-        this.setState({ ready:true, progress:prog, lang, factsOn });
+        let soundOn = true;
+        try { soundOn = localStorage.getItem('worldcapitals_sound') !== 'off'; } catch(e){}
+        this.setState({ ready:true, progress:prog, lang, factsOn, soundOn });
       } else if (tries++ < 60) { setTimeout(check, 60); }
     };
     check();
@@ -1422,6 +1456,15 @@ class Component extends DCLogic {
   // Leaving mid-level throws the round away — there is nowhere it is saved. So
   // it asks, but only when there is something to lose: backing out of a level
   // you have not started yet should not cost a dialog.
+  // How many levels have a saved result. Shown in the reset confirmation so the
+  // number makes the consequence concrete, and used to hide the whole control
+  // when there is nothing to erase.
+  progressCount(){ return Object.keys(this.state.progress).length; }
+  resetProgress(){
+    try{ localStorage.removeItem('worldcapitals_v1'); }catch(e){}
+    this.setState({ progress:{}, resetOpen:false });
+  }
+
   tryLeaveLevel(){
     const done = this.taskIds().some(id=>this.state.placed[id]);
     if(done){ this.setState({ quitOpen:true }); return; }
@@ -1661,6 +1704,16 @@ class Component extends DCLogic {
       base.worldEmoji = w.emoji;
       base.worldCountText = this.idsOfRegion(this.WORLD_ID,'all').length+' '+this.unitWord(t, S.mode);
       base.onOpenWorld = ()=>this.openContinent(this.WORLD_ID);
+      // Only offered once there is something to lose, so a fresh install shows
+      // no button whose only possible effect is to do nothing.
+      const nProg = this.progressCount();
+      base.canReset = nProg > 0;
+      base.resetOpen = S.resetOpen;
+      base.resetBody = t.resetBody.replace('{n}', String(nProg));
+      base.onAskReset = ()=>this.setState({resetOpen:true});
+      base.onCancelReset = ()=>this.setState({resetOpen:false});
+      base.onConfirmReset = ()=>this.resetProgress();
+      base.onKeepDialog = (e)=>e.stopPropagation();
       return base;
     }
 
@@ -1725,7 +1778,11 @@ class Component extends DCLogic {
       base.showNames=S.showNames;
       base.namesBtnBg = S.showNames? color : '#F6ECD6';
       base.namesBtnColor = S.showNames? '#fff' : '#9A7E5C';
-      base.onToggleSound = ()=>this.setState({soundOn:!S.soundOn});
+      base.onToggleSound = ()=>{
+        const next = !S.soundOn;
+        try{ localStorage.setItem('worldcapitals_sound', next?'on':'off'); }catch(e){}
+        this.setState({soundOn:next});
+      };
       base.soundIcon = S.soundOn?'🔊':'🔇';
       base.factsTitle = t.factsToggle;
       base.factsBtnBg = S.factsOn ? color : '#F6ECD6';
