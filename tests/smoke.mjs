@@ -375,6 +375,72 @@ check(facts.beside.screen === 'result', 'long level: the round finishes with not
 check(!facts.off.sawPopup && !facts.off.sawCard, 'switched off: no anecdote of either kind');
 check(facts.off.screen === 'result', 'switched off: the round still finishes');
 
+// ---- micro-states, overall progress, and the lazy label points ----
+console.log('\nmicro-states, overall, label points');
+const extras = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const enter = async (contId, regionId) => {
+    c.setState({ continentId: contId, screen: 'continent' });
+    await sleep(50);
+    c.startLevel(regionId);
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 200)));
+  };
+
+  // --- the switch changes the roster, and only when it is on ---
+  c.setState({ mode: 'cap', microOn: false, progress: {} });
+  await sleep(50);
+  const off = { euSud: c.idsOfRegion('europe', 'eu-sud').length, world: c.idsOfRegion('monde', 'all').length };
+  c.setState({ microOn: true });
+  await sleep(50);
+  const on = { euSud: c.idsOfRegion('europe', 'eu-sud').length, world: c.idsOfRegion('monde', 'all').length };
+
+  // --- and it files its stars separately ---
+  c.setState({ continentId: 'europe', regionId: 'eu-sud' });
+  await sleep(30);
+  const keyMicro = c.progKey();
+  c.setState({ microOn: false });
+  await sleep(30);
+  const keyPlain = c.progKey();
+
+  // --- overall counter follows the mode and the progress ---
+  const blank = c.overallStars();
+  c.setState({ progress: { 'cap:europe:eu-nord': { stars: 3, best: 9 },
+                           'cap:europe:eu-sud': { stars: 2, best: 9 },
+                           'cap:afrique:af-nord': { stars: 3, best: 9 },
+                           'flag:europe:eu-nord': { stars: 3, best: 9 } } });
+  await sleep(30);
+  const capMode = c.overallStars();
+  c.setState({ mode: 'flag' });
+  await sleep(30);
+  const flagMode = c.overallStars();
+  c.setState({ mode: 'cap', progress: {} });
+  await sleep(30);
+
+  // --- label points: skipped in capital mode with names off, computed the
+  //     moment they are actually needed ---
+  await enter('monde', 'all');
+  const lazySkipped = c._labelPts === null;
+  const t0 = performance.now();
+  c.setState({ showNames: true });
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 900)));
+  const computedOnDemand = !!c._labelPts && Object.keys(c._labelPts).length > 0;
+  const ms = Math.round(performance.now() - t0);
+  c.setState({ showNames: false });
+
+  return { off, on, keyMicro, keyPlain, blank, capMode, flagMode, lazySkipped, computedOnDemand };
+});
+
+check(extras.on.euSud > extras.off.euSud && extras.on.world === extras.off.world + 23,
+  `the switch deals the 23 micro-states (world ${extras.off.world} -> ${extras.on.world}, Southern Europe ${extras.off.euSud} -> ${extras.on.euSud})`);
+check(extras.keyMicro !== extras.keyPlain && /:micro$/.test(extras.keyMicro),
+  `with and without them are different levels ("${extras.keyPlain}" vs "${extras.keyMicro}")`);
+check(extras.blank === '★ 0 / 23', `a blank slate reads ${extras.blank}`);
+check(extras.capMode === '★ 2 / 23', `only three-starred regions count (${extras.capMode})`);
+check(extras.flagMode === '★ 1 / 23', `the counter is per mode (flags: ${extras.flagMode})`);
+check(extras.lazySkipped, 'capital mode with names off never computes the label points');
+check(extras.computedOnDemand, 'turning names on computes them, at that moment');
+
 // ---- preferences and the reset ----
 console.log('\npreferences');
 const prefs = await page.evaluate(async () => {

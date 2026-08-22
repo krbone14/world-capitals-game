@@ -460,6 +460,12 @@ if ('serviceWorker' in navigator) {
         </div>
         <h1 class="g-title" style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:54px;line-height:1.02;margin:16px 0 6px;letter-spacing:-.5px;">{{ homeTitle }}</h1>
         <p class="g-subtitle" style="font-size:18px;color:#7A6A57;max-width:560px;margin:0;font-weight:600;">{{ homeSubtitle }}</p>
+        <!-- Overall progress for the mode showing, so there is one number to aim
+             at without opening all six continents to add them up. -->
+        <div style="display:inline-flex;align-items:baseline;gap:8px;margin-top:14px;background:#FCEFD6;border:2px solid #EFD9A8;border-radius:999px;padding:6px 16px;">
+          <span style="font-family:'Fredoka';font-weight:600;font-size:17px;color:#B07B3A;">{{ overallText }}</span>
+          <span style="font-family:'Nunito';font-weight:800;font-size:13px;color:#9A7E5C;">{{ t.overallLabel }}</span>
+        </div>
       </div>
       <button onclick="{{ onToggleLang }}" style="cursor:pointer;background:#fff;border:2px solid #EAD7B0;border-radius:14px;padding:11px 16px;font-family:'Nunito';font-weight:800;font-size:15px;color:#3B2F27;box-shadow:0 4px 0 #EAD7B0;display:flex;align-items:center;gap:8px;">
         <span style="font-size:18px;">{{ langFlag }}</span>{{ langLabel }}
@@ -478,6 +484,11 @@ if ('serviceWorker' in navigator) {
           <span style="width:17px;height:12px;border-radius:2px;background:{{ modeFlagDot }};display:inline-block;"></span>{{ t.modeFlag }}
         </button>
       </div>
+      <!-- The 23 micro-states are in the data with flag, capital and anecdote but
+           are too small to aim at, so they are opt-in rather than dealt by
+           default. Turning them on makes a different level: progKey() keeps its
+           stars apart. -->
+      <button onclick="{{ onToggleMicro }}" title="{{ t.microToggle }}" style="cursor:pointer;background:{{ microBg }};color:{{ microColor }};border:2px solid #EAD7B0;border-radius:14px;padding:10px 16px;font-family:'Nunito';font-weight:800;font-size:14px;box-shadow:0 4px 0 #EAD7B0;">&#128205; {{ t.microToggle }}</button>
     </div>
 
     <div style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">
@@ -552,6 +563,11 @@ if ('serviceWorker' in navigator) {
           <span style="width:17px;height:12px;border-radius:2px;background:{{ modeFlagDot }};display:inline-block;"></span>{{ t.modeFlag }}
         </button>
       </div>
+      <!-- The 23 micro-states are in the data with flag, capital and anecdote but
+           are too small to aim at, so they are opt-in rather than dealt by
+           default. Turning them on makes a different level: progKey() keeps its
+           stars apart. -->
+      <button onclick="{{ onToggleMicro }}" title="{{ t.microToggle }}" style="cursor:pointer;background:{{ microBg }};color:{{ microColor }};border:2px solid #EAD7B0;border-radius:14px;padding:10px 16px;font-family:'Nunito';font-weight:800;font-size:14px;box-shadow:0 4px 0 #EAD7B0;">&#128205; {{ t.microToggle }}</button>
     </div>
 
     <sc-if value="{{ mapLoading }}" hint-placeholder-val="{{ false }}">
@@ -861,6 +877,7 @@ class Component extends DCLogic {
     factsOn: true,         // anecdotes at all — the top-bar 📖 toggle
     factCardId: null,      // anecdote shown beside the map, on long levels
     resetOpen: false,      // the "erase all progress?" confirmation
+    microOn: false,        // deal the 23 micro-states too
   };
 
   // Above this many countries a level stops interrupting for each anecdote and
@@ -910,7 +927,9 @@ class Component extends DCLogic {
     const C=this.C, out=[], world=contId===this.WORLD_ID;
     for(const id in C){
       const c=C[id];
-      if(c.tier!==1) continue;
+      // tier 2 are the 23 micro-states. They have a dot target on every map, so
+      // they are perfectly playable — just small, which is why they are opt-in.
+      if(c.tier!==1 && !(this.state.microOn && c.tier===2)) continue;
       // On the world map a "region" is a continent id; elsewhere, a region id.
       if(regionId==='all'){ if(world || c.cont===contId) out.push(id); }
       else if(world ? c.cont===regionId : c.reg===regionId) out.push(id);
@@ -1006,6 +1025,8 @@ class Component extends DCLogic {
       review: "Revoir mes erreurs",
       reviewTitle: "Révision",
       factsToggle: "Anecdotes",
+      microToggle: "Micro-États",
+      overallLabel: "régions maîtrisées",
       resetBtn: "Réinitialiser la progression",
       resetTitle: "Tout effacer ?",
       resetBody: "Tu perdras toutes tes étoiles et tes meilleurs scores ({n} niveaux). C'est définitif.",
@@ -1076,6 +1097,8 @@ class Component extends DCLogic {
       review: "Review my mistakes",
       reviewTitle: "Review",
       factsToggle: "Fun facts",
+      microToggle: "Micro-states",
+      overallLabel: "regions mastered",
       resetBtn: "Reset progress",
       resetTitle: "Erase everything?",
       resetBody: "You will lose every star and best score ({n} levels). This cannot be undone.",
@@ -1120,7 +1143,9 @@ class Component extends DCLogic {
         try { factsOn = localStorage.getItem('worldcapitals_facts') !== 'off'; } catch(e){}
         let soundOn = true;
         try { soundOn = localStorage.getItem('worldcapitals_sound') !== 'off'; } catch(e){}
-        this.setState({ ready:true, progress:prog, lang, factsOn, soundOn });
+        let microOn = false;
+        try { microOn = localStorage.getItem('worldcapitals_micro') === 'on'; } catch(e){}
+        this.setState({ ready:true, progress:prog, lang, factsOn, soundOn, microOn });
       } else if (tries++ < 60) { setTimeout(check, 60); }
     };
     check();
@@ -1364,6 +1389,14 @@ class Component extends DCLogic {
     }
     this._centers = m; return m;
   }
+  // computeLabelPoints() costs ~250 ms on the world map (147 shapes x 17x17
+  // probes, each an isPointInFill), and it used to run at every level start.
+  // Its result is only ever read for country-name labels and for the pins of
+  // country and flag mode — so in capital mode with names off, the default, the
+  // game paid for it and threw it away. Now it is computed on first real need,
+  // which is also the moment the player turns names on.
+  needsLabelPoints(){ return this.state.mode !== 'cap' || this.state.showNames; }
+
   // Compute a representative interior point for each country (guaranteed inside the shape,
   // deep in the largest landmass) so name labels sit in the middle of the country.
   computeLabelPoints(){
@@ -1400,7 +1433,7 @@ class Component extends DCLogic {
     // a returning English player never presses that button at all.
     if (document.documentElement.lang !== this.state.lang) document.documentElement.lang = this.state.lang;
     if (this.state.screen==='play'){
-      if (!this._labelPts) requestAnimationFrame(()=>this.computeLabelPoints());
+      if (!this._labelPts && this.needsLabelPoints()) requestAnimationFrame(()=>this.computeLabelPoints());
       this.fitMap();
       if (!this._ro && window.ResizeObserver && this.fitRef.current){
         this._ro = new ResizeObserver(()=>this.fitMap());
@@ -1440,7 +1473,11 @@ class Component extends DCLogic {
   }
   // Progress is filed per mode, per continent, per region — "all of Europe" and
   // "all of Asia" are different levels and keep separate stars.
-  progKey(){ return this.state.mode+':'+this.state.continentId+':'+this.state.regionId; }
+  // The micro-state switch changes which countries a level deals, so it changes
+  // which level it is: "Southern Europe" and "Southern Europe + micro-states"
+  // keep separate stars rather than one overwriting the other.
+  progSuffix(){ return this.state.microOn ? ':micro' : ''; }
+  progKey(){ return this.state.mode+':'+this.state.continentId+':'+this.state.regionId+this.progSuffix(); }
 
   shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
@@ -1640,6 +1677,15 @@ class Component extends DCLogic {
       onModeCap: ()=>this.setState({mode:'cap'}),
       onModeCountry: ()=>this.setState({mode:'country'}),
       onModeFlag: ()=>this.setState({mode:'flag'}),
+      microOn: this.state.microOn,
+      microBg: this.state.microOn ? '#7A5CB0' : '#fff',
+      microColor: this.state.microOn ? '#fff' : '#9A7E5C',
+      onToggleMicro: ()=>{
+        const next = !this.state.microOn;
+        try{ localStorage.setItem('worldcapitals_micro', next?'on':'off'); }catch(e){}
+        this.setState({ microOn: next });
+      },
+      overallText: this.overallStars(),
     };
   }
 
@@ -1656,10 +1702,25 @@ class Component extends DCLogic {
 
   // "★ 3/6" — how many of a continent's regions are three-starred in this mode,
   // so the home screen shows progress without opening every continent.
+  // "★ 14 / 23" across every region of every continent, for the mode showing.
+  // The continent-wide and world levels are deliberately left out: the 23
+  // regions are the set the game presents as its map of itself.
+  overallStars(){
+    let done = 0, total = 0;
+    for (const contId of window.WORLD_DATA.continentOrder) {
+      for (const r of this.CONTINENTS[contId].regions) {
+        total++;
+        const pr = this.state.progress[this.state.mode+':'+contId+':'+r.id+this.progSuffix()];
+        if (pr && pr.stars >= 3) done++;
+      }
+    }
+    return '★ ' + done + ' / ' + total;
+  }
+
   continentStars(contId){
     const c=this.CONTINENTS[contId]; if(!c) return '';
     const done=c.regions.filter(r=>{
-      const pr=this.state.progress[this.state.mode+':'+contId+':'+r.id];
+      const pr=this.state.progress[this.state.mode+':'+contId+':'+r.id+this.progSuffix()];
       return pr && pr.stars>=3;
     }).length;
     return done ? '★ '+done+'/'+c.regions.length : '';
@@ -1733,7 +1794,7 @@ class Component extends DCLogic {
       const unit=this.unitWord(t, S.mode);
       base.regionCards = this.regions().map(r=>{
         const ids=this.idsOfRegion(S.continentId, r.id);
-        const pr=S.progress[S.mode+':'+S.continentId+':'+r.id]||{stars:0,best:0};
+        const pr=S.progress[S.mode+':'+S.continentId+':'+r.id+this.progSuffix()]||{stars:0,best:0};
         return {
           name: lang==='fr'?r.fr:r.en,
           countText: ids.length+' '+unit,

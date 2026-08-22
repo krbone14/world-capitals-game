@@ -23,7 +23,8 @@ and this one grew out of it.
   because 172 popups to dismiss is not a reward. A 📖 button turns them off
 - **Mobile friendly** — tap a label then tap the map, pinch to zoom, responsive
 - **Installable PWA** — add it to your home screen and play fully offline
-- **Score, stars & best-score tracking**, per mode, per continent, per region
+- **Score, stars & best-score tracking**, per mode, per continent, per region,
+  with an overall "★ 14 / 23 regions mastered" on the home screen, and a reset
 - **A hint when you are stuck** — after missing the same country twice, its
   label offers to show you where it is. The round then scores no stars and
   banks nothing, and says so: the stars stay a record of what you knew unaided
@@ -36,7 +37,9 @@ and this one grew out of it.
 
 195 in the data: the 193 UN member states plus the Vatican and Palestine.
 
-**172 of them are dealt in the rounds.** The 23 micro-states — anything under
+**172 of them are dealt by default**, and a 📍 Micro-States switch on the home
+screen deals all 195. With the switch on a level keeps its own stars, since it
+is not the same level. The 23 micro-states — anything under
 1 000 km², from Monaco to Tuvalu — are in the data with their flag, capital and
 anecdote, but stay out of the levels because they are too small to aim at. They
 carry `tier: 2` in `assets/data/countries.js`; the threshold is one constant
