@@ -698,6 +698,22 @@ if ('serviceWorker' in navigator) {
     </div>
   </sc-if>
 
+  <!-- leave-the-level confirmation. Clicking the backdrop keeps playing, which
+       is the safe answer; the card stops the click so choosing "Quitter" is
+       never also read as a click outside. -->
+  <sc-if value="{{ quitOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:110;background:rgba(40,28,18,.34);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="{{ onStay }}">
+      <div onclick="{{ onKeepDialog }}" style="background:#fff;border-radius:24px;max-width:400px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:cardIn .3s ease both;border-top:8px solid {{ playColor }};">
+        <div style="font-family:'Fredoka';font-weight:600;font-size:21px;line-height:1.15;">{{ t.quitTitle }}</div>
+        <p style="font-size:15px;line-height:1.5;color:#52453A;font-weight:600;margin:11px 0 20px;">{{ quitBody }}</p>
+        <div style="display:flex;gap:10px;">
+          <button onclick="{{ onStay }}" style="cursor:pointer;flex:1;background:{{ playColor }};color:#fff;border:none;border-radius:13px;padding:13px;font-family:'Nunito';font-weight:800;font-size:15px;box-shadow:0 5px 0 rgba(0,0,0,.12);">{{ t.quitStay }}</button>
+          <button onclick="{{ onLeave }}" style="cursor:pointer;flex:none;background:#F6ECD6;color:#7A6A57;border:none;border-radius:13px;padding:13px 18px;font-family:'Nunito';font-weight:800;font-size:15px;">{{ t.quitLeave }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   </sc-if>
 
   <!-- ===================== RESULT ===================== -->
@@ -786,6 +802,7 @@ class Component extends DCLogic {
     resMissed: [],         // countries missed in the round just finished
     hinted: {},            // id -> true: the game was asked to show this one
     resUsedHint: false,
+    quitOpen: false,       // the "leave the level?" confirmation
   };
 
   // Wrong tries on the same country before its "show me" button appears. Two
@@ -922,6 +939,13 @@ class Component extends DCLogic {
       factBtn: "Continuer",
       review: "Revoir mes erreurs",
       reviewTitle: "Révision",
+      quitTitle: "Quitter le niveau ?",
+      // "{n}" is the "6 / 12" already shown in the top bar. Counting that way
+      // rather than "6 capitales" keeps one sentence for all three modes, with
+      // no plural or gender agreement to get wrong.
+      quitBody: "Tu as déjà placé {n}. Si tu pars maintenant, tu recommenceras à zéro.",
+      quitStay: "Continuer à jouer",
+      quitLeave: "Quitter",
       hint: "Montre-moi",
       hintCost: "sans étoile",
       hintUsed: "Tu as demandé de l'aide : pas d'étoile cette fois. Réessaie sans !",
@@ -979,6 +1003,10 @@ class Component extends DCLogic {
       factBtn: "Continue",
       review: "Review my mistakes",
       reviewTitle: "Review",
+      quitTitle: "Leave the level?",
+      quitBody: "You have already placed {n}. Leaving now starts this level over.",
+      quitStay: "Keep playing",
+      quitLeave: "Leave",
       hint: "Show me",
       hintCost: "no star",
       hintUsed: "You asked for help, so no star this time. Try again without it!",
@@ -1338,8 +1366,18 @@ class Component extends DCLogic {
     const ids = reviewIds || this.idsOfRegion(this.state.continentId, id);
     // Label points are per-map, so drop the cache when a new level starts.
     this._labelPts = null; this._centers = null;
-    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, hinted:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
+    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, hinted:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, quitOpen:false, zoom:1, panX:0, panY:0 });
   }
+
+  // Leaving mid-level throws the round away — there is nowhere it is saved. So
+  // it asks, but only when there is something to lose: backing out of a level
+  // you have not started yet should not cost a dialog.
+  tryLeaveLevel(){
+    const done = this.taskIds().some(id=>this.state.placed[id]);
+    if(done){ this.setState({ quitOpen:true }); return; }
+    this.leaveLevel();
+  }
+  leaveLevel(){ this.setState({ screen:'continent', quitOpen:false, reviewIds:null, selectedId:null }); }
 
   // ---- drag ----
   startDrag(id, e){
@@ -1604,7 +1642,12 @@ class Component extends DCLogic {
       const nPlaced=taskIds.filter(id=>placed[id]).length;
       base.progressText = nPlaced+' / '+taskIds.length;
       base.scoreText = String(S.score);
-      base.onBack = ()=>this.setState({screen:'continent'});
+      base.onBack = ()=>this.tryLeaveLevel();
+      base.quitOpen = S.quitOpen;
+      base.quitBody = t.quitBody.replace('{n}', nPlaced+' / '+taskIds.length);
+      base.onStay = ()=>this.setState({quitOpen:false});
+      base.onLeave = ()=>this.leaveLevel();
+      base.onKeepDialog = (e)=>e.stopPropagation();
       const isCountry = S.mode==='country';
       const isFlag = S.mode==='flag';
       base.showNamesBtn = !isCountry;   // country names on the map would be the answer in country mode; in flag mode they are only a partial hint

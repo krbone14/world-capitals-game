@@ -305,6 +305,56 @@ check(hint.flagged, 'the result screen is told the hint was used');
 check(hint.after && hint.after.stars === 3 && hint.after.best === hint.earned.best,
   `the hinted round banks nothing, leaving 3 stars and ${hint.earned && hint.earned.best} points`);
 
+// ---- leaving a level ----
+// Nothing about a half-played round is saved anywhere, so the back button asks
+// before discarding it — but only once there is something to discard.
+console.log('\nleaving a level');
+const quit = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const enter = async () => {
+    c.setState({ mode: 'cap', continentId: 'amerique-sud', screen: 'continent' });
+    await sleep(50);
+    c.startLevel('sa-cone-sud');
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 120)));
+  };
+  const placeOne = async () => {
+    const id = c.taskIds()[0], g = c.GEO, cap = g.caps[id];
+    const b = c.mapBoxRef.current.getBoundingClientRect();
+    c.tryPlace(id, b.left + (cap.x / g.W) * b.width, b.top + (cap.y / g.H) * b.height);
+    await sleep(20); c._factAt = 0; c.closeFact(); await sleep(20);
+  };
+
+  // Nothing placed: straight out, no dialog.
+  await enter();
+  c.tryLeaveLevel();
+  const untouched = { asked: c.state.quitOpen, screen: c.state.screen };
+
+  // One placed: it asks, and staying really does stay.
+  await enter();
+  await placeOne();
+  c.tryLeaveLevel();
+  const asked = { asked: c.state.quitOpen, screen: c.state.screen, body: c.renderVals().quitBody };
+  c.setState({ quitOpen: false });                     // "keep playing"
+  const stayed = { screen: c.state.screen, placed: Object.keys(c.state.placed).length };
+
+  // Confirming leaves for real.
+  c.tryLeaveLevel();
+  c.leaveLevel();
+  const left = { screen: c.state.screen, asked: c.state.quitOpen };
+
+  return { untouched, asked, stayed, left };
+});
+
+check(!quit.untouched.asked && quit.untouched.screen === 'continent',
+  'backing out of an untouched level does not ask');
+check(quit.asked.asked && quit.asked.screen === 'play',
+  'backing out after placing one asks, and stays on the map meanwhile');
+check(/1 \/ 5/.test(quit.asked.body), `the dialog says what is at stake ("${quit.asked.body}")`);
+check(quit.stayed.screen === 'play' && quit.stayed.placed === 1,
+  'keeping playing leaves the round exactly as it was');
+check(quit.left.screen === 'continent' && !quit.left.asked, 'confirming leaves the level');
+
 // ---- both languages, on every screen ----
 console.log('\nlanguages');
 for (const lang of ['fr', 'en']) {
