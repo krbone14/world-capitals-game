@@ -305,6 +305,76 @@ check(hint.flagged, 'the result screen is told the hint was used');
 check(hint.after && hint.after.stars === 3 && hint.after.best === hint.earned.best,
   `the hinted round banks nothing, leaving 3 stars and ${hint.earned && hint.earned.best} points`);
 
+// ---- how the anecdote is shown ----
+// Short levels keep the popup; long ones show the anecdote beside the map, and
+// the switch turns it off entirely. The structural part is that finishing used
+// to be a side effect of dismissing the last popup — these two paths have no
+// popup to dismiss, so the round has to end on its own.
+console.log('\nanecdotes');
+const facts = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const enter = async (contId, regionId) => {
+    c.setState({ mode: 'cap', continentId: contId, screen: 'continent' });
+    await sleep(50);
+    c.startLevel(regionId);
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 150)));
+  };
+  // Plays a whole level, never touching closeFact unless told to.
+  const play = async (dismiss) => {
+    let sawPopup = false, sawCard = false;
+    for (const id of c.taskIds()) {
+      const g = c.GEO, cap = g.caps[id];
+      const b = c.mapBoxRef.current.getBoundingClientRect();
+      c.tryPlace(id, b.left + (cap.x / g.W) * b.width, b.top + (cap.y / g.H) * b.height);
+      await sleep(25);
+      if (c.state.factOpen) sawPopup = true;
+      if (c.state.factCardId) sawCard = true;
+      if (dismiss) { c._factAt = 0; c.closeFact(); await sleep(20); }
+    }
+    await sleep(120);
+    return { sawPopup, sawCard, screen: c.state.screen };
+  };
+
+  // The real threshold, on the real levels.
+  await enter('amerique-sud', 'sa-cone-sud');
+  const shortLevel = { n: c.taskIds().length, long: c.longLevel() };
+  await enter('europe', 'all');
+  const europeAll = { n: c.taskIds().length, long: c.longLevel() };
+  await enter('monde', 'all');
+  const worldAll = { n: c.taskIds().length, long: c.longLevel() };
+
+  // Short level, anecdotes on: the popup, dismissed as before.
+  c.setState({ factsOn: true });
+  await enter('amerique-sud', 'sa-cone-sud');
+  const popup = await play(true);
+
+  // Same level forced over the threshold: the card, and nothing to dismiss.
+  const realMax = c.FACT_MODAL_MAX;
+  c.FACT_MODAL_MAX = 2;
+  await enter('amerique-sud', 'sa-cone-sud');
+  const beside = await play(false);
+  c.FACT_MODAL_MAX = realMax;
+
+  // Switched off: neither, and the round still ends.
+  c.setState({ factsOn: false });
+  await enter('amerique-sud', 'sa-cone-sud');
+  const off = await play(false);
+  c.setState({ factsOn: true });
+
+  return { shortLevel, europeAll, worldAll, popup, beside, off };
+});
+
+check(!facts.shortLevel.long, `a ${facts.shortLevel.n}-country region keeps the popup`);
+check(facts.europeAll.long, `all of Europe (${facts.europeAll.n}) shows anecdotes beside the map`);
+check(facts.worldAll.long, `the whole world (${facts.worldAll.n}) shows anecdotes beside the map`);
+check(facts.popup.sawPopup && !facts.popup.sawCard, 'short level: the popup, not the card');
+check(facts.popup.screen === 'result', 'short level: dismissing the last popup still finishes it');
+check(facts.beside.sawCard && !facts.beside.sawPopup, 'long level: the card, and no popup at all');
+check(facts.beside.screen === 'result', 'long level: the round finishes with nothing to dismiss');
+check(!facts.off.sawPopup && !facts.off.sawCard, 'switched off: no anecdote of either kind');
+check(facts.off.screen === 'result', 'switched off: the round still finishes');
+
 // ---- the social preview ----
 // The tags ship relative and the deploy stamps them absolute. Both halves have
 // to agree: these are the exact values tools/stamp-social-url.mjs matches on,

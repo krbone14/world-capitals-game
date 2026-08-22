@@ -596,6 +596,7 @@ if ('serviceWorker' in navigator) {
       <sc-if value="{{ showNamesBtn }}" hint-placeholder-val="{{ true }}">
       <button onclick="{{ onToggleNames }}" title="{{ t.showNames }}" style="cursor:pointer;background:{{ namesBtnBg }};border:2px solid #EFE0C1;border-radius:11px;height:40px;padding:0 13px;font-weight:800;font-size:13px;color:{{ namesBtnColor }};">{{ t.namesShort }}</button>
       </sc-if>
+      <button onclick="{{ onToggleFacts }}" title="{{ factsTitle }}" style="cursor:pointer;background:{{ factsBtnBg }};color:{{ factsBtnColor }};border:2px solid #EFE0C1;border-radius:11px;width:40px;height:40px;font-size:15px;">&#128214;</button>
       <button onclick="{{ onToggleSound }}" style="cursor:pointer;background:#F6ECD6;border:none;border-radius:11px;width:40px;height:40px;font-size:16px;">{{ soundIcon }}</button>
       <button onclick="{{ onToggleLang }}" style="cursor:pointer;background:#F6ECD6;border:none;border-radius:11px;height:40px;padding:0 13px;font-weight:800;font-size:14px;">{{ langFlag }}</button>
     </div>
@@ -653,6 +654,20 @@ if ('serviceWorker' in navigator) {
           </div>
           </div>
          </div>
+
+          <!-- Anecdote beside the map, on levels too long to interrupt for each
+               one. pointer-events:none is what makes it non-blocking: a drop
+               aimed through it lands on the map underneath, so it can sit over
+               the board without ever costing a placement. -->
+          <sc-if value="{{ factCardOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;pointer-events:none;max-width:min(560px,92%);display:flex;align-items:center;gap:12px;background:rgba(255,253,247,.96);border:2px solid #EFE0C1;border-left:7px solid {{ factCardColor }};border-radius:15px;padding:10px 15px;box-shadow:0 8px 22px rgba(0,0,0,.16);animation:toastIn .3s ease both;">
+              <div style="width:42px;height:29px;flex:none;border-radius:5px;border:2px solid #EFE0C1;background-color:#F6ECD6;background-image:url('{{ factCardFlag }}');background-size:cover;background-position:center;"></div>
+              <div style="min-width:0;">
+                <div style="font-family:'Fredoka';font-weight:600;font-size:15px;line-height:1.15;color:#3B2F27;">{{ factCardCap }}<span style="font-family:'Nunito';font-weight:800;font-size:12px;color:{{ factCardColor }};margin-left:7px;">{{ factCardCountry }}</span></div>
+                <div style="font-size:13px;line-height:1.35;color:#52453A;font-weight:600;margin-top:2px;">{{ factCardText }}</div>
+              </div>
+            </div>
+          </sc-if>
 
           <!-- bad flash -->
           <sc-if value="{{ badOpen }}" hint-placeholder-val="{{ false }}">
@@ -822,7 +837,17 @@ class Component extends DCLogic {
     hinted: {},            // id -> true: the game was asked to show this one
     resUsedHint: false,
     quitOpen: false,       // the "leave the level?" confirmation
+    factsOn: true,         // anecdotes at all — the top-bar 📖 toggle
+    factCardId: null,      // anecdote shown beside the map, on long levels
   };
+
+  // Above this many countries a level stops interrupting for each anecdote and
+  // shows it beside the map instead. The whole world deals 172: that many
+  // popups to dismiss is what made the ultimate challenge unplayable in
+  // practice. Regions top out at 16, so they keep the popup, where the pause is
+  // a welcome beat rather than a toll.
+  FACT_MODAL_MAX = 20;
+  longLevel(){ return this.taskIds().length > this.FACT_MODAL_MAX; }
 
   // Wrong tries on the same country before its "show me" button appears. Two
   // is late enough that a lucky guess does not unlock it, early enough that a
@@ -958,6 +983,7 @@ class Component extends DCLogic {
       factBtn: "Continuer",
       review: "Revoir mes erreurs",
       reviewTitle: "Révision",
+      factsToggle: "Anecdotes",
       quitTitle: "Quitter le niveau ?",
       // "{n}" is the "6 / 12" already shown in the top bar. Counting that way
       // rather than "6 capitales" keeps one sentence for all three modes, with
@@ -1022,6 +1048,7 @@ class Component extends DCLogic {
       factBtn: "Continue",
       review: "Review my mistakes",
       reviewTitle: "Review",
+      factsToggle: "Fun facts",
       quitTitle: "Leave the level?",
       quitBody: "You have already placed {n}. Leaving now starts this level over.",
       quitStay: "Keep playing",
@@ -1055,7 +1082,11 @@ class Component extends DCLogic {
         let prog = {}, lang = 'fr';
         try { prog = JSON.parse(localStorage.getItem('worldcapitals_v1')||'{}'); } catch(e){}
         try { const l = localStorage.getItem('worldcapitals_lang'); if (l==='fr'||l==='en') lang = l; } catch(e){}
-        this.setState({ ready:true, progress:prog, lang });
+        // Turning the anecdotes off is a lasting preference: someone who does
+        // not want them should not have to say so again every session.
+        let factsOn = true;
+        try { factsOn = localStorage.getItem('worldcapitals_facts') !== 'off'; } catch(e){}
+        this.setState({ ready:true, progress:prog, lang, factsOn });
       } else if (tries++ < 60) { setTimeout(check, 60); }
     };
     check();
@@ -1385,7 +1416,7 @@ class Component extends DCLogic {
     const ids = reviewIds || this.idsOfRegion(this.state.continentId, id);
     // Label points are per-map, so drop the cache when a new level starts.
     this._labelPts = null; this._centers = null;
-    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, hinted:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, quitOpen:false, zoom:1, panX:0, panY:0 });
+    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, hinted:{}, score:0, dragId:null, selectedId:null, factOpen:false, factCardId:null, badOpen:false, quitOpen:false, zoom:1, panX:0, panY:0 });
   }
 
   // Leaving mid-level throws the round away — there is nowhere it is saved. So
@@ -1474,8 +1505,21 @@ class Component extends DCLogic {
     // Pick a random anecdote for this country (index is language-independent,
     // so switching language inside the popup keeps the same fact).
     const nFacts = this.factsOf(id, this.state.lang).length;
+    const show = this.state.factsOn && nFacts > 0;
+    const blocking = show && !this.longLevel();
+    const done = this.taskIds().every(x=>placed[x]);
     this._factAt = Date.now();
-    this.setState({ placed, score, dragId:null, selectedId:null, factOpen:true, factId:id, factIdx: Math.floor(Math.random()*nFacts) });
+    // Finishing used to be a side effect of dismissing the last popup. Now that
+    // a round can end with no popup to dismiss, the win is detected here — but
+    // only when nothing blocking is on screen, or the last anecdote would be
+    // swept away by the result screen before it could be read.
+    this.setState(
+      { placed, score, dragId:null, selectedId:null,
+        factOpen: blocking, factId: show ? id : null,
+        factCardId: (show && !blocking) ? id : null,
+        factIdx: nFacts ? Math.floor(Math.random()*nFacts) : 0 },
+      () => { if (done && !blocking) this.finishLevel(); }
+    );
   }
   resolveWrong(id){
     this.playBad();
@@ -1486,6 +1530,9 @@ class Component extends DCLogic {
     clearTimeout(this._shTo); this._shTo=setTimeout(()=>this.setState({shake:false}),500);
   }
   closeFact(){
+    // Nothing to close when the anecdote was shown beside the map, or not at
+    // all. Without this, resolveCorrect and this would both finish the level.
+    if (!this.state.factOpen) return;
     // Mobile browsers fire a ghost "click" right after the placement tap; it
     // lands on the freshly opened popup overlay and would close it instantly.
     if (this._factAt && Date.now() - this._factAt < 400) return;
@@ -1680,6 +1727,34 @@ class Component extends DCLogic {
       base.namesBtnColor = S.showNames? '#fff' : '#9A7E5C';
       base.onToggleSound = ()=>this.setState({soundOn:!S.soundOn});
       base.soundIcon = S.soundOn?'🔊':'🔇';
+      base.factsTitle = t.factsToggle;
+      base.factsBtnBg = S.factsOn ? color : '#F6ECD6';
+      base.factsBtnColor = S.factsOn ? '#fff' : '#9A7E5C';
+      base.onToggleFacts = ()=>{
+        const next = !S.factsOn;
+        try{ localStorage.setItem('worldcapitals_facts', next?'on':'off'); }catch(e){}
+        // Drop whatever is on screen: leaving a popup up after switching them
+        // off would be exactly the interruption the switch is there to stop.
+        this.setState({ factsOn:next, factOpen:false, factId:null, factCardId:null });
+      };
+
+      // The anecdote shown beside the map on long levels. It never blocks: it
+      // is pointer-transparent and simply updates with each correct answer, so
+      // a player who wants to read stops on their own and one who does not
+      // never has to click anything.
+      const fc = S.factCardId;
+      base.factCardOpen = !!fc;
+      if(fc){
+        const facts = this.factsOf(fc, lang);
+        base.factCardText = facts[Math.min(S.factIdx||0, facts.length-1)] || '';
+        base.factCardCap = lang==='fr'?this.C[fc].capFr:this.C[fc].capEn;
+        base.factCardCountry = lang==='fr'?this.C[fc].cf:this.C[fc].ce;
+        base.factCardFlag = this.flagUrl(fc);
+        base.factCardColor = this.idColor(fc);
+      } else {
+        base.factCardText=''; base.factCardCap=''; base.factCardCountry='';
+        base.factCardFlag='data:,'; base.factCardColor=color;
+      }
       base.shakeAnim = S.shake? 'mapShake .45s ease' : 'none';
       base.zoom=S.zoom; base.panX=S.panX; base.panY=S.panY; base.invZoom=1/S.zoom;
       base.mapCursor = S.zoom>1 ? 'grab' : 'default';

@@ -18,7 +18,9 @@ and this one grew out of it.
   172 countries at once
 - **Bilingual** — French / English, switchable at any time, remembered
 - **Fun facts & flags** — every correct answer shows the country's flag and one
-  of 360 rotating anecdotes
+  of 360 rotating anecdotes. Short levels pause on a popup for it; levels of
+  more than 20 countries show it beside the map instead and play straight on,
+  because 172 popups to dismiss is not a reward. A 📖 button turns them off
 - **Mobile friendly** — tap a label then tap the map, pinch to zoom, responsive
 - **Installable PWA** — add it to your home screen and play fully offline
 - **Score, stars & best-score tracking**, per mode, per continent, per region
