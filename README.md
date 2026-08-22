@@ -68,6 +68,7 @@ assets/
   data/regions.js       # 6 continents + the world map, and their regions
   data/facts.js         # 360 bilingual anecdotes
   geo/<map>.js          # SVG paths + capital coordinates, one file per map
+  social-card.png       # 1200x630 link preview (generated, do not edit)
   vendor/               # React 18.3.1 UMD, served from this origin
   dc-runtime.js         # declarative-component runtime (generated, do not edit)
   asset_*.woff2         # Fredoka & Nunito (self-hosted)
@@ -89,6 +90,7 @@ cd tools && npm install
 npm run data       # countries.js, regions.js, facts.js
 npm run geo        # the seven maps  (npm run geo -- europe for just one)
 npm run validate   # check the generated files against each other
+npm run social     # assets/social-card.png, the link-preview image
 node preview-geo.mjs   # render each map to tools/.preview/*.png for review
 ```
 
@@ -100,6 +102,7 @@ node preview-geo.mjs   # render each map to tools/.preview/*.png for review
 | region names, colours, order | `CONTINENTS`, same file |
 | an anecdote | `tools/facts-world.mjs` (Africa: `tools/facts-africa.mjs`) |
 | a map's projection or framing | `MAPS` in `tools/build-geo.mjs` |
+| the link-preview card | `tools/build-social.mjs`, then `npm run social` |
 
 Map geometry comes from [Natural Earth](https://www.naturalearthdata.com/)
 1:50m (public domain), downloaded once into `tools/.cache/`. Each map gets its
@@ -121,7 +124,8 @@ each of the three modes.
 Both run on every push and pull request
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), as two parallel jobs
 so a data regression is reported without waiting for a browser download. The
-smoke job uploads its screenshots as an artifact when it fails.
+smoke job uploads its screenshots as an artifact when it fails. A third job then
+deploys to GitHub Pages, so only a commit that passed both ever reaches players.
 
 ## Contributing
 

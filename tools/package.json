@@ -8,7 +8,8 @@
     "geo": "node build-geo.mjs",
     "validate": "node validate-data.mjs",
     "preview": "node preview-geo.mjs",
-    "smoke": "node ../tests/smoke.mjs"
+    "smoke": "node ../tests/smoke.mjs",
+    "social": "node build-social.mjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1"

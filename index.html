@@ -5,6 +5,25 @@
 <title>Les Capitales du Monde · Capitals of the World</title>
 <meta name="description" content="Jeu de géographie bilingue : place les capitales, les pays et les drapeaux du monde sur la carte. / Bilingual geography game: drag the world's capitals, countries and flags onto the map.">
 <meta name="theme-color" content="#F6E9CD">
+<!-- Social preview. These three URLs are deliberately relative: the whole app is
+     location-independent (see start_url and scope in manifest.json) and nothing
+     here should hardcode where it happens to be deployed. Unfurlers do not
+     resolve relative URLs reliably, so tools/stamp-social-url.mjs rewrites them
+     to absolute during the deploy, from the URL the deployment itself reports.
+     Move the site and the tags follow, with nothing to edit. -->
+<link rel="canonical" href="./">
+<meta property="og:url" content="./">
+<meta property="og:image" content="assets/social-card.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Les Capitales du Monde · Capitals of the World">
+<meta property="og:title" content="Les Capitales du Monde · Capitals of the World">
+<meta property="og:description" content="Place les capitales, les pays et les drapeaux du monde sur la carte. 195 pays, 7 cartes, jouable hors ligne. / Drag the world's capitals, countries and flags onto the map. 195 countries, 7 maps, playable offline.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Une carte du monde colorée par continent, à côté du titre du jeu. / A world map coloured by continent, beside the game's title.">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">

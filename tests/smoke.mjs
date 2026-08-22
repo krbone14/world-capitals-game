@@ -305,6 +305,41 @@ check(hint.flagged, 'the result screen is told the hint was used');
 check(hint.after && hint.after.stars === 3 && hint.after.best === hint.earned.best,
   `the hinted round banks nothing, leaving 3 stars and ${hint.earned && hint.earned.best} points`);
 
+// ---- the social preview ----
+// The tags ship relative and the deploy stamps them absolute. Both halves have
+// to agree: these are the exact values tools/stamp-social-url.mjs matches on,
+// so a change here that forgot that script would ship a preview no unfurler can
+// fetch — and platform caches make that expensive to notice late.
+console.log('\nsocial preview');
+const og = await page.evaluate(() => {
+  const meta = (p) => (document.querySelector(`meta[property="${p}"]`) || {}).content;
+  return {
+    canonical: (document.querySelector('link[rel="canonical"]') || {}).getAttribute?.('href'),
+    url: meta('og:url'),
+    image: meta('og:image'),
+    title: meta('og:title'),
+    description: meta('og:description'),
+    width: meta('og:image:width'),
+    height: meta('og:image:height'),
+    card: (document.querySelector('meta[name="twitter:card"]') || {}).content,
+  };
+});
+check(!!og.title && !!og.description, 'og:title and og:description are set');
+check(og.card === 'summary_large_image', `twitter:card asks for the large layout (saw "${og.card}")`);
+check(og.canonical === './' && og.url === './' && og.image === 'assets/social-card.png',
+  'the three stamped URLs ship relative, exactly as the stamp script expects them');
+
+const card = path.join(ROOT, 'assets', 'social-card.png');
+check(fs.existsSync(card), 'assets/social-card.png exists');
+if (fs.existsSync(card)) {
+  // PNG header: width and height are big-endian uint32 at bytes 16 and 20.
+  const head = fs.readFileSync(card).subarray(0, 24);
+  const w = head.readUInt32BE(16), h = head.readUInt32BE(20);
+  check(String(w) === og.width && String(h) === og.height,
+    `og:image:width/height match the file (${w}x${h} vs ${og.width}x${og.height})`);
+  check(w === 1200 && h === 630, `the card is 1200x630 (saw ${w}x${h})`);
+}
+
 // ---- leaving a level ----
 // Nothing about a half-played round is saved anywhere, so the back button asks
 // before discarding it — but only once there is something to discard.

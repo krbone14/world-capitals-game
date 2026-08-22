@@ -96,7 +96,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/configure-pages@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - id: pages
+        uses: actions/configure-pages@v6
+      # og:image and rel=canonical have to be absolute, but index.html must not
+      # hardcode where the site lives. base_url is whatever this deployment
+      # actually is — a github.io path today, a custom domain the day one is
+      # configured — so moving the site needs no edit anywhere.
+      - name: Point the social tags at this deployment
+        run: node tools/stamp-social-url.mjs "${{ steps.pages.outputs.base_url }}"
       # The whole checkout, exactly as the branch-based build served it. tools/
       # and tests/ ride along unused; excluding them would risk dropping a file
       # index.html or the service worker actually asks for.
