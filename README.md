@@ -22,6 +22,12 @@ and this one grew out of it.
 - **Mobile friendly** — tap a label then tap the map, pinch to zoom, responsive
 - **Installable PWA** — add it to your home screen and play fully offline
 - **Score, stars & best-score tracking**, per mode, per continent, per region
+- **A hint when you are stuck** — after missing the same country twice, its
+  label offers to show you where it is. The round then scores no stars and
+  banks nothing, and says so: the stars stay a record of what you knew unaided
+- **Replay just your mistakes** — the result screen deals back the countries
+  you missed, and only those. It leaves the region's saved stars alone, since
+  it is a fraction of the level
 - **Sound effects** and confetti 🎉
 
 ## Which countries?
