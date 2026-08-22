@@ -396,6 +396,7 @@ if ('serviceWorker' in navigator) {
   @keyframes confettiFall { 0%{transform:translateY(-30px) rotate(0);opacity:1} 100%{transform:translateY(620px) rotate(540deg);opacity:0} }
   @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
   @keyframes badFlash { 0%,100%{opacity:0;transform:translate(-50%,8px)} 15%,75%{opacity:1;transform:translate(-50%,0)} }
+  @keyframes hintPulse { 0%{transform:scale(.5);opacity:.95} 70%{transform:scale(2.6);opacity:0} 100%{transform:scale(2.6);opacity:0} }
 
   /* Use dynamic viewport height on mobile so the browser URL bar doesn't hide the tray. */
   @supports (height: 100dvh) {
@@ -612,6 +613,14 @@ if ('serviceWorker' in navigator) {
             <sc-for list="{{ nameLabels }}" as="n" hint-placeholder-count="0">
               <div style="position:absolute;left:{{ n.leftPct }}%;top:{{ n.topPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});font-family:'Nunito';font-weight:800;font-size:12px;color:#5A4836;background:rgba(255,253,247,.82);padding:1px 6px;border-radius:7px;white-space:nowrap;line-height:1.3;">{{ n.text }}</div>
             </sc-for>
+            <!-- "Show me" markers: a pulsing amber ring, kept until the country
+                 is placed so the help stays usable while the player aims. -->
+            <sc-for list="{{ hintDots }}" as="h" hint-placeholder-count="0">
+              <div style="position:absolute;left:{{ h.leftPct }}%;top:{{ h.topPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
+                <div style="width:20px;height:20px;border-radius:50%;border:3px solid #E2A24B;animation:hintPulse 1.5s ease-out infinite;"></div>
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:#E2A24B;box-shadow:0 0 0 2.5px #fff,0 2px 5px rgba(0,0,0,.25);"></div>
+              </div>
+            </sc-for>
             <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
               <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.topPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
                 <div style="width:13px;height:13px;border-radius:50%;background:{{ p.color }};border:2.5px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.25);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"></div>
@@ -651,6 +660,9 @@ if ('serviceWorker' in navigator) {
             <div class="g-chip" data-cap-id="{{ c.id }}" draggable="false" style="cursor:grab;user-select:none;touch-action:pan-y;background:{{ c.bg }};border:2px solid {{ c.border }};border-left:7px solid {{ c.color }};border-radius:14px;padding:11px 14px;opacity:{{ c.opacity }};box-shadow:0 3px 0 {{ c.shadow }};transition:transform .08s;">
               <div style="display:{{ c.flagDisplay }};width:66px;height:44px;border-radius:6px;border:2px solid #EFE0C1;background-color:#F6ECD6;background-image:url('{{ c.flag }}');background-size:cover;background-position:center;pointer-events:none;"></div>
               <div class="g-chip-cap" style="display:{{ c.capDisplay }};font-family:'Fredoka';font-weight:600;font-size:17px;line-height:1.15;color:#3B2F27;">{{ c.cap }}</div>
+              <!-- Appears on this chip alone, once this country has been missed
+                   twice. data-hint-btn keeps the drag delegation off it. -->
+              <button data-hint-btn="" onclick="{{ c.onHint }}" style="display:{{ c.hintDisplay }};margin-top:9px;cursor:pointer;width:100%;background:#FCEFD6;border:2px solid #EFD9A8;color:#B07B3A;border-radius:9px;padding:5px 8px;font-family:'Nunito';font-weight:800;font-size:12px;">&#128161; {{ hintLabel }}</button>
             </div>
           </sc-for>
           <sc-if value="{{ trayEmpty }}" hint-placeholder-val="{{ false }}">
@@ -708,6 +720,10 @@ if ('serviceWorker' in navigator) {
         <div style="width:2px;background:#EFE0C1;"></div>
         <div><div style="font-family:'Fredoka';font-size:30px;color:{{ playColor }};">{{ resAccuracy }}</div><div style="font-size:12px;font-weight:800;color:#9A7E5C;text-transform:uppercase;letter-spacing:.5px;">{{ t.firstTry }}</div></div>
       </div>
+      <!-- Says why the stars are empty, so a zero is never a mystery. -->
+      <sc-if value="{{ usedHint }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FCEFD6;border:2px solid #EFD9A8;color:#B07B3A;border-radius:13px;padding:10px 13px;font-weight:800;font-size:13.5px;line-height:1.35;margin-bottom:14px;">&#128161; {{ hintUsedText }}</div>
+      </sc-if>
       <!-- Only rendered when the round actually had mistakes; it is the most
            useful thing to do next, so it sits above Play again. -->
       <sc-if value="{{ hasMissed }}" hint-placeholder-val="{{ true }}">
@@ -768,7 +784,14 @@ class Component extends DCLogic {
     resStars: 0, resAcc: 0,
     reviewIds: null,       // review round: the subset of the region it deals
     resMissed: [],         // countries missed in the round just finished
+    hinted: {},            // id -> true: the game was asked to show this one
+    resUsedHint: false,
   };
+
+  // Wrong tries on the same country before its "show me" button appears. Two
+  // is late enough that a lucky guess does not unlock it, early enough that a
+  // child who has no idea is not left guessing across a whole continent.
+  HINT_AFTER = 2;
 
   // Hit-test radius, in viewBox units. Each map declares its own (a world map
   // and a South America map are not the same scale), and in capital mode it
@@ -899,6 +922,9 @@ class Component extends DCLogic {
       factBtn: "Continuer",
       review: "Revoir mes erreurs",
       reviewTitle: "Révision",
+      hint: "Montre-moi",
+      hintCost: "sans étoile",
+      hintUsed: "Tu as demandé de l'aide : pas d'étoile cette fois. Réessaie sans !",
       reset: "Réinitialiser le zoom",
       good: ["Bravo !", "Super !", "Excellent !", "Parfait !", "Génial !"],
       bad: ["Presque !", "Réessaie !", "Pas tout à fait…", "Encore un essai !"],
@@ -953,6 +979,9 @@ class Component extends DCLogic {
       factBtn: "Continue",
       review: "Review my mistakes",
       reviewTitle: "Review",
+      hint: "Show me",
+      hintCost: "no star",
+      hintUsed: "You asked for help, so no star this time. Try again without it!",
       reset: "Reset zoom",
       good: ["Nice!", "Great!", "Excellent!", "Perfect!", "Awesome!"],
       bad: ["Almost!", "Try again!", "Not quite…", "One more try!"],
@@ -994,6 +1023,9 @@ class Component extends DCLogic {
       // While a map gesture is in progress, additional touch pointers feed the
       // pinch — they must NOT be swallowed, or two-finger zoom never starts.
       if (this._panning) { if (onMap && e.pointerType === 'touch') this.startMapGesture(e); return; }
+      // The hint button sits inside a chip, which this listener would otherwise
+      // read as the start of a drag. Its own onclick does the work.
+      if (t.closest('[data-hint-btn]')) return;
       const chip = t.closest('[data-cap-id]');
       if (chip) {
         const id = chip.getAttribute('data-cap-id');
@@ -1154,6 +1186,19 @@ class Component extends DCLogic {
     this.setState({ selectedId: this.state.selectedId === id ? null : id });
   }
 
+  // ---- hint ----
+  // Offered per country, only once it has actually been missed HINT_AFTER
+  // times, and only ever on request: it costs the round its stars, so it must
+  // never fire on its own.
+  canHint(id){ return !this.state.placed[id] && (this.state.wrong[id]||0) >= this.HINT_AFTER; }
+  // The marker stays until the country is placed rather than flashing once —
+  // a player who needed it should not have to pay for it twice.
+  showHint(id){
+    if (!this.canHint(id)) return;
+    this.setState({ hinted:{...this.state.hinted, [id]:true}, selectedId:id });
+  }
+  usedHint(){ return Object.keys(this.state.hinted).length > 0; }
+
   // ---- audio ----
   ac(){ if(!this._ac){ try{ this._ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return this._ac; }
   beep(freq, t0, dur, type, vol){
@@ -1287,7 +1332,7 @@ class Component extends DCLogic {
     const ids = reviewIds || this.idsOfRegion(this.state.continentId, id);
     // Label points are per-map, so drop the cache when a new level starts.
     this._labelPts = null; this._centers = null;
-    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
+    this.setState({ screen:'play', regionId:id, reviewIds:reviewIds||null, queue:this.shuffle(ids), placed:{}, wrong:{}, hinted:{}, score:0, dragId:null, selectedId:null, factOpen:false, badOpen:false, zoom:1, panX:0, panY:0 });
   }
 
   // ---- drag ----
@@ -1392,13 +1437,19 @@ class Component extends DCLogic {
     const missed=ids.filter(id=>this.state.wrong[id]);
     const firstTry=total-missed.length;
     const ratio=firstTry/total;
-    const stars = ratio>=0.9?3 : ratio>=0.6?2 : 1;
+    const usedHint=this.usedHint();
+    // Stars are a record of what the player knew unaided. A round in which the
+    // game was asked for an answer earns none — and says so on the result
+    // screen, so the zero is never a surprise.
+    const stars = usedHint ? 0 : (ratio>=0.9?3 : ratio>=0.6?2 : 1);
     const acc=Math.round(ratio*100);
     let prog=this.state.progress;
-    // A review round deals only part of the region, so its result says nothing
-    // about the region: three stars on the four countries you missed are not
-    // three stars on all twelve. It leaves the saved progress untouched.
-    if(!this.state.reviewIds){
+    // Two rounds leave the saved progress untouched. A review round deals only
+    // part of the region, so its result says nothing about the region: three
+    // stars on the four countries you missed are not three stars on all twelve.
+    // A hinted round is not the player's own score to bank — including its
+    // points, or the best score would be farmable by asking for every answer.
+    if(!this.state.reviewIds && !usedHint){
       prog={...prog};
       const pk=this.progKey();
       const prev=prog[pk]||{stars:0,best:0};
@@ -1414,7 +1465,7 @@ class Component extends DCLogic {
       dur:(1.6+Math.random()*1.4)+'s',
       delay:(Math.random()*0.6)+'s',
     }));
-    this.setState({ screen:'result', factOpen:false, resStars:stars, resAcc:acc, resMissed:missed, confetti, progress:prog });
+    this.setState({ screen:'result', factOpen:false, resStars:stars, resAcc:acc, resMissed:missed, resUsedHint:usedHint, confetti, progress:prog });
   }
 
   // "capitales" / "pays" / "drapeaux": the noun the current mode counts in.
@@ -1579,6 +1630,13 @@ class Component extends DCLogic {
         return { id:c.id, d:c.d, fill, stroke };
       });
 
+      // Where the hinted countries are. Amber rather than the region colour, so
+      // a revealed answer never reads as a pin the player earned.
+      base.hintDots = taskIds.filter(id=>S.hinted[id] && !placed[id] && GEO.caps[id]).map(id=>{
+        const cap=GEO.caps[id];
+        return { leftPct: cap.x/GEO.W*100, topPct: cap.y/GEO.H*100 };
+      });
+
       // island target dots for islands in this task
       base.islandDots = taskIds.filter(id=>GEO.caps[id]&&GEO.caps[id].island).map(id=>{
         const cap=GEO.caps[id];
@@ -1618,7 +1676,10 @@ class Component extends DCLogic {
         border: S.selectedId===id ? (neutralChips?'#BBA37E':this.idColor(id)) : '#EFE0C1',
         opacity: S.dragId===id?0.4:1,
         onDown:(e)=>this.startDrag(id,e),
+        hintDisplay: this.canHint(id) && !S.hinted[id] ? 'block' : 'none',
+        onHint:()=>this.showHint(id),
       }));
+      base.hintLabel = t.hint + ' · ' + t.hintCost;
       base.trayEmpty = base.chips.length===0;
 
       // ghost
@@ -1667,6 +1728,8 @@ class Component extends DCLogic {
       base.hasMissed = S.resMissed.length > 0;
       base.reviewText = t.review + ' (' + S.resMissed.length + ')';
       base.onReview = ()=>this.startLevel(S.regionId, S.resMissed);
+      base.usedHint = S.resUsedHint;
+      base.hintUsedText = t.hintUsed;
       return base;
     }
     return base;

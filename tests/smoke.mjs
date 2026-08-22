@@ -242,6 +242,69 @@ check(rev.afterReview.saved && rev.afterReview.saved.stars === 2,
 check(rev.backToFull.dealt === 5 && rev.backToFull.chips === 5,
   `replaying the whole region deals all 5 again (${rev.backToFull.dealt} ids, ${rev.backToFull.chips} chips)`);
 
+// ---- the hint, and what it costs ----
+// The point of the hint is that it is not free: it reveals the answer, so the
+// round banks nothing. This checks the threshold that unlocks it and, above
+// all, that a hinted round cannot overwrite stars the player really earned.
+console.log('\nhint');
+const hint = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const key = 'cap:amerique-sud:sa-cone-sud';
+  const saved = () => JSON.parse(localStorage.getItem('worldcapitals_v1') || '{}')[key];
+  const at = (id) => {                       // client point of id's own capital
+    const g = c.GEO, cap = g.caps[id], b = c.mapBoxRef.current.getBoundingClientRect();
+    return [b.left + (cap.x / g.W) * b.width, b.top + (cap.y / g.H) * b.height];
+  };
+  const drop = async (id, onto) => { c.tryPlace(id, ...at(onto)); await sleep(20); };
+  const settle = async () => { c._factAt = 0; c.closeFact(); await sleep(20); };
+
+  localStorage.removeItem('worldcapitals_v1');
+  c.setState({ mode: 'cap', continentId: 'amerique-sud', screen: 'continent', progress: {} });
+  await sleep(50);
+
+  // A clean round first, so there are real stars on record to try to clobber.
+  c.startLevel('sa-cone-sud');
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 120)));
+  for (const id of c.taskIds()) { await drop(id, id); await settle(); }
+  const earned = saved();
+
+  // Now a round that asks for help.
+  c.startLevel('sa-cone-sud');
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 120)));
+  const ids = c.taskIds(), stuck = ids[0], elsewhere = ids[1];
+  const gate = [];
+  gate.push(c.canHint(stuck));               // 0 misses: no
+  await drop(stuck, elsewhere);
+  gate.push(c.canHint(stuck));               // 1 miss: still no
+  c.showHint(stuck);
+  const refusedEarly = !c.state.hinted[stuck];
+  await drop(stuck, elsewhere);
+  gate.push(c.canHint(stuck));               // 2 misses: yes
+  c.showHint(stuck);
+  const shown = !!c.state.hinted[stuck];
+
+  await drop(stuck, stuck); await settle();
+  for (const id of ids.slice(1)) { await drop(id, id); await settle(); }
+
+  return {
+    earned, refusedEarly, shown, gate,
+    stars: c.state.resStars,
+    flagged: c.state.resUsedHint,
+    after: saved(),
+  };
+});
+
+check(hint.earned && hint.earned.stars === 3, 'a clean round banks 3 stars first');
+check(JSON.stringify(hint.gate) === JSON.stringify([false, false, true]),
+  `the hint unlocks only on the 2nd miss (${JSON.stringify(hint.gate)})`);
+check(hint.refusedEarly, 'asking for it before the 2nd miss does nothing');
+check(hint.shown, 'asking for it after the 2nd miss reveals the country');
+check(hint.stars === 0, `a hinted round scores 0 stars (got ${hint.stars})`);
+check(hint.flagged, 'the result screen is told the hint was used');
+check(hint.after && hint.after.stars === 3 && hint.after.best === hint.earned.best,
+  `the hinted round banks nothing, leaving 3 stars and ${hint.earned && hint.earned.best} points`);
+
 // ---- both languages, on every screen ----
 console.log('\nlanguages');
 for (const lang of ['fr', 'en']) {
