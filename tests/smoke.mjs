@@ -316,7 +316,18 @@ for (const lang of ['fr', 'en']) {
   await page.waitForTimeout(250);
   const contText = await page.locator('.g-home').innerText();
   check(!/undefined/.test(contText), `${lang}: continent screen has no "undefined"`);
+  const declared = await page.getAttribute('html', 'lang');
+  check(declared === lang, `${lang}: <html lang> follows the language (saw "${declared}")`);
 }
+
+// The button is not the only way in: a returning player has their language
+// restored from localStorage before touching anything, and that is the path
+// where a hardcoded lang="fr" would ship English text as French.
+await page.evaluate(() => localStorage.setItem('worldcapitals_lang', 'en'));
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForSelector('text=/GEOGRAPHY/', { timeout: 15000 });
+const restored = await page.getAttribute('html', 'lang');
+check(restored === 'en', `a reload with English saved declares lang="en" (saw "${restored}")`);
 
 console.log('\nconsole');
 check(errors.length === 0, `no unexpected page errors${errors.length ? ' — ' + errors.slice(0, 3).join(' | ') : ''}`);

@@ -1281,6 +1281,12 @@ class Component extends DCLogic {
     this.forceUpdate();
   }
   componentDidUpdate(){
+    // <html lang> sits above the React root, so no re-render ever reaches it.
+    // Screen readers pick their pronunciation rules from it: left at "fr" it
+    // reads the English text with French phonetics. Syncing here rather than in
+    // the language button also covers the restore-from-localStorage path, where
+    // a returning English player never presses that button at all.
+    if (document.documentElement.lang !== this.state.lang) document.documentElement.lang = this.state.lang;
     if (this.state.screen==='play'){
       if (!this._labelPts) requestAnimationFrame(()=>this.computeLabelPoints());
       this.fitMap();
