@@ -1,0 +1,17 @@
+{
+  "name": "world-capitals-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android packaging for the game. The game itself is the static site at the repository root and needs none of this.",
+  "type": "module",
+  "scripts": {
+    "dist": "node tools/build-dist.mjs",
+    "android:icons": "node tools/build-android-icons.mjs",
+    "sync": "npm run dist && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0"
+  }
+}

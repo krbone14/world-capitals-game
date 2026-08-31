@@ -50,8 +50,6 @@ if ('serviceWorker' in navigator) {
 
 <x-dc>
 <helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <style>/* hebrew */
 @font-face {
   font-family: 'Fredoka';
@@ -950,7 +948,7 @@ class Component extends DCLogic {
     const f = window.WORLD_DATA.facts[id];
     return f ? (lang==='fr' ? f.fr : f.en) : [];
   }
-  flagUrl(id){ const c=this.C[id]; return c && c.i2 ? 'https://flagcdn.com/w160/'+c.i2+'.png' : ''; }
+  flagUrl(id){ const c=this.C[id]; return c && c.i2 ? 'assets/flags/'+c.i2+'.png' : ''; }
 
   // Map files are fetched only when their continent is opened: loading all
   // seven up front would be half a megabyte for a player who wants Europe.

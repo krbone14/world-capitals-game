@@ -73,16 +73,23 @@ assets/
   data/regions.js       # 6 continents + the world map, and their regions
   data/facts.js         # 360 bilingual anecdotes
   geo/<map>.js          # SVG paths + capital coordinates, one file per map
+  flags/<cc>.png        # 195 country flags (generated, do not edit)
   social-card.png       # 1200x630 link preview (generated, do not edit)
   vendor/               # React 18.3.1 UMD, served from this origin
   dc-runtime.js         # declarative-component runtime (generated, do not edit)
   asset_*.woff2         # Fredoka & Nunito (self-hosted)
+privacy.html            # privacy policy, required by Google Play
+android/                # the Android app: a Capacitor shell around dist/
+store/                  # Play listing images (generated, do not edit)
 tools/                  # build scripts — never served to the browser
 tests/smoke.mjs         # end-to-end test, drives a real Chromium
 ```
 
-Country flags come from [flagcdn.com](https://flagcdn.com) and are cached by the
-service worker in the background after install, so flag mode works offline too.
+Country flags ship with the game rather than being fetched as it runs:
+`npm run flags` pulls the 195 PNGs from [flagcdn.com](https://flagcdn.com) once,
+at build time, and commits them. Nothing the game loads comes from another
+origin any more — which is what lets an Android package work offline, and what
+makes a failed flag a test failure rather than an excused network error.
 
 ## Regenerating the data
 
@@ -94,8 +101,11 @@ cd tools && npm install
 
 npm run data       # countries.js, regions.js, facts.js
 npm run geo        # the seven maps  (npm run geo -- europe for just one)
+npm run flags      # assets/flags/ (skips what is already there; --force re-fetches)
+npm run dist       # dist/: exactly the files a browser loads, for the Android build
 npm run validate   # check the generated files against each other
 npm run social     # assets/social-card.png, the link-preview image
+npm run store      # store/: the Play screenshots and feature graphic
 node preview-geo.mjs   # render each map to tools/.preview/*.png for review
 ```
 
@@ -114,6 +124,36 @@ Map geometry comes from [Natural Earth](https://www.naturalearthdata.com/)
 own projection, is framed on the countries it actually shows, clipped to its
 viewBox and simplified in projected space. A capital that would land outside its
 viewBox fails the build rather than shipping an unreachable target.
+
+## Android / Google Play
+
+The same static site, wrapped in a [Capacitor](https://capacitorjs.com) shell and
+published as `io.github.krbone14.worldcapitals`. There is no second codebase:
+`dist/` is copied into the APK, so what the phone runs is what the browser runs.
+
+Capacitor serves those files from a local origin, where no service worker runs —
+which is why the flags had to stop being fetched from a CDN. Nothing in the app
+reaches the network at all.
+
+```bash
+npm run dist                      # assemble exactly what ships
+npx cap sync android              # copy it into the Android project
+android/gradlew -p android bundleRelease
+```
+
+Signing is read from `android/keystore.properties` (gitignored; copy the
+`.example` beside it). Without that file the project still builds — only the
+release signing is skipped — so a clone is not broken by a secret it lacks.
+
+| Play asks for | Comes from |
+|---|---|
+| launcher icon, splash | `npm run android-icons`, all sizes from `icons/icon-512.png` |
+| phone screenshots, feature graphic | `npm run store`, driven through the real game |
+| privacy policy URL | [`privacy.html`](privacy.html), served with the site |
+| app icon 512×512 | `icons/icon-512.png` |
+
+The build needs a JDK 21 (not 25 — Gradle rejects it) and the Android SDK with
+platform 36; `android/local.properties` points at the latter and is gitignored.
 
 ## Tests
 

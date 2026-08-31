@@ -49,26 +49,27 @@ const base = `http://127.0.0.1:${server.address().port}/`;
 const browser = await launchChromium();
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
-// Two classes of console noise are expected and say nothing about the app:
+// One class of console noise is expected and says nothing about the app: the
+// <x-dc> template sits in the document as inert HTML until dc-runtime compiles
+// it, so the SVG parser first sees attributes still holding a "{{ mustache }}"
+// and complains once about each.
 //
-//  - the <x-dc> template sits in the document as inert HTML until dc-runtime
-//    compiles it, so the SVG parser first sees attributes still holding a
-//    "{{ mustache }}" and complains once about each;
-//  - flag images come from flagcdn.com, which a sandboxed runner may have no
-//    route to. Flag *placement* is tested above and needs no image to load.
+// The flags used to be a second class — they came from flagcdn.com, which a
+// sandboxed runner may have no route to. They ship with the game now, so a flag
+// that fails to load is a real failure, and playing flag mode below is what
+// catches it: nothing excuses a network error here any more.
 //
-// Both patterns are matched narrowly so a genuine error still fails the run.
+// The pattern is matched narrowly so a genuine error still fails the run.
 const EXPECTED = [
   /attribute \w+: .*"\{\{.*\}\}"/,
-  /net::ERR_(TUNNEL_CONNECTION_FAILED|NAME_NOT_RESOLVED|INTERNET_DISCONNECTED)/,
 ];
 const errors = [];
-let blockedFlags = 0;
+let ignoredNoise = 0;
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('console', (m) => {
   if (m.type() !== 'error') return;
   const text = m.text();
-  if (EXPECTED.some((re) => re.test(text))) { blockedFlags++; return; }
+  if (EXPECTED.some((re) => re.test(text))) { ignoredNoise++; return; }
   errors.push(text);
 });
 
@@ -597,7 +598,7 @@ check(restored === 'en', `a reload with English saved declares lang="en" (saw "$
 
 console.log('\nconsole');
 check(errors.length === 0, `no unexpected page errors${errors.length ? ' — ' + errors.slice(0, 3).join(' | ') : ''}`);
-if (blockedFlags) console.log(`  note  ${blockedFlags} expected console message(s) ignored (inert template attributes, unreachable flagcdn)`);
+if (ignoredNoise) console.log(`  note  ${ignoredNoise} expected console message(s) ignored (inert template attributes)`);
 
 await browser.close();
 server.close();
