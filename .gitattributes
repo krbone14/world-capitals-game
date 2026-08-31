@@ -1,0 +1,32 @@
+# Line endings, settled once.
+#
+# Git already stores text as LF. Without this file, what lands in the working
+# tree is left to core.autocrlf — true on a Windows clone, so every checkout
+# rewrites LF to CRLF, while the build scripts, Capacitor and Gradle keep
+# writing LF back. Neither side is wrong and neither gives way, so git warns
+# about files nobody edited, on every add, on every commit.
+#
+# Pinning the working tree to LF ends it: what the tools write is what git sees,
+# on every platform. Nothing in this repository is edited by a tool that cannot
+# read LF.
+* text=auto eol=lf
+
+# Except Windows batch files. cmd.exe can mis-parse a .bat whose lines end in
+# LF alone — labels and goto are the usual casualties — and android/gradlew.bat
+# ships with the Gradle wrapper.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary, so git never inspects them for line endings, never converts them, and
+# never tries to diff them as text. The flags and map renders are full of bytes
+# that look like CR to a naive scan.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.ico       binary
+*.woff2     binary
+*.jar       binary
+*.aab       binary
+*.apk       binary
+*.jks       binary
+*.keystore  binary
