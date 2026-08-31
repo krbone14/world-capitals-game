@@ -102,6 +102,7 @@ cd tools && npm install
 npm run data       # countries.js, regions.js, facts.js
 npm run geo        # the seven maps  (npm run geo -- europe for just one)
 npm run flags      # assets/flags/ (skips what is already there; --force re-fetches)
+npm run icon       # icons/icon-512, -192, -180, drawn from the world map
 npm run dist       # dist/: exactly the files a browser loads, for the Android build
 npm run validate   # check the generated files against each other
 npm run social     # assets/social-card.png, the link-preview image
@@ -145,8 +146,17 @@ Signing is read from `android/keystore.properties` (gitignored; copy the
 `.example` beside it). Without that file the project still builds — only the
 release signing is skipped — so a clone is not broken by a secret it lacks.
 
+`versionCode` is the commit count, so it rises on its own and stays the same for
+the same source; Play only requires it to increase. `-PversionCode=<n>`
+overrides it for the case the history cannot answer, since an upload Play has
+already seen burns its number even when it was rejected. The build fails rather
+than guessing when it cannot count the commits: a silent fallback would be
+discovered at upload time, with an error that says nothing about where the
+number came from.
+
 | Play asks for | Comes from |
 |---|---|
+| the icon itself | `npm run icon`, drawn from `assets/geo/world.js` in the continent colours |
 | launcher icon, splash | `npm run android-icons`, all sizes from `icons/icon-512.png` |
 | phone screenshots, feature graphic | `npm run store`, driven through the real game |
 | privacy policy URL | [`privacy.html`](privacy.html), served with the site |
