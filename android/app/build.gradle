@@ -6,6 +6,35 @@ apply plugin: 'com.android.application'
 // cannot be undone by rotating anything. Without that file the project still
 // configures and builds — only the release signing is skipped — so a clone, or
 // CI, is not broken by a secret it does not have.
+
+// versionCode is the number of commits behind HEAD. Play only ever requires it
+// to increase, and a commit is the smallest thing that can change what ships —
+// so this is monotonic by construction, identical for identical source, and
+// there is no number anywhere that someone has to remember to bump.
+//
+// -PversionCode=<n> overrides it, for the one case the history cannot answer:
+// an upload Play has already seen burns its number even if it was rejected, and
+// the replacement has to be higher than the commit count alone would give.
+//
+// It fails rather than guessing. A silent fallback would hand Play a code lower
+// than one it has already accepted, and that is discovered at upload time with
+// an error that says nothing about where the number came from.
+def resolveVersionCode = {
+    if (project.hasProperty('versionCode')) {
+        return project.property('versionCode').toString().toInteger()
+    }
+    try {
+        return providers.exec {
+            commandLine 'git', 'rev-list', '--count', 'HEAD'
+        }.standardOutput.asText.get().trim().toInteger()
+    } catch (Exception e) {
+        throw new GradleException(
+            "versionCode: could not count the commits (" + e.message + "). " +
+            "Build from a git clone, or pass -PversionCode=<n>.")
+    }
+}
+def appVersionCode = resolveVersionCode()
+
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
@@ -19,7 +48,7 @@ android {
         applicationId "io.github.krbone14.worldcapitals"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode appVersionCode
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

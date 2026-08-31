@@ -7,6 +7,7 @@
     "data": "node build-data.mjs",
     "geo": "node build-geo.mjs",
     "flags": "node build-flags.mjs",
+    "icon": "node build-icon.mjs",
     "dist": "node build-dist.mjs",
     "validate": "node validate-data.mjs",
     "preview": "node preview-geo.mjs",
