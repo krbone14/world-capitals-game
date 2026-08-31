@@ -1,13 +1,19 @@
 // Service worker: offline support for the PWA.
 //
 // Two caching postures, by what the resource is:
-//   - everything same-origin : network-first, so an update lands immediately
-//     and the cache is only the offline fallback. React ships from
-//     assets/vendor/, so this covers all of the app;
-//   - flags from flagcdn     : cache-first, warmed in the background after
-//     activation rather than during install — 195 images is too much to make a
-//     player wait for, or pay mobile data for, before the game will start.
-const CACHE = 'worldcapitals-v1';
+//   - the flags under assets/flags/ : cache-first, warmed in the background
+//     after activation rather than during install. A flag never changes under
+//     the same path, so revalidating 195 images on every visit buys nothing;
+//     and warming them at install time would make a player wait, or pay mobile
+//     data, before the game would start;
+//   - everything else same-origin   : network-first, so an update lands
+//     immediately and the cache is only the offline fallback. React ships from
+//     assets/vendor/, so this covers all of the app.
+//
+// Nothing here is cross-origin any more: the flags used to come from
+// flagcdn.com and now ship with the game (tools/build-flags.mjs), which is what
+// lets the Android package work offline without a service worker at all.
+const CACHE = 'worldcapitals-v2';
 
 const PRECACHE = [
   './',
@@ -43,7 +49,7 @@ const PRECACHE = [
   './icons/icon-512.png',
 ];
 
-const CACHE_FIRST_HOSTS = ['flagcdn.com'];
+const FLAGS = './assets/flags/';
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
@@ -67,47 +73,39 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
+  if (url.origin !== self.location.origin) return;
 
   // Flag images never change: cache-first.
-  if (CACHE_FIRST_HOSTS.includes(url.hostname)) {
+  if (url.pathname.includes('/assets/flags/')) {
     e.respondWith((async () => {
       const c = await caches.open(CACHE);
-      const hit = await c.match(e.request, { ignoreVary: true });
+      const hit = await c.match(e.request);
       if (hit) return hit;
       const res = await fetch(e.request);
-      c.put(e.request, res.clone());
+      if (res && res.ok) c.put(e.request, res.clone());
       return res;
     })());
     return;
   }
 
-  // Same-origin: network-first with cache fallback.
-  if (url.origin === self.location.origin) {
-    e.respondWith((async () => {
-      const c = await caches.open(CACHE);
-      try {
-        const res = await fetch(e.request);
-        if (res && res.ok) c.put(e.request, res.clone());
-        return res;
-      } catch (err) {
-        const hit = await c.match(e.request, { ignoreSearch: true });
-        if (hit) return hit;
-        if (e.request.mode === 'navigate') {
-          const idx = await c.match('./index.html');
-          if (idx) return idx;
-        }
-        throw err;
+  // Everything else: network-first with cache fallback.
+  e.respondWith((async () => {
+    const c = await caches.open(CACHE);
+    try {
+      const res = await fetch(e.request);
+      if (res && res.ok) c.put(e.request, res.clone());
+      return res;
+    } catch (err) {
+      const hit = await c.match(e.request, { ignoreSearch: true });
+      if (hit) return hit;
+      if (e.request.mode === 'navigate') {
+        const idx = await c.match('./index.html');
+        if (idx) return idx;
       }
-    })());
-  }
+      throw err;
+    }
+  })());
 });
-
-async function putOpaque(cache, url) {
-  try {
-    const res = await fetch(url, { mode: 'no-cors' });
-    await cache.put(url, res);
-  } catch (err) { /* offline, or the CDN is down: the runtime fetch retries */ }
-}
 
 // Flag codes are read out of the generated country data rather than duplicated
 // here, so adding a country never means remembering to edit this file too.
@@ -119,9 +117,12 @@ async function warmFlags() {
     new Function('window', await res.text()).call(sandbox, sandbox.window);
     const countries = sandbox.window.WORLD_DATA.countries;
     for (const id of Object.keys(countries)) {
-      const url = 'https://flagcdn.com/w160/' + countries[id].i2 + '.png';
-      if (await cache.match(url, { ignoreVary: true })) continue;
-      await putOpaque(cache, url);
+      const url = FLAGS + countries[id].i2 + '.png';
+      if (await cache.match(url)) continue;
+      try {
+        const flag = await fetch(url);
+        if (flag && flag.ok) await cache.put(url, flag);
+      } catch (err) { /* offline: the fetch handler still caches flags on sight */ }
     }
   } catch (err) { /* best effort: the fetch handler still caches flags on sight */ }
 }

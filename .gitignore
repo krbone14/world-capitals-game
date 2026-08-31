@@ -7,3 +7,6 @@ test-results/
 playwright-report/
 tools/.preview/
 tests/.shots/
+
+# assembled by tools/build-dist.mjs, and by the Android build from it
+dist/
