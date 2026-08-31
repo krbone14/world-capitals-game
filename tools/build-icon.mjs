@@ -29,10 +29,17 @@ const OUT = path.join(ROOT, 'icons');
 // entry, 180 the apple-touch-icon in index.html.
 const SIZES = [512, 192, 180];
 
-// How much of the world to show. At 1 the whole map fits and the continents are
-// too small to tell apart at 48px; this crops to Europe, Africa and western Asia
-// — the densest, most recognisable part of the map the game draws.
-const ZOOM = 1.6;
+// The map is about twice as wide as it is tall, so how it meets a square frame
+// is the whole question. `slice` fills the square by cropping the sides, which
+// left a vertical band — Europe and Africa only, and an icon for a game about
+// the world that showed a corner of it. `meet` fits the full width instead and
+// the ocean fills what is left above and below.
+//
+// FIT then scales that fitted map: 1 leaves it small inside the square, higher
+// values grow it until the edges start to leave the frame. 1.35 fills the
+// launcher's circular mask without losing a continent — only the polar caps and
+// the last of New Zealand, which no icon needs.
+const FIT = 1.35;
 
 // Lighter than the game's own ocean, so the landmasses stay the darker element
 // and the silhouette survives being shrunk.
@@ -57,26 +64,29 @@ const PIN = 'M32 4C19.3 4 9 14.3 9 27c0 15.5 19.5 31.6 22 33.4.5.4 1.3.4 1.8 0' 
             'C35.4 58.6 55 42.5 55 27 55 14.3 44.7 4 32 4z';
 
 const vb = {
-  x: geo.W * (1 - 1 / ZOOM) / 2,
-  y: geo.H * (1 - 1 / ZOOM) / 2,
-  w: geo.W / ZOOM,
-  h: geo.H / ZOOM,
+  x: -geo.W * (1 / FIT - 1) / 2,
+  y: -geo.H * (1 / FIT - 1) / 2,
+  w: geo.W / FIT,
+  h: geo.H / FIT,
 };
 
 const html = `
 <style>
   * { box-sizing:border-box; margin:0; }
   body { width:512px; height:512px; }
-  .icon { position:relative; width:512px; height:512px; overflow:hidden; background:${OCEAN}; }
+  .icon { position:relative; width:512px; height:512px; overflow:hidden; background:${OCEAN};
+          display:flex; align-items:center; justify-content:center; }
   .map { position:absolute; inset:0; width:100%; height:100%; }
-  .pin { position:absolute; left:50%; top:50%; transform:translate(-50%,-52%); width:46%;
-         filter:drop-shadow(0 7px 9px rgba(30,50,80,.35)); }
+  /* Small enough that the map reads as the subject and the pin as the verb.
+     At 46% the pin covered Africa and the icon became a pin again. */
+  .pin { position:absolute; left:50%; top:50%; transform:translate(-50%,-52%); width:26%;
+         filter:drop-shadow(0 5px 7px rgba(30,50,80,.4)); }
   .pin svg { width:100%; height:auto; display:block; }
 </style>
 <div class="icon">
   <svg class="map" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}"
-       preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-9999" y="-9999" width="99999" height="99999" fill="${OCEAN}"/>
+       preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+    <rect x="-99999" y="-99999" width="999999" height="999999" fill="${OCEAN}"/>
     ${shapes}
   </svg>
   <div class="pin">

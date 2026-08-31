@@ -37,5 +37,15 @@
 
     <!-- Permissions -->
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+      No INTERNET permission, deliberately. Every asset the game uses — maps,
+      flags, fonts, anecdotes, React — is packaged into the APK, and Capacitor
+      serves them from a local origin that never touches a socket. Declaring the
+      permission would let the app reach the network; not declaring it means the
+      system will not, which is a stronger statement than the privacy policy
+      alone can make and is what the Data safety form is really asking about.
+
+      If the app ever needs a network call, this is the line to bring back:
+        <uses-permission android:name="android.permission.INTERNET" />
+    -->
 </manifest>
