@@ -219,17 +219,19 @@ async function featureGraphic(lang, dir) {
   const fredoka = b64('asset_5.woff2');
   const nunito = b64('asset_15.woff2');
 
-  // The other language stays on the card as the subtitle: the game is bilingual,
-  // and that is worth saying on either listing.
+  // Each banner speaks one language. The subtitle used to carry the title in the
+  // other one, to say the game is bilingual — but on an English listing a French
+  // line under the title does not read as "bilingual", it reads as a mistake.
+  // The last chip says it instead, where it is a feature rather than an error.
   const copy = lang.code === 'fr' ? {
-    badge: 'GÉOGRAPHIE · GEOGRAPHY',
+    badge: 'GÉOGRAPHIE',
     title: 'Les Capitales<br>du Monde',
-    sub: 'Capitals of the World',
+    sub: 'Apprends le monde en jouant',
     chips: ['Capitales', 'Pays', 'Drapeaux', '195 pays · FR / EN'],
   } : {
-    badge: 'GEOGRAPHY · GÉOGRAPHIE',
+    badge: 'GEOGRAPHY',
     title: 'Capitals of<br>the World',
-    sub: 'Les Capitales du Monde',
+    sub: 'Learn the world by playing',
     chips: ['Capitals', 'Countries', 'Flags', '195 countries · EN / FR'],
   };
 
