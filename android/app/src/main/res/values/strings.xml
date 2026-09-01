@@ -1,7 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
+<!--
+  The default, used on every device whose language has no folder of its own —
+  so English is the fallback for the world, and values-fr/ answers for French
+  devices. It is not a statement about which language the game prefers: the
+  game reads the device's language too, and the two have to agree, or the name
+  under the icon promises something the app does not open in.
+-->
 <resources>
-    <string name="app_name">Les Capitales du Monde</string>
-    <string name="title_activity_main">Les Capitales du Monde</string>
+    <string name="app_name">Capitals of the World</string>
+    <string name="title_activity_main">Capitals of the World</string>
     <string name="package_name">io.github.krbone14.worldcapitals</string>
     <string name="custom_url_scheme">io.github.krbone14.worldcapitals</string>
 </resources>

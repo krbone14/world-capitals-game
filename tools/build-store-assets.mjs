@@ -54,7 +54,10 @@ const browser = await launchChromium();
 const shots = [];
 
 // ---------------------------------------------------------------- screenshots
-const page = await browser.newPage({ viewport: PHONE, deviceScaleFactor: SCALE });
+// French, pinned: the game follows the device's language now, and the Play
+// listing's default language is French. Without this the screenshots would come
+// out in whatever language the machine building them happens to use.
+const page = await browser.newPage({ viewport: PHONE, deviceScaleFactor: SCALE, locale: 'fr-FR' });
 
 // The service worker would serve a previous run's files.
 await page.addInitScript(() => {
