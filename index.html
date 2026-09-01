@@ -1132,8 +1132,16 @@ class Component extends DCLogic {
       // the home screen.
       const d = window.WORLD_DATA;
       if (d && d.countries && d.continents && d.facts) {
-        let prog = {}, lang = 'fr';
+        // With nothing saved yet, follow the device instead of assuming French.
+        // The game is bilingual and now reaches English speakers through a Play
+        // listing in their language: opening in French would contradict the name
+        // they installed it under. Only the primary language counts — someone
+        // whose first choice is English should get English even with French
+        // further down their list.
+        let prog = {}, lang = /^fr\b/i.test(navigator.language||'') ? 'fr' : 'en';
         try { prog = JSON.parse(localStorage.getItem('worldcapitals_v1')||'{}'); } catch(e){}
+        // A saved choice always wins: nobody who has picked a language should be
+        // overruled by the device it is running on.
         try { const l = localStorage.getItem('worldcapitals_lang'); if (l==='fr'||l==='en') lang = l; } catch(e){}
         // Turning the anecdotes off is a lasting preference: someone who does
         // not want them should not have to say so again every session.

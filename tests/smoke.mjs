@@ -47,7 +47,10 @@ await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const base = `http://127.0.0.1:${server.address().port}/`;
 
 const browser = await launchChromium();
-const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+// The locale is pinned because the game now reads it: without this the suite
+// would exercise French on a French machine and English on a CI runner, and the
+// selectors below are French — "Jouer" is not a button in English.
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, locale: 'fr-FR' });
 
 // One class of console noise is expected and says nothing about the app: the
 // <x-dc> template sits in the document as inert HTML until dc-runtime compiles
@@ -595,6 +598,26 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.waitForSelector('text=/GEOGRAPHY/', { timeout: 15000 });
 const restored = await page.getAttribute('html', 'lang');
 check(restored === 'en', `a reload with English saved declares lang="en" (saw "${restored}")`);
+
+// With nothing saved, the device decides. This is a player's very first launch,
+// and it is what a localised store listing promises: an English listing that
+// opened in French would contradict the name they installed it under. German is
+// here for the fallback — every language without its own translation gets
+// English, matching res/values/strings.xml.
+for (const [locale, want] of [['en-US', 'en'], ['fr-FR', 'fr'], ['de-DE', 'en']]) {
+  const fresh = await browser.newPage({ locale });
+  await fresh.addInitScript(() => {
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      get: () => ({ register: () => Promise.resolve() }),
+    });
+  });
+  await fresh.goto(base, { waitUntil: 'networkidle' });
+  await fresh.waitForSelector('text=/GÉOGRAPHIE|GEOGRAPHY/', { timeout: 15000 });
+  const got = await fresh.getAttribute('html', 'lang');
+  check(got === want, `a fresh ${locale} device opens in "${want}" (saw "${got}")`);
+  await fresh.close();
+}
 
 console.log('\nconsole');
 check(errors.length === 0, `no unexpected page errors${errors.length ? ' — ' + errors.slice(0, 3).join(' | ') : ''}`);

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  French devices. Only the two visible names are overridden; package_name and
+  custom_url_scheme are identifiers, not labels, and must not be translated.
+-->
+<resources>
+    <string name="app_name">Les Capitales du Monde</string>
+    <string name="title_activity_main">Les Capitales du Monde</string>
+</resources>
