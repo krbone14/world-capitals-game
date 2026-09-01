@@ -80,7 +80,7 @@ assets/
   asset_*.woff2         # Fredoka & Nunito (self-hosted)
 privacy.html            # privacy policy, required by Google Play
 android/                # the Android app: a Capacitor shell around dist/
-store/                  # Play listing images (generated, do not edit)
+store/<lang>/           # Play listing images, one set per language (generated)
 tools/                  # build scripts — never served to the browser
 tests/smoke.mjs         # end-to-end test, drives a real Chromium
 ```
@@ -106,7 +106,7 @@ npm run icon       # icons/icon-512, -192, -180, drawn from the world map
 npm run dist       # dist/: exactly the files a browser loads, for the Android build
 npm run validate   # check the generated files against each other
 npm run social     # assets/social-card.png, the link-preview image
-npm run store      # store/: the Play screenshots and feature graphic
+npm run store      # store/fr/ and store/en/: screenshots and feature graphic
 node preview-geo.mjs   # render each map to tools/.preview/*.png for review
 ```
 
@@ -158,7 +158,7 @@ number came from.
 |---|---|
 | the icon itself | `npm run icon`, drawn from `assets/geo/world.js` in the continent colours |
 | launcher icon, splash | `npm run android-icons`, all sizes from `icons/icon-512.png` |
-| phone screenshots, feature graphic | `npm run store`, driven through the real game |
+| phone screenshots, feature graphic | `npm run store`, driven through the real game in each language |
 | privacy policy URL | [`privacy.html`](privacy.html), served with the site |
 | app icon 512×512 | `icons/icon-512.png` |
 
