@@ -5,6 +5,17 @@
 <title>Les Capitales du Monde · Capitals of the World</title>
 <meta name="description" content="Jeu de géographie bilingue : place les capitales, les pays et les drapeaux du monde sur la carte. / Bilingual geography game: drag the world's capitals, countries and flags onto the map.">
 <meta name="theme-color" content="#F6E9CD">
+<!-- The game is drawn in one palette and has no dark counterpart. Without this,
+     Chrome on Android and any WebView with algorithmic darkening on will invert
+     it themselves, and that inversion has no idea which colours carry meaning:
+     it flattens a country's fill and its border towards the same darkness, so
+     the borders disappear exactly where two selected countries meet. "only
+     light" opts out of the whole mechanism, and opts out before first paint, so
+     there is no flash of a darkened map either.
+
+     If a dark theme is ever wanted, it belongs here as a real one — a second
+     palette behind prefers-color-scheme — not as an automatic inversion. -->
+<meta name="color-scheme" content="only light">
 <!-- Social preview. These three URLs are deliberately relative: the whole app is
      location-independent (see start_url and scope in manifest.json) and nothing
      here should hardcode where it happens to be deployed. Unfurlers do not
