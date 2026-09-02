@@ -590,6 +590,17 @@ check(/2/.test(prefs.offered.body), `the confirmation counts what is at stake ("
 check(prefs.after === 0 && prefs.storage === null,
   `resetting clears both the state and localStorage (${prefs.after} left, storage ${prefs.storage})`);
 
+// ---- the colour scheme is declared ----
+// Not decoration: without this tag Chrome on Android inverts the whole game by
+// itself, and the inversion pushes a country's fill and its border to the same
+// darkness — the borders vanish where two selected countries meet. A tester hit
+// exactly that. "only light" is what turns the mechanism off.
+console.log('\ncolour scheme');
+const scheme = await page.evaluate(() =>
+  (document.querySelector('meta[name="color-scheme"]') || {}).content);
+check(scheme === 'only light',
+  `the page declares it has no dark mode (saw "${scheme}")`);
+
 // ---- the social preview ----
 // The tags ship relative and the deploy stamps them absolute. Both halves have
 // to agree: these are the exact values tools/stamp-social-url.mjs matches on,
