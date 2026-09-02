@@ -508,23 +508,26 @@ const zoomBits = await page.evaluate(async () => {
   c.setState({ dragId: null });
   await sleep(140);
 
-  // On-screen size = the label's own scale times the map's. Constant means the
-  // label holds its size; below 1 means it is giving space back to the map.
+  // On-screen size = the label's own scale times the map's. It has to stay 1 at
+  // every zoom. Shrinking it with the zoom looks like a way to give the map room
+  // back, and is not: a constant-size label already covers less ground the
+  // further in you go, so shrinking only makes it unreadable. This is here
+  // because that was tried.
   const screenSize = async (z) => {
     c.setZoom(z);
     await sleep(140);
     const el = label();
     return el ? scaleOf(el) * z : null;
   };
-  const screenAt2 = await screenSize(2);
-  const screenAtMax = await screenSize(c.MAX_ZOOM);
+  const screenSizes = [];
+  for (const z of [1, 2, 4, c.MAX_ZOOM]) screenSizes.push([z, await screenSize(z)]);
 
   c.setZoom(1);
   c.setState({ screen: 'home', continentId: null });
   await sleep(80);
 
   return { maxed, floored, base, tolAt2, tolAtMax, tolCountry, found, idle, dragging,
-           screenAt2, screenAtMax, MAX: c.MAX_ZOOM, TOL: c.TOL_ZOOM, LMIN: c.LABEL_MIN };
+           screenSizes, MAX: c.MAX_ZOOM, TOL: c.TOL_ZOOM };
 });
 
 check(zoomBits.maxed === zoomBits.MAX, `zoom reaches x${zoomBits.MAX} (saw x${zoomBits.maxed})`);
@@ -538,10 +541,9 @@ check(zoomBits.found, 'a placed answer leaves a label on the map');
 check(Number(zoomBits.idle) === 1, `that label is opaque with nothing in hand (saw ${zoomBits.idle})`);
 check(Number(zoomBits.dragging) < 0.5,
   `and steps aside while an answer is held (saw ${zoomBits.dragging})`);
-check(Math.abs(zoomBits.screenAt2 - 1) < 0.02,
-  'a label holds its on-screen size up to the threshold');
-check(zoomBits.screenAtMax < 0.8 && zoomBits.screenAtMax >= zoomBits.LMIN - 0.02,
-  `and shrinks past it, to ${zoomBits.screenAtMax.toFixed(2)} of normal at x${zoomBits.MAX}`);
+const wrongSize = zoomBits.screenSizes.filter(([, s]) => Math.abs(s - 1) > 0.02);
+check(wrongSize.length === 0,
+  `a label keeps its on-screen size at every zoom (${zoomBits.screenSizes.map(([z, s]) => 'x' + z + ':' + s.toFixed(2)).join(', ')})`);
 
 // ---- preferences and the reset ----
 console.log('\npreferences');

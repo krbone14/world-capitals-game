@@ -682,7 +682,7 @@ if ('serviceWorker' in navigator) {
               </div>
             </sc-for>
             <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
-              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ placedLabelScale }});opacity:{{ placedLabelOpacity }};transition:opacity .15s ease;">
+              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});opacity:{{ placedLabelOpacity }};transition:opacity .15s ease;">
                 <div style="display:flex;align-items:center;gap:5px;font-family:'Fredoka';font-weight:600;font-size:13.5px;color:{{ p.color }};background:#fff;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.16);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"><span style="display:{{ p.flagDisplay }};width:19px;height:13px;border-radius:2px;background-image:url('{{ p.flag }}');background-size:cover;background-position:center;box-shadow:0 0 0 1px #EFE0C1;"></span>{{ p.label }}</div>
               </div>
             </sc-for>
@@ -854,13 +854,6 @@ class Component extends DCLogic {
   // see the country better and hit it exactly as poorly. Beyond this zoom the
   // tolerance holds still and magnification finally buys accuracy.
   TOL_ZOOM = 2.5;
-
-  // Where a placed label stops holding its on-screen size. Labels counter-scale
-  // so they stay readable, which means that at high zoom they cover more and
-  // more of the map — worst exactly when someone zoomed in to see what is under
-  // them. Past this they shrink, down to LABEL_MIN of their normal size.
-  LABEL_ZOOM = 2;
-  LABEL_MIN = 0.55;
 
   state = {
     ready: false,
@@ -1906,13 +1899,15 @@ class Component extends DCLogic {
       base.shakeAnim = S.shake? 'mapShake .45s ease' : 'none';
       base.zoom=S.zoom; base.panX=S.panX; base.panY=S.panY; base.invZoom=1/S.zoom;
 
-      // Placed labels: they hold their screen size up to LABEL_ZOOM, then give
-      // some of it back so they stop swallowing the map at high zoom.
-      const shrink = Math.max(this.LABEL_MIN, Math.min(1, Math.sqrt(this.LABEL_ZOOM/Math.max(1,S.zoom))));
-      base.placedLabelScale = base.invZoom * shrink;
-      // And they step out of the way while an answer is in hand — which is the
-      // one moment the player needs to read the map underneath them, and the one
+      // Placed labels step out of the way while an answer is in hand — the one
+      // moment the player needs to read the map underneath them, and the one
       // moment they are not reading the labels themselves.
+      //
+      // They keep their on-screen size at every zoom, which is deliberate and
+      // was briefly got wrong: a constant-size label covers *less* map the
+      // further in you go — 60px against a map 8 times wider is an eighth of the
+      // ground it covered at x1 — so shrinking it with the zoom fixes nothing
+      // and only makes it unreadable. Crowding is a low-zoom problem.
       base.placedLabelOpacity = (S.dragId || S.selectedId) ? 0.3 : 1;
       base.mapCursor = S.zoom>1 ? 'grab' : 'default';
       base.vpRefObj=this.vpRef; base.panRefObj=this.panRef; base.fitRefObj=this.fitRef; base.mapBoxRefObj=this.mapBoxRef;
