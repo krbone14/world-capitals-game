@@ -445,6 +445,104 @@ check(extras.flagMode === '★ 1 / 23', `the counter is per mode (flags: ${extra
 check(extras.lazySkipped, 'capital mode with names off never computes the label points');
 check(extras.computedOnDemand, 'turning names on computes them, at that moment');
 
+// ---- zoom, hit tolerance and placed labels ----
+//
+// Two things testers asked for, and both are about the same countries: the ones
+// small enough to be a few pixels wide on a world map. One is being able to zoom
+// far enough to see them; the other is the labels of already-placed answers
+// sitting on top of them.
+console.log('\nzoom and placed labels');
+const zoomBits = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  c.setState({ mode: 'cap', continentId: 'afrique', screen: 'continent' });
+  await sleep(60);
+  c.startLevel('af-ouest');
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 140)));
+
+  const base = c.GEO.tol;
+
+  // setZoom and the pinch handler both clamp; this checks the one they share.
+  c.setZoom(999);
+  const maxed = c.state.zoom;
+  c.setZoom(0.1);
+  const floored = c.state.zoom;
+
+  c.setZoom(2);
+  const tolAt2 = c.tol();
+  c.setZoom(c.MAX_ZOOM);
+  const tolAtMax = c.tol();
+
+  // Country mode never scaled its tolerance with the zoom, and still must not.
+  c.setState({ mode: 'country' });
+  const tolCountry = c.tol();
+  c.setState({ mode: 'cap' });
+  c.setZoom(1);
+  await sleep(80);
+
+  // A placed answer, so there is a label on the map to look at.
+  const id = c.taskIds()[0];
+  const box = c.mapBoxRef.current.getBoundingClientRect();
+  const g = c.GEO, cap = g.caps[id];
+  c.tryPlace(id, box.left + (cap.x / g.W) * box.width, box.top + (cap.y / g.H) * box.height);
+  await sleep(40);
+  c._factAt = 0;
+  c.closeFact();
+  await sleep(140);
+
+  // Found by computed style rather than by matching the style attribute: React
+  // normalises inline styles, so the literal string never appears there. This is
+  // the only element in the document with an opacity transition.
+  const label = () => [...document.querySelectorAll('div')]
+    .find((el) => getComputedStyle(el).transitionProperty === 'opacity');
+  const scaleOf = (el) => {
+    const m = getComputedStyle(el).transform.match(/matrix\(([^)]+)\)/);
+    return m ? parseFloat(m[1].split(',')[0]) : null;
+  };
+  const found = !!label();
+  const idle = found ? getComputedStyle(label()).opacity : null;
+
+  c.setState({ dragId: c.taskIds()[0] });
+  await sleep(140);
+  const dragging = found ? getComputedStyle(label()).opacity : null;
+  c.setState({ dragId: null });
+  await sleep(140);
+
+  // On-screen size = the label's own scale times the map's. Constant means the
+  // label holds its size; below 1 means it is giving space back to the map.
+  const screenSize = async (z) => {
+    c.setZoom(z);
+    await sleep(140);
+    const el = label();
+    return el ? scaleOf(el) * z : null;
+  };
+  const screenAt2 = await screenSize(2);
+  const screenAtMax = await screenSize(c.MAX_ZOOM);
+
+  c.setZoom(1);
+  c.setState({ screen: 'home', continentId: null });
+  await sleep(80);
+
+  return { maxed, floored, base, tolAt2, tolAtMax, tolCountry, found, idle, dragging,
+           screenAt2, screenAtMax, MAX: c.MAX_ZOOM, TOL: c.TOL_ZOOM, LMIN: c.LABEL_MIN };
+});
+
+check(zoomBits.maxed === zoomBits.MAX, `zoom reaches x${zoomBits.MAX} (saw x${zoomBits.maxed})`);
+check(zoomBits.floored === 1, `and never drops below x1 (saw x${zoomBits.floored})`);
+check(Math.abs(zoomBits.tolAt2 - zoomBits.base / 2) < 1e-6,
+  'under the cap, the hit tolerance still tightens in step with the zoom');
+check(Math.abs(zoomBits.tolAtMax - zoomBits.base / zoomBits.TOL) < 1e-6,
+  `over it the tolerance holds, so zooming buys accuracy (${zoomBits.tolAtMax.toFixed(2)} at x${zoomBits.MAX}, not ${(zoomBits.base / zoomBits.MAX).toFixed(2)})`);
+check(zoomBits.tolCountry === zoomBits.base, 'country mode is still untouched by the zoom');
+check(zoomBits.found, 'a placed answer leaves a label on the map');
+check(Number(zoomBits.idle) === 1, `that label is opaque with nothing in hand (saw ${zoomBits.idle})`);
+check(Number(zoomBits.dragging) < 0.5,
+  `and steps aside while an answer is held (saw ${zoomBits.dragging})`);
+check(Math.abs(zoomBits.screenAt2 - 1) < 0.02,
+  'a label holds its on-screen size up to the threshold');
+check(zoomBits.screenAtMax < 0.8 && zoomBits.screenAtMax >= zoomBits.LMIN - 0.02,
+  `and shrinks past it, to ${zoomBits.screenAtMax.toFixed(2)} of normal at x${zoomBits.MAX}`);
+
 // ---- preferences and the reset ----
 console.log('\npreferences');
 const prefs = await page.evaluate(async () => {

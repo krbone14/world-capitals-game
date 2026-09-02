@@ -682,7 +682,7 @@ if ('serviceWorker' in navigator) {
               </div>
             </sc-for>
             <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
-              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
+              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ placedLabelScale }});opacity:{{ placedLabelOpacity }};transition:opacity .15s ease;">
                 <div style="display:flex;align-items:center;gap:5px;font-family:'Fredoka';font-weight:600;font-size:13.5px;color:{{ p.color }};background:#fff;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.16);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"><span style="display:{{ p.flagDisplay }};width:19px;height:13px;border-radius:2px;background-image:url('{{ p.flag }}');background-size:cover;background-position:center;box-shadow:0 0 0 1px #EFE0C1;"></span>{{ p.label }}</div>
               </div>
             </sc-for>
@@ -842,6 +842,26 @@ class Component extends DCLogic {
   fitRef = React.createRef();
   mapBoxRef = React.createRef();
 
+  // How far in the map can go. Both setZoom() and the pinch handler clamp, and
+  // two copies of the same number drift apart — this is the number.
+  // 5 was not enough: São Tomé, Equatorial Guinea and the Vatican stayed a few
+  // pixels wide on the world map, which is where testers gave up on them.
+  MAX_ZOOM = 8;
+
+  // Where the hit-test stops tightening. Below this, shrinking the tolerance in
+  // step with the zoom keeps the demanded precision constant on screen, which is
+  // the point. Past it, that rule turns zooming into a purely cosmetic act — you
+  // see the country better and hit it exactly as poorly. Beyond this zoom the
+  // tolerance holds still and magnification finally buys accuracy.
+  TOL_ZOOM = 2.5;
+
+  // Where a placed label stops holding its on-screen size. Labels counter-scale
+  // so they stay readable, which means that at high zoom they cover more and
+  // more of the map — worst exactly when someone zoomed in to see what is under
+  // them. Past this they shrink, down to LABEL_MIN of their normal size.
+  LABEL_ZOOM = 2;
+  LABEL_MIN = 0.55;
+
   state = {
     ready: false,
     lang: 'fr',
@@ -897,7 +917,11 @@ class Component extends DCLogic {
   tol(){
     const g = this.GEO;
     const base = g && g.tol ? g.tol : 20;
-    return this.state.mode==='cap' ? base/Math.max(1, this.state.zoom) : base;
+    if (this.state.mode !== 'cap') return base;
+    // Capped at TOL_ZOOM: see the comment on it. Past that point the divisor
+    // stops growing, so the tolerance holds its size in viewBox units while the
+    // map keeps magnifying — which is what makes a tiny country reachable.
+    return base / Math.min(Math.max(1, this.state.zoom), this.TOL_ZOOM);
   }
 
   // ---- data ----
@@ -1238,7 +1262,7 @@ class Component extends DCLogic {
     return { panX: Math.max(-mx, Math.min(mx, px)), panY: Math.max(-my, Math.min(my, py)) };
   }
   setZoom(z){
-    z = Math.max(1, Math.min(5, z));
+    z = Math.max(1, Math.min(this.MAX_ZOOM, z));
     let c = this.clampPan(this.state.panX, this.state.panY, z);
     if (z === 1) { c = { panX:0, panY:0 }; }
     this.setState({ zoom:z, panX:c.panX, panY:c.panY });
@@ -1269,7 +1293,7 @@ class Component extends DCLogic {
       if (this._placeCand && Math.hypot(ev.clientX-this._placeCand.x, ev.clientY-this._placeCand.y) > 10) this._placeCand.moved = true;
       if (this._pinch && this._mapPts.size >= 2) {
         const [a,b] = [...this._mapPts.values()];
-        const z = Math.max(1, Math.min(5, this._pinch.z0 * Math.hypot(a.x-b.x, a.y-b.y) / this._pinch.d0));
+        const z = Math.max(1, Math.min(this.MAX_ZOOM, this._pinch.z0 * Math.hypot(a.x-b.x, a.y-b.y) / this._pinch.d0));
         const c = this.clampPan(this._gest.panX, this._gest.panY, z);
         this._gest = { zoom:z, panX:c.panX, panY:c.panY };
       } else if (this._panStart) {
@@ -1881,6 +1905,15 @@ class Component extends DCLogic {
       }
       base.shakeAnim = S.shake? 'mapShake .45s ease' : 'none';
       base.zoom=S.zoom; base.panX=S.panX; base.panY=S.panY; base.invZoom=1/S.zoom;
+
+      // Placed labels: they hold their screen size up to LABEL_ZOOM, then give
+      // some of it back so they stop swallowing the map at high zoom.
+      const shrink = Math.max(this.LABEL_MIN, Math.min(1, Math.sqrt(this.LABEL_ZOOM/Math.max(1,S.zoom))));
+      base.placedLabelScale = base.invZoom * shrink;
+      // And they step out of the way while an answer is in hand — which is the
+      // one moment the player needs to read the map underneath them, and the one
+      // moment they are not reading the labels themselves.
+      base.placedLabelOpacity = (S.dragId || S.selectedId) ? 0.3 : 1;
       base.mapCursor = S.zoom>1 ? 'grab' : 'default';
       base.vpRefObj=this.vpRef; base.panRefObj=this.panRef; base.fitRefObj=this.fitRef; base.mapBoxRefObj=this.mapBoxRef;
       base.onZoomIn=()=>this.setZoom(this.state.zoom*1.4);
