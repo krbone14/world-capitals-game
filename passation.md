@@ -123,7 +123,7 @@ cocher : Google demande comment les testeurs ont été recrutés, quels retours 
 été recueillis et ce qui en a été fait. L'argument est déjà constitué — quatre
 retours, quatre corrections livrées le 4 septembre.
 
-**Trois changements convenus pour la prochaine mise à jour :**
+**Quatre chantiers convenus pour la prochaine mise à jour :**
 
 1. **L'emoji de l'Afrique.** C'est `🌍`, qui ne dit rien de l'Afrique et fait
    doublon avec le `🌐` du Monde. **Stéphane a tranché le 4 septembre : `🦁`**,
@@ -141,6 +141,23 @@ retours, quatre corrections livrées le 4 septembre.
    Brazzaville sont le pire cas possible — 5 km d'écart. Aucun réglage d'opacité
    ou de taille ne les séparera : il faut replier les étiquettes anciennes sur
    leur seule pastille, ou une vraie passe de détection de collisions.
+
+4. **Les remerciements aux testeurs, par leur prénom.** Ils ont porté le test
+   fermé et quatre d'entre eux ont fait remonter les défauts corrigés le
+   4 septembre ; la version publique devrait le dire. **Deux points à régler
+   avant d'écrire quoi que ce soit :**
+   - **Les prénoms.** Ils ne sont écrits nulle part dans le dépôt. À demander à
+     Stéphane, qui seul a la liste dans la Play Console. Prénoms seuls, jamais
+     les adresses e-mail des comptes de test.
+   - **Où les mettre.** Deux endroits possibles, de coût très différent. La
+     **fiche Play** se modifie dans la console sans release ni code, et la
+     description est déjà bilingue — c'est le chemin court. Un **écran de
+     crédits dans le jeu** n'existe pas : il n'y a aujourd'hui aucune surface
+     « à propos », donc il faudrait la créer, la traduire dans les deux langues
+     et la couvrir dans `tests/smoke.mjs`. Choix non tranché.
+
+   Leur demander leur accord avant publication : un prénom reste une donnée
+   personnelle, et l'app se vante à juste titre de n'en collecter aucune.
 
 **Après la production :** itch.io, où `dist/` se téléverse tel quel.
 
