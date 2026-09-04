@@ -112,16 +112,30 @@ testait une version périmée servie par `npx serve`, qui n'envoie pas de
 
 ## 5. La prochaine étape
 
-**Immédiat — attendre.** La version 25 est en ligne sur le canal de test fermé
-depuis le 4 septembre 09:44. 14 testeurs inscrits, soit deux de marge sur les 12
-requis. Vérifier le compteur tous les deux ou trois jours : une désinscription
-est silencieuse, et un remplaçant repart pour 14 jours à lui seul.
+**Immédiat — combler la marge.** La version 25 est en ligne sur le canal de
+test fermé depuis le 4 septembre 09:44. La console affichait le jour même :
+« 12 testeurs sont actuellement inscrits pour 1 jour ». Donc **12 opt-in, pas
+14** : le groupe Google compte 14 membres, deux d'entre eux n'ont jamais ouvert
+le lien d'inscription. Être membre du groupe ne compte pas — seul l'opt-in
+compte. À 12 pile la marge est nulle : une désinscription fait tomber la
+condition et repart pour 14 jours. Relancer les deux manquants ; ajouter des
+testeurs ne remet aucun compteur à zéro.
 
-**Vers le 16 septembre — demander l'accès à la production.** *Aperçu de la
-publication → Production → Demander l'accès*. C'est une rédaction, pas une case à
-cocher : Google demande comment les testeurs ont été recrutés, quels retours ont
-été recueillis et ce qui en a été fait. L'argument est déjà constitué — quatre
-retours, quatre corrections livrées le 4 septembre.
+Le chiffre se lit dans `Tester et publier → Production`, bloc *Demander un accès
+en production* : la console y donne le nombre d'inscrits et depuis combien de
+jours. Nulle part elle ne dit **qui** — avec un groupe, la liste nominative n'est
+que dans `groups.google.com → Membres`, et l'onglet *Statistiques* ne sert à
+rien ici (agrégation quotidienne différée, et effectifs trop faibles pour être
+affichés dès qu'on ventile).
+
+**Vers le 17 septembre — demander l'accès à la production.** `Tester et publier
+→ Production`, bouton *Demander à publier en production*, grisé tant que les
+14 jours ne sont pas faits — le décompte a démarré le 4 septembre (« pour
+1 jour » ce jour-là). Ce n'est pas une case à cocher mais une rédaction : Google
+demande comment les testeurs ont été recrutés, quels retours ont été recueillis
+et ce qui en a été fait. *Prévisualiser les questions* les montre à l'avance.
+L'argument est déjà constitué — quatre retours, quatre corrections livrées le
+4 septembre.
 
 **Quatre chantiers convenus pour la prochaine mise à jour :**
 
