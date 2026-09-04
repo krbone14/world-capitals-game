@@ -126,11 +126,12 @@ retours, quatre corrections livrées le 4 septembre.
 **Trois changements convenus pour la prochaine mise à jour :**
 
 1. **L'emoji de l'Afrique.** C'est `🌍`, qui ne dit rien de l'Afrique et fait
-   doublon avec le `🌐` du Monde. Recommandation : `🦓` — le zèbre n'existe qu'en
-   Afrique là où lion et éléphant ont des cousins asiatiques, son noir et blanc
-   tranche sur le terracotta `#DD7A57` de la carte, et l'Amérique du Sud utilise
-   déjà `🦜` donc l'animal ne rompt aucune règle. Alternative si le registre
-   animalier gêne : `🥁`. **Choix non tranché.**
+   doublon avec le `🌐` du Monde. **Stéphane a tranché le 4 septembre : `🦁`**,
+   contre le `🦓` qui était recommandé et le `🥁` proposé en alternative. Le
+   zèbre l'était pour son noir et blanc, qui tranche sur le terracotta `#DD7A57`
+   de la carte là où un lion est fauve sur fauve : à regarder sur le téléphone à
+   la taille d'une carte, et à lui montrer si ça passe mal — pas à remplacer de
+   son propre chef. Une ligne dans `tools/country-config.mjs`, puis `npm run data`.
 2. **Le fondu pendant le panoramique.** Les étiquettes ne s'estompent pas quand
    on déplace la carte. Le panoramique écrit la transformation directement dans
    le DOM sans rendu React, délibérément, donc aucune liaison d'opacité ne se met

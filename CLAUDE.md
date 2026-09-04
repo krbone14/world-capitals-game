@@ -44,6 +44,14 @@ to `main`: merging `main` deploys to GitHub Pages and changes the live site
 immediately. Wait for both CI checks to be green, merge with `--rebase` to keep
 the history linear, then rebuild the AAB if Android is affected.
 
+**The notes are the exception.** `passation.md`, this file and `README.md` may be
+committed straight to `main`. None of them ships: the dist whitelist is
+`index.html`, `manifest.json`, `sw.js`, `assets` and `icons`, so a note never
+reaches the app, and the Pages deploy republishes a site identical to the one
+already live. The branch-and-PR rule exists to protect the public site, and on
+these files it protects nothing while making the handover note expensive to keep
+current — which is the one thing it must be.
+
 Propose options and let him choose when a change involves a design trade-off.
 
 ## Android
