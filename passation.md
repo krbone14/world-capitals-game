@@ -113,13 +113,26 @@ testait une version périmée servie par `npx serve`, qui n'envoie pas de
 ## 5. La prochaine étape
 
 **Immédiat — combler la marge.** La version 25 est en ligne sur le canal de
-test fermé depuis le 4 septembre 09:44. La console affichait le jour même :
-« 12 testeurs sont actuellement inscrits pour 1 jour ». Donc **12 opt-in, pas
-14** : le groupe Google compte 14 membres, deux d'entre eux n'ont jamais ouvert
-le lien d'inscription. Être membre du groupe ne compte pas — seul l'opt-in
-compte. À 12 pile la marge est nulle : une désinscription fait tomber la
-condition et repart pour 14 jours. Relancer les deux manquants ; ajouter des
-testeurs ne remet aucun compteur à zéro.
+test fermé depuis le 4 septembre 09:44. La console affichait le jour même, dans
+`Tester et publier → Production` : « 12 testeurs sont actuellement inscrits pour
+1 jour ». Le groupe Google, lui, compte 14 membres.
+
+**Ce que ce 12 signifie n'est pas établi.** Soit c'est le nombre réel d'opt-in,
+et deux membres du groupe n'ont jamais ouvert le lien d'inscription — la marge
+est alors nulle. Soit l'affichage est plafonné au seuil exigé, et il resterait à
+12 même à 16 testeurs. Ni la documentation Google ni les guides consultés ne
+décrivent cette ligne. Le seul indice : le « 1 jour » ne peut venir que des
+données du compte, puisque l'exigence est de 14 jours, donc la phrase rapporte
+un état et non la règle — ce qui rend le plafonnement peu probable sans
+l'exclure.
+
+**Le test qui tranche :** faire activer le test aux deux membres non inscrits.
+Si la ligne passe à 13 ou 14, le nombre est réel. Si elle reste à 12 alors que
+les 14 ont confirmé avoir installé, il est plafonné et la seule vérité devient
+leur confirmation directe. Dans les deux cas ces opt-in sont à obtenir : être
+membre du groupe ne compte pas, et ajouter des testeurs ne remet aucun compteur
+à zéro. À 12 pile, une désinscription fait tomber la condition et repart pour
+14 jours.
 
 Le chiffre se lit dans `Tester et publier → Production`, bloc *Demander un accès
 en production* : la console y donne le nombre d'inscrits et depuis combien de
