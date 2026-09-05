@@ -150,7 +150,7 @@ et ce qui en a été fait. *Prévisualiser les questions* les montre à l'avance
 L'argument est déjà constitué — quatre retours, quatre corrections livrées le
 4 septembre.
 
-**Quatre chantiers convenus pour la prochaine mise à jour :**
+**Cinq chantiers convenus pour la prochaine mise à jour :**
 
 1. **L'emoji de l'Afrique.** C'est `🌍`, qui ne dit rien de l'Afrique et fait
    doublon avec le `🌐` du Monde. **Stéphane a tranché le 4 septembre : `🦁`**,
@@ -185,6 +185,34 @@ L'argument est déjà constitué — quatre retours, quatre corrections livrées
 
    Leur demander leur accord avant publication : un prénom reste une donnée
    personnelle, et l'app se vante à juste titre de n'en collecter aucune.
+
+5. **Bug — l'anecdote qu'on ne peut pas fermer sur « Tout le continent ».**
+   Signalé le 5 septembre. Au-dessus de `FACT_MODAL_MAX = 20` pays,
+   `longLevel()` est vrai et l'anecdote n'est plus la fenêtre modale avec son
+   bouton *Continuer* mais une carte posée en bas de la carte du monde
+   (`index.html`, gabarit ligne 708, affectation ligne 1633). Cette carte n'a
+   aucun bouton de fermeture, elle est en `pointer-events:none`, et elle reste
+   jusqu'au placement correct suivant — donc indéfiniment après le dernier. Elle
+   masque le bas du continent, là où il reste des pays à poser.
+
+   **Décision de Stéphane : supprimer les anecdotes sur ces niveaux**, qui sont
+   un examen final où elles n'apportent rien. Deux conséquences à vérifier avant
+   de coder :
+   - La carte latérale **n'existe que** sur les niveaux longs : la retirer là ne
+     laisse rien derrière, ça supprime la fonctionnalité entière plutôt que
+     d'ajouter une condition. Les anecdotes redeviennent la modale seule, à 20
+     pays ou moins.
+   - Le seuil est un **nombre de pays**, pas le mode « tout le continent » : la
+     règle attrape aussi Le Monde et tout continent entier. Confirmer que c'est
+     bien voulu, sinon il faut un critère distinct.
+
+   `tests/smoke.mjs` affirme aujourd'hui le contraire — que l'Europe entière et
+   le monde entier montrent l'anecdote à côté de la carte. Ces assertions sont à
+   retourner, pas à supprimer : elles restent la mémoire de la règle.
+
+   À noter, le contournement existe déjà pour un joueur : le bouton 📖 de la
+   barre du haut coupe les anecdotes et le choix est retenu d'une partie à
+   l'autre.
 
 **Après la production :** itch.io, où `dist/` se téléverse tel quel.
 
