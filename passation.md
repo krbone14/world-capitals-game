@@ -196,15 +196,16 @@ L'argument est déjà constitué — quatre retours, quatre corrections livrées
    masque le bas du continent, là où il reste des pays à poser.
 
    **Décision de Stéphane : supprimer les anecdotes sur ces niveaux**, qui sont
-   un examen final où elles n'apportent rien. Deux conséquences à vérifier avant
-   de coder :
-   - La carte latérale **n'existe que** sur les niveaux longs : la retirer là ne
-     laisse rien derrière, ça supprime la fonctionnalité entière plutôt que
-     d'ajouter une condition. Les anecdotes redeviennent la modale seule, à 20
-     pays ou moins.
-   - Le seuil est un **nombre de pays**, pas le mode « tout le continent » : la
-     règle attrape aussi Le Monde et tout continent entier. Confirmer que c'est
-     bien voulu, sinon il faut un critère distinct.
+   un examen final où elles n'apportent rien. Portée confirmée le 5 septembre :
+   **tous** les niveaux longs, Le Monde et les continents entiers compris, et
+   non le seul mode « tout le continent ». Le critère reste donc le comptage
+   existant, il n'y a pas de nouveau test à écrire.
+
+   Conséquence : la carte latérale **n'existe que** sur les niveaux longs, donc
+   la retirer ne laisse rien derrière — c'est la suppression d'une
+   fonctionnalité, pas l'ajout d'une condition. Les anecdotes redeviennent la
+   modale seule, à 20 pays ou moins, et `factCardId`, `factCardOpen` et le
+   gabarit de la ligne 708 partent avec.
 
    `tests/smoke.mjs` affirme aujourd'hui le contraire — que l'Europe entière et
    le monde entier montrent l'anecdote à côté de la carte. Ces assertions sont à
