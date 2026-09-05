@@ -195,17 +195,42 @@ L'argument est déjà constitué — quatre retours, quatre corrections livrées
    jusqu'au placement correct suivant — donc indéfiniment après le dernier. Elle
    masque le bas du continent, là où il reste des pays à poser.
 
-   **Décision de Stéphane : supprimer les anecdotes sur ces niveaux**, qui sont
-   un examen final où elles n'apportent rien. Portée confirmée le 5 septembre :
-   **tous** les niveaux longs, Le Monde et les continents entiers compris, et
-   non le seul mode « tout le continent ». Le critère reste donc le comptage
-   existant, il n'y a pas de nouveau test à écrire.
+   **Décision de Stéphane : plus d'anecdotes du tout sur un continent entier ni
+   sur Le Monde**, qui sont un examen final ; elles restent sur les
+   sous-régions. Portée confirmée le 5 septembre.
 
-   Conséquence : la carte latérale **n'existe que** sur les niveaux longs, donc
-   la retirer ne laisse rien derrière — c'est la suppression d'une
-   fonctionnalité, pas l'ajout d'une condition. Les anecdotes redeviennent la
-   modale seule, à 20 pays ou moins, et `factCardId`, `factCardOpen` et le
-   gabarit de la ligne 708 partent avec.
+   **Le comptage ne peut pas servir de critère, contrairement à ce que cette
+   note a d'abord affirmé.** Trois continents entiers sont sous les 20 pays et
+   garderaient donc leurs anecdotes — en modale bloquante, qui interrompt à
+   chaque pays, soit l'inverse de l'intention :
+
+   | Continent entier | micro off | micro on |
+   |---|---|---|
+   | Afrique | 54 | 54 |
+   | Asie | 44 | 47 |
+   | Europe | 39 | 45 |
+   | Amérique du Nord | **16** | 23 |
+   | Amérique du Sud | **12** | **12** |
+   | Océanie | **7** | **14** |
+
+   Le Monde fait 172 pays, 195 micro-états compris. Toutes les sous-régions sont
+   sous le seuil sans exception, la plus fournie étant l'Afrique de l'Ouest à 16
+   — c'est pourquoi le bug ne s'est vu que sur les grands continents.
+
+   **Le bon critère est la nature du niveau, pas sa taille :** un niveau est une
+   sous-région si et seulement si `continentId` n'est pas le monde et que
+   `regionId` n'est pas `'all'`. Tout le reste — continent entier, quel que soit
+   le chemin d'entrée, et Le Monde — est un examen. Vérifié : partir de l'onglet
+   Le Monde et cliquer sur un continent, ou entrer dans le continent et choisir
+   « tout le continent », donne exactement le même ensemble de pays.
+
+   Conséquences : `FACT_MODAL_MAX` et `longLevel()` ne servent qu'aux anecdotes
+   et disparaissent avec ce changement ; la carte latérale n'existait que sur les
+   niveaux longs, donc `factCardId`, `factCardOpen` et le gabarit de la ligne 708
+   partent entièrement. Reste un cas à trancher : les niveaux de **révision**
+   (`reviewIds`), qui ne sont ni une région ni un continent — ce sont des pays
+   ratés qu'on rejoue, donc plutôt de l'entraînement que de l'examen, et les
+   anecdotes y ont leur place.
 
    `tests/smoke.mjs` affirme aujourd'hui le contraire — que l'Europe entière et
    le monde entier montrent l'anecdote à côté de la carte. Ces assertions sont à
