@@ -227,10 +227,18 @@ L'argument est déjà constitué — quatre retours, quatre corrections livrées
    Conséquences : `FACT_MODAL_MAX` et `longLevel()` ne servent qu'aux anecdotes
    et disparaissent avec ce changement ; la carte latérale n'existait que sur les
    niveaux longs, donc `factCardId`, `factCardOpen` et le gabarit de la ligne 708
-   partent entièrement. Reste un cas à trancher : les niveaux de **révision**
-   (`reviewIds`), qui ne sont ni une région ni un continent — ce sont des pays
-   ratés qu'on rejoue, donc plutôt de l'entraînement que de l'examen, et les
-   anecdotes y ont leur place.
+   partent entièrement.
+
+   Les niveaux de **révision** (`reviewIds`) **gardent les anecdotes**, tranché
+   le 5 septembre : ce sont des pays ratés qu'on rejoue, donc de l'entraînement,
+   et c'est là qu'elles servent le plus.
+
+   Le bouton 📖 de la barre du haut coupe les anecdotes à la main, sur tous les
+   niveaux : il bascule `factsOn`, efface ce qui est affiché au même instant, et
+   retient le choix dans `localStorage` — c'est l'échappatoire du joueur face au
+   bug actuel. Une fois les anecdotes retirées des examens, ce bouton y resterait
+   affiché sans effet : le masquer là comme `showNamesBtn` masque déjà son
+   voisin, pour qu'il ne mente pas.
 
    `tests/smoke.mjs` affirme aujourd'hui le contraire — que l'Europe entière et
    le monde entier montrent l'anecdote à côté de la carte. Ces assertions sont à
