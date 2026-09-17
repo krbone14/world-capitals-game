@@ -154,16 +154,15 @@ Les quatre retours du test fermé et leurs corrections, tous livrés avant le
 Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
 pendant le panoramique et le chevauchement des étiquettes à faible zoom.
 
-**Chantiers pour la prochaine mise à jour** (1 et 5 livrés, restent 2, 3 et 4) :
+**Chantiers pour la prochaine mise à jour** (1, 2 et 5 livrés, restent 3 et 4) :
 
 1. **Livré le 17 septembre — 🦁 pour l'Afrique** (PR #10, `dcfbb68`, vu sur
    téléphone). La crinière sombre fait le contraste sur le terracotta ; les
    captures du store sont refaites avec.
-2. **Le fondu pendant le panoramique.** Les étiquettes ne s'estompent pas quand
-   on déplace la carte. Le panoramique écrit la transformation directement dans
-   le DOM sans rendu React, délibérément, donc aucune liaison d'opacité ne se met
-   à jour. Correctif sans perdre la fluidité : une classe CSS posée sur le
-   conteneur au début du geste, l'opacité pilotée par la feuille de style.
+2. **Livré le 17 septembre — le fondu pendant le panoramique** (PR #11,
+   `9bd639e`, vu sur téléphone). Deux classes CSS, `g-in-hand` par le rendu et
+   `g-panning` par le geste ; le test pilote de vrais événements pointeur et
+   échoue sur l'ancien code.
 3. **Les étiquettes qui se masquent entre elles à faible zoom.** Kinshasa et
    Brazzaville sont le pire cas possible — 5 km d'écart. Aucun réglage d'opacité
    ou de taille ne les séparera : il faut replier les étiquettes anciennes sur
