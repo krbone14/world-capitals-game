@@ -603,8 +603,21 @@ const overlap = await page.evaluate(async () => {
     await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 150)));
   };
 
+  // One label alone: its distance to the pin, in screen pixels, must not move
+  // with the zoom. It used to be set in map units and grew eight-fold at x8.
   await enter('afrique', 'af-centre');
-  await place('COD'); await place('COG');
+  await place('COD');
+  const gap = () => {
+    const l = labels()[0].getBoundingClientRect();
+    const pin = [...document.querySelectorAll('div')].find((el) => getComputedStyle(el).borderRadius === '50%' && el.offsetWidth === 13);
+    const pr = pin.getBoundingClientRect();
+    return Math.round((pr.top + pr.height / 2) - (l.top + l.height / 2));
+  };
+  const gapAt1 = gap();
+  c.setZoom(c.MAX_ZOOM); await sleep(150);
+  const gapAtMax = gap();
+  c.setZoom(1); await sleep(100);
+  await place('COG');
   const congo = { n: labels().length, overlaps: overlaps(),
     colours: new Set(labels().map((el) => getComputedStyle(el).color)).size };
 
@@ -620,8 +633,10 @@ const overlap = await page.evaluate(async () => {
   const westAtMax = { n: labels().length, overlaps: overlaps() };
   c.setZoom(1);
   c.setState({ screen: 'home', continentId: null, factsOn: true });
-  return { congo, westAt1, westAt2, westAtMax, total: most.length };
+  return { congo, westAt1, westAt2, westAtMax, total: most.length, gapAt1, gapAtMax };
 });
+check(overlap.gapAt1 > 0 && Math.abs(overlap.gapAt1 - overlap.gapAtMax) <= 1,
+  `a label keeps its distance to the pin at every zoom (${overlap.gapAt1}px at x1, ${overlap.gapAtMax}px at x8)`);
 check(overlap.congo.n === 2 && overlap.congo.overlaps === 0,
   `Kinshasa and Brazzaville: two labels, not touching (saw ${overlap.congo.n}, ${overlap.congo.overlaps} overlapping)`);
 check(overlap.congo.colours === 2, `and the moved pair in its own colour (saw ${overlap.congo.colours} colour(s))`);
