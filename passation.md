@@ -154,7 +154,7 @@ Les quatre retours du test fermé et leurs corrections, tous livrés avant le
 Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
 pendant le panoramique et le chevauchement des étiquettes à faible zoom.
 
-**Cinq chantiers convenus pour la prochaine mise à jour :**
+**Chantiers pour la prochaine mise à jour** (le 5 est livré, il reste les quatre premiers) :
 
 1. **L'emoji de l'Afrique.** C'est `🌍`, qui ne dit rien de l'Afrique et fait
    doublon avec le `🌐` du Monde. **Stéphane a tranché le 4 septembre : `🦁`**,
@@ -190,67 +190,13 @@ pendant le panoramique et le chevauchement des étiquettes à faible zoom.
    Leur demander leur accord avant publication : un prénom reste une donnée
    personnelle, et l'app se vante à juste titre de n'en collecter aucune.
 
-5. **Bug — l'anecdote qu'on ne peut pas fermer sur « Tout le continent ».**
-   Signalé le 5 septembre. Au-dessus de `FACT_MODAL_MAX = 20` pays,
-   `longLevel()` est vrai et l'anecdote n'est plus la fenêtre modale avec son
-   bouton *Continuer* mais une carte posée en bas de la carte du monde
-   (`index.html`, gabarit ligne 708, affectation ligne 1633). Cette carte n'a
-   aucun bouton de fermeture, elle est en `pointer-events:none`, et elle reste
-   jusqu'au placement correct suivant — donc indéfiniment après le dernier. Elle
-   masque le bas du continent, là où il reste des pays à poser.
-
-   **Décision de Stéphane : plus d'anecdotes du tout sur un continent entier ni
-   sur Le Monde**, qui sont un examen final ; elles restent sur les
-   sous-régions. Portée confirmée le 5 septembre.
-
-   **Le comptage ne peut pas servir de critère, contrairement à ce que cette
-   note a d'abord affirmé.** Trois continents entiers sont sous les 20 pays et
-   garderaient donc leurs anecdotes — en modale bloquante, qui interrompt à
-   chaque pays, soit l'inverse de l'intention :
-
-   | Continent entier | micro off | micro on |
-   |---|---|---|
-   | Afrique | 54 | 54 |
-   | Asie | 44 | 47 |
-   | Europe | 39 | 45 |
-   | Amérique du Nord | **16** | 23 |
-   | Amérique du Sud | **12** | **12** |
-   | Océanie | **7** | **14** |
-
-   Le Monde fait 172 pays, 195 micro-états compris. Toutes les sous-régions sont
-   sous le seuil sans exception, la plus fournie étant l'Afrique de l'Ouest à 16
-   — c'est pourquoi le bug ne s'est vu que sur les grands continents.
-
-   **Le bon critère est la nature du niveau, pas sa taille :** un niveau est une
-   sous-région si et seulement si `continentId` n'est pas le monde et que
-   `regionId` n'est pas `'all'`. Tout le reste — continent entier, quel que soit
-   le chemin d'entrée, et Le Monde — est un examen. Vérifié : partir de l'onglet
-   Le Monde et cliquer sur un continent, ou entrer dans le continent et choisir
-   « tout le continent », donne exactement le même ensemble de pays.
-
-   Conséquences : `FACT_MODAL_MAX` et `longLevel()` ne servent qu'aux anecdotes
-   et disparaissent avec ce changement ; la carte latérale n'existait que sur les
-   niveaux longs, donc `factCardId`, `factCardOpen` et le gabarit de la ligne 708
-   partent entièrement.
-
-   Les niveaux de **révision** (`reviewIds`) **gardent les anecdotes**, tranché
-   le 5 septembre : ce sont des pays ratés qu'on rejoue, donc de l'entraînement,
-   et c'est là qu'elles servent le plus.
-
-   Le bouton 📖 de la barre du haut coupe les anecdotes à la main, sur tous les
-   niveaux : il bascule `factsOn`, efface ce qui est affiché au même instant, et
-   retient le choix dans `localStorage` — c'est l'échappatoire du joueur face au
-   bug actuel. Une fois les anecdotes retirées des examens, ce bouton y resterait
-   affiché sans effet : le masquer là comme `showNamesBtn` masque déjà son
-   voisin, pour qu'il ne mente pas.
-
-   `tests/smoke.mjs` affirme aujourd'hui le contraire — que l'Europe entière et
-   le monde entier montrent l'anecdote à côté de la carte. Ces assertions sont à
-   retourner, pas à supprimer : elles restent la mémoire de la règle.
-
-   À noter, le contournement existe déjà pour un joueur : le bouton 📖 de la
-   barre du haut coupe les anecdotes et le choix est retenu d'une partie à
-   l'autre.
+5. **Livré le 17 septembre — plus d'anecdotes sur un continent entier ni sur
+   Le Monde** (PR #9, `3696964`, testé sur téléphone). La carte latérale qui ne
+   se fermait pas a disparu entièrement, avec `FACT_MODAL_MAX` et
+   `longLevel()` ; le critère est `finalLevel()` — pas de révision en cours, et
+   onglet Monde ou région `'all'`. Les sous-régions et les révisions gardent la
+   fenêtre, le bouton 📖 est masqué sur les examens. Le raisonnement complet et
+   le tableau des comptes par niveau sont dans le message de la PR.
 
 **Après la production :** itch.io, où `dist/` se téléverse tel quel.
 
