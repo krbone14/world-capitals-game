@@ -34,7 +34,7 @@ export const AREA_KM2 = {
 export const CONTINENTS = [
   {
     id: 'afrique', geo: 'africa', fr: 'Afrique', en: 'Africa',
-    bg: '#DD7A57', shadow: '#B25636', emoji: '🌍',
+    bg: '#DD7A57', shadow: '#B25636', emoji: '🦁',
     regions: [
       { id: 'af-nord',   fr: 'Afrique du Nord',     en: 'North Africa',    bg: '#E2A24B', shadow: '#B97E2C' },
       { id: 'af-ouest',  fr: "Afrique de l'Ouest",  en: 'West Africa',     bg: '#DD7A57', shadow: '#B25636' },

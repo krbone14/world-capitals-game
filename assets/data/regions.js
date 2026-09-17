@@ -3,7 +3,7 @@
 // countries.js is the single source of truth, so the two can never disagree.
 window.WORLD_DATA = window.WORLD_DATA || {};
 window.WORLD_DATA.continents = {
-  "afrique":{fr:"Afrique",en:"Africa",geo:"africa",bg:"#DD7A57",shadow:"#B25636",emoji:"🌍",regions:[
+  "afrique":{fr:"Afrique",en:"Africa",geo:"africa",bg:"#DD7A57",shadow:"#B25636",emoji:"🦁",regions:[
     {id:"af-nord",fr:"Afrique du Nord",en:"North Africa",bg:"#E2A24B",shadow:"#B97E2C"},
     {id:"af-ouest",fr:"Afrique de l'Ouest",en:"West Africa",bg:"#DD7A57",shadow:"#B25636"},
     {id:"af-centre",fr:"Afrique Centrale",en:"Central Africa",bg:"#3F9E78",shadow:"#2C7A5A"},
