@@ -112,43 +112,37 @@ testait une version périmée servie par `npx serve`, qui n'envoie pas de
 
 ## 5. La prochaine étape
 
-**Immédiat — combler la marge.** La version 25 est en ligne sur le canal de
-test fermé depuis le 4 septembre 09:44. La console affichait le jour même, dans
-`Tester et publier → Production` : « 12 testeurs sont actuellement inscrits pour
-1 jour ». Le groupe Google, lui, compte 14 membres.
+**Le test fermé est validé.** La version 25 est sur le canal fermé depuis le
+4 septembre 09:44. La console affichait ce jour-là « 12 testeurs sont
+actuellement inscrits pour 1 jour » pour un groupe Google de 14 membres — et il
+n'était pas établi si ce 12 était le vrai nombre d'opt-in ou un affichage
+plafonné au seuil. Le passage à **13 le 11 septembre** a tranché : le chiffre
+est réel, être membre du groupe ne compte pas, seul l'opt-in compte. Le
+17 septembre, le bouton *Demander à publier en production* est devenu actif.
 
-**Ce que ce 12 signifie n'est pas établi.** Soit c'est le nombre réel d'opt-in,
-et deux membres du groupe n'ont jamais ouvert le lien d'inscription — la marge
-est alors nulle. Soit l'affichage est plafonné au seuil exigé, et il resterait à
-12 même à 16 testeurs. Ni la documentation Google ni les guides consultés ne
-décrivent cette ligne. Le seul indice : le « 1 jour » ne peut venir que des
-données du compte, puisque l'exigence est de 14 jours, donc la phrase rapporte
-un état et non la règle — ce qui rend le plafonnement peu probable sans
-l'exclure.
+Pour mémoire, où chaque chiffre se lit : `Tester et publier → Production`,
+bloc *Demander un accès en production*, donne le nombre d'inscrits et depuis
+combien de jours ; la liste nominative n'est que dans `groups.google.com →
+Membres` ; l'onglet *Statistiques* ne sert à rien ici (agrégation quotidienne
+différée, effectifs masqués dès qu'on ventile).
 
-**Le test qui tranche :** faire activer le test aux deux membres non inscrits.
-Si la ligne passe à 13 ou 14, le nombre est réel. Si elle reste à 12 alors que
-les 14 ont confirmé avoir installé, il est plafonné et la seule vérité devient
-leur confirmation directe. Dans les deux cas ces opt-in sont à obtenir : être
-membre du groupe ne compte pas, et ajouter des testeurs ne remet aucun compteur
-à zéro. À 12 pile, une désinscription fait tomber la condition et repart pour
-14 jours.
+**Immédiat — déposer la demande de production.** Ce n'est pas une case à
+cocher mais une rédaction : Google demande comment les testeurs ont été
+recrutés, quels retours ont été recueillis et ce qui en a été fait. Les quatre
+retours et leurs corrections, tous livrés avant le 4 septembre :
 
-Le chiffre se lit dans `Tester et publier → Production`, bloc *Demander un accès
-en production* : la console y donne le nombre d'inscrits et depuis combien de
-jours. Nulle part elle ne dit **qui** — avec un groupe, la liste nominative n'est
-que dans `groups.google.com → Membres`, et l'onglet *Statistiques* ne sert à
-rien ici (agrégation quotidienne différée, et effectifs trop faibles pour être
-affichés dès qu'on ventile).
+1. Zoom insuffisant pour les petits pays (São Tomé, Guinée équatoriale,
+   Vatican) → `MAX_ZOOM` 5 → 8, et la tolérance de placement se resserre
+   enfin avec le zoom (`af01e83`).
+2. Les étiquettes posées cachent les pays restant à trouver → fondu à 0,3
+   pendant qu'une réponse est en main (`af01e83`).
+3. Étiquettes « microscopiques » à fort zoom — retour sur la première
+   correction → rétrécissement annulé, taille d'écran constante (`5ac8829`).
+4. Carte sombre sans frontières le soir → `color-scheme: only light`, Chrome
+   n'inverse plus les couleurs (`de7d190`).
 
-**Vers le 17 septembre — demander l'accès à la production.** `Tester et publier
-→ Production`, bouton *Demander à publier en production*, grisé tant que les
-14 jours ne sont pas faits — le décompte a démarré le 4 septembre (« pour
-1 jour » ce jour-là). Ce n'est pas une case à cocher mais une rédaction : Google
-demande comment les testeurs ont été recrutés, quels retours ont été recueillis
-et ce qui en a été fait. *Prévisualiser les questions* les montre à l'avance.
-L'argument est déjà constitué — quatre retours, quatre corrections livrées le
-4 septembre.
+Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
+pendant le panoramique et le chevauchement des étiquettes à faible zoom.
 
 **Cinq chantiers convenus pour la prochaine mise à jour :**
 
