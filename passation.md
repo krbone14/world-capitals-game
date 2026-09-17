@@ -154,7 +154,7 @@ Les quatre retours du test fermé et leurs corrections, tous livrés avant le
 Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
 pendant le panoramique et le chevauchement des étiquettes à faible zoom.
 
-**Chantiers pour la prochaine mise à jour** (1, 2 et 5 livrés, restent 3 et 4) :
+**Chantiers pour la prochaine mise à jour** (1, 2, 3 et 5 livrés, reste le 4) :
 
 1. **Livré le 17 septembre — 🦁 pour l'Afrique** (PR #10, `dcfbb68`, vu sur
    téléphone). La crinière sombre fait le contraste sur le terracotta ; les
@@ -163,11 +163,18 @@ pendant le panoramique et le chevauchement des étiquettes à faible zoom.
    `9bd639e`, vu sur téléphone). Deux classes CSS, `g-in-hand` par le rendu et
    `g-panning` par le geste ; le test pilote de vrais événements pointeur et
    échoue sur l'ancien code.
-3. **Les étiquettes qui se masquent entre elles à faible zoom.** Kinshasa et
-   Brazzaville sont le pire cas possible — 5 km d'écart. Aucun réglage d'opacité
-   ou de taille ne les séparera : il faut replier les étiquettes anciennes sur
-   leur seule pastille, ou une vraie passe de détection de collisions.
-
+3. **Livré le 17 septembre — les étiquettes se déplacent au lieu de se
+   recouvrir** (PR #13, `eed9d6d`, trois essais sur téléphone). Les masquer
+   (PR #12, fermée) a été refusé : une réponse doit rester lisible. Une
+   étiquette essaie dix cases autour de sa pastille, dans l'ordre qui s'éloigne
+   des voisines — la plus au nord au-dessus, la plus au sud en dessous, quel
+   que soit l'ordre des clics, donc une étiquette peut bouger quand une voisine
+   arrive. Décalages en pixels d'écran (18 px), pas en unités de carte : c'est
+   ce qui faisait fuir l'étiquette au zoom. Une étiquette déplacée et sa
+   pastille prennent le ton foncé de la palette. Largeur estimée d'après le
+   texte (7,5 px par caractère), marquée `ponytail:` dans le code. Mesuré : les
+   deux Congos séparés à tout zoom ; côte ouest presque complète, une paire se
+   touche encore à ×1 contre neuf avant, zéro dès ×2.
 4. **Les remerciements aux testeurs, par leur prénom.** Ils ont porté le test
    fermé et quatre d'entre eux ont fait remonter les défauts corrigés le
    4 septembre ; la version publique devrait le dire. **Deux points à régler
