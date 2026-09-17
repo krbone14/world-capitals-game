@@ -77,9 +77,13 @@ const MAPS = {
 };
 
 // Simplification tolerance in viewBox units, and the minimum projected area a
-// ring must cover to be worth drawing. Both are per-map: the world map can
-// afford to be coarser because everything on it is smaller.
-const SIMPLIFY = { world: 0.7, asia: 0.5, 'north-america': 0.5, default: 0.4 };
+// ring must cover to be worth drawing. Both are per-map. The tolerance is what
+// the player sees at x8, and a viewBox unit is not the same distance on every
+// map: 1400 units span the whole world, so 0.7 there was ~20 km against ~2 km
+// on Europe, and the Turkish coast came out as a polygon. 0.15 is ~4 km, on a
+// par with Asia, for 326 kB instead of 121 — loaded only when the world is
+// played.
+const SIMPLIFY = { world: 0.15, asia: 0.5, 'north-america': 0.5, default: 0.4 };
 const MIN_RING_AREA = { world: 1.5, default: 1.0 };
 
 // A country becomes a dot target unless its *largest* island covers at least
