@@ -678,7 +678,7 @@ if ('serviceWorker' in navigator) {
             </g>
             <!-- island target dots -->
             <sc-for list="{{ islandDots }}" as="i" hint-placeholder-count="0">
-              <circle cx="{{ i.x }}" cy="{{ i.y }}" r="4" fill="{{ i.fill }}" stroke="#fff" stroke-width="1.4"></circle>
+              <circle cx="{{ i.x }}" cy="{{ i.y }}" r="{{ dotR }}" fill="{{ i.fill }}" stroke="#fff" stroke-width="{{ dotStroke }}"></circle>
             </sc-for>
           </svg>
 
@@ -1919,6 +1919,11 @@ class Component extends DCLogic {
       });
 
       // island target dots for islands in this task
+      // Sized in screen pixels like the pins and labels, not in map units: a
+      // 4-unit dot was a pixel wide on the world at x1 and hid whole countries
+      // at x8, where the countries around it are only a few pixels themselves.
+      const dotPx = (this._fit ? this._fit.w/GEO.W : 1) * S.zoom;
+      base.dotR = 4.5/dotPx; base.dotStroke = 1.2/dotPx;
       base.islandDots = taskIds.filter(id=>GEO.caps[id]&&GEO.caps[id].island).map(id=>{
         const cap=GEO.caps[id];
         return { x:cap.x, y:cap.y, fill: placed[id]? this.idColor(id) : this.hexA(this.idColor(id),0.5) };
@@ -1985,7 +1990,14 @@ class Component extends DCLogic {
       }
 
       const neutralChips = S.regionId==='all';
-      base.chips = this.shuffleStable(taskIds).filter(id=>!placed[id]).map(id=>({
+      // The world deals 172 chips: shuffled, finding one is a search, so they
+      // come alphabetically there — except flags, which have no text to sort
+      // by. The order gives nothing away; a region keeps the shuffle.
+      const chipText = id => isCountry ? (lang==='fr'?this.C[id].cf:this.C[id].ce) : (lang==='fr'?this.C[id].capFr:this.C[id].capEn);
+      const dealt = (this.isWorld() && S.regionId==='all' && !isFlag)
+        ? taskIds.slice().sort((a,b)=>chipText(a).localeCompare(chipText(b), lang))
+        : this.shuffleStable(taskIds);
+      base.chips = dealt.filter(id=>!placed[id]).map(id=>({
         id,
         cap: isCountry ? (lang==='fr'?this.C[id].cf:this.C[id].ce) : isFlag ? '' : (lang==='fr'?this.C[id].capFr:GEO.caps[id].n),
         capDisplay: isFlag ? 'none' : 'block',
