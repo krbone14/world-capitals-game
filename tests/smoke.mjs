@@ -518,6 +518,21 @@ const zoomBits = await page.evaluate(async () => {
   c.setState({ dragId: null });
   await sleep(140);
 
+  // A pan, through the real gesture handler. It never renders while the finger
+  // is down — the transform goes straight to the DOM — so a fade bound to state
+  // would sit at 1 the whole way. A tester noticed. Touch, because a mouse pan
+  // is refused at x1.
+  const vp = c.vpRef.current.getBoundingClientRect();
+  const at = (x, y) => ({ pointerId: 7, pointerType: 'touch', clientX: x, clientY: y, preventDefault() {} });
+  const ptr = (type, x, y) => window.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: y, bubbles: true }));
+  c.startMapGesture(at(vp.left + 100, vp.top + 100));
+  ptr('pointermove', vp.left + 140, vp.top + 120);
+  await sleep(160);
+  const panning = found ? getComputedStyle(label()).opacity : null;
+  ptr('pointerup', vp.left + 140, vp.top + 120);
+  await sleep(160);
+  const afterPan = found ? getComputedStyle(label()).opacity : null;
+
   // On-screen size = the label's own scale times the map's. It has to stay 1 at
   // every zoom. Shrinking it with the zoom looks like a way to give the map room
   // back, and is not: a constant-size label already covers less ground the
@@ -536,7 +551,7 @@ const zoomBits = await page.evaluate(async () => {
   c.setState({ screen: 'home', continentId: null });
   await sleep(80);
 
-  return { maxed, floored, base, tolAt2, tolAtMax, tolCountry, found, idle, dragging,
+  return { maxed, floored, base, tolAt2, tolAtMax, tolCountry, found, idle, dragging, panning, afterPan,
            screenSizes, MAX: c.MAX_ZOOM, TOL: c.TOL_ZOOM };
 });
 
@@ -551,6 +566,10 @@ check(zoomBits.found, 'a placed answer leaves a label on the map');
 check(Number(zoomBits.idle) === 1, `that label is opaque with nothing in hand (saw ${zoomBits.idle})`);
 check(Number(zoomBits.dragging) < 0.5,
   `and steps aside while an answer is held (saw ${zoomBits.dragging})`);
+check(Number(zoomBits.panning) < 0.5,
+  `and while the map is being dragged (saw ${zoomBits.panning})`);
+check(Number(zoomBits.afterPan) === 1,
+  `and is back once the finger lifts (saw ${zoomBits.afterPan})`);
 const wrongSize = zoomBits.screenSizes.filter(([, s]) => Math.abs(s - 1) > 0.02);
 check(wrongSize.length === 0,
   `a label keeps its on-screen size at every zoom (${zoomBits.screenSizes.map(([z, s]) => 'x' + z + ':' + s.toFixed(2)).join(', ')})`);
