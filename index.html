@@ -530,14 +530,37 @@ if ('serviceWorker' in navigator) {
       </button>
     </div>
 
+    <!-- The testers, by first name. Small and last, like the reset link below
+         it: a thank-you, not a feature. -->
+    <div style="margin-top:34px;text-align:center;">
+      <button onclick="{{ onOpenThanks }}" style="cursor:pointer;background:#fff;border:2px solid #EAD7B0;border-radius:14px;padding:8px 14px;font-family:'Nunito';font-weight:800;font-size:14px;color:#7A6A57;box-shadow:0 4px 0 #EAD7B0;">&#128155; {{ t.thanksBtn }}</button>
+    </div>
+
     <!-- Deliberately plain and last on the page: findable by an adult who wants
          a clean slate, not something a child clicks on the way to a continent. -->
     <sc-if value="{{ canReset }}" hint-placeholder-val="{{ false }}">
-    <div style="margin-top:34px;text-align:center;">
+    <div style="margin-top:14px;text-align:center;">
       <button onclick="{{ onAskReset }}" style="cursor:pointer;background:none;border:none;font-family:'Nunito';font-weight:800;font-size:13px;color:#B49A77;text-decoration:underline;padding:6px 10px;">{{ t.resetBtn }}</button>
     </div>
     </sc-if>
   </div>
+
+  <!-- Each name pops in like a placed capital, one after the other, in the
+       colours of the continents. -->
+  <sc-if value="{{ thanksOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:120;background:rgba(40,28,18,.34);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="{{ onCloseThanks }}">
+      <div onclick="{{ onKeepDialog }}" style="background:#fff;border-radius:24px;max-width:440px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:cardIn .3s ease both;border-top:8px solid #DD7A57;">
+        <div style="font-family:'Fredoka';font-weight:600;font-size:24px;line-height:1.15;">{{ t.thanksTitle }}</div>
+        <p style="font-size:15px;line-height:1.5;color:#52453A;font-weight:600;margin:11px 0 18px;">{{ thanksBody }}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:9px;justify-content:center;">
+          <sc-for list="{{ thanks }}" as="p" hint-placeholder-count="0">
+            <div class="g-thanks-name" style="font-family:'Fredoka';font-weight:600;font-size:16px;color:#3B2F27;background:#FFFDF7;border:2px solid #EFE0C1;border-left:7px solid {{ p.color }};border-radius:14px;padding:8px 13px;box-shadow:0 3px 0 {{ p.shadow }};animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;animation-delay:{{ p.delay }};">{{ p.name }}</div>
+          </sc-for>
+        </div>
+        <button onclick="{{ onCloseThanks }}" style="cursor:pointer;width:100%;margin-top:20px;background:#DD7A57;color:#fff;border:none;border-radius:13px;padding:13px;font-family:'Nunito';font-weight:800;font-size:16px;">{{ t.thanksClose }}</button>
+      </div>
+    </div>
+  </sc-if>
 
   <sc-if value="{{ resetOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;z-index:120;background:rgba(40,28,18,.34);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="{{ onCancelReset }}">
@@ -892,6 +915,7 @@ class Component extends DCLogic {
     quitOpen: false,       // the "leave the level?" confirmation
     factsOn: true,         // anecdotes at all — the top-bar 📖 toggle
     resetOpen: false,      // the "erase all progress?" confirmation
+    thanksOpen: false,     // the testers' names, from the home screen
     microOn: false,        // deal the 23 micro-states too
   };
 
@@ -995,6 +1019,10 @@ class Component extends DCLogic {
     this.loadGeo(c.geo).then(() => this.forceUpdate()).catch(() => this.setState({ mapError: true }));
   }
 
+  // The closed-test testers, by first name, alphabetically. Not translated:
+  // names are names.
+  TESTERS = ['Alexandre', 'Audrey', 'Elea', 'Florian', 'Julien', 'Maeline', 'Moshen', 'Murielle', 'Nancy', 'Precious', 'Sepanta', 'Sylvain', 'Thomas'];
+
   // Every user-facing string. Country, capital and anecdote text lives in
   // assets/data/ instead — this is only the UI chrome.
   T = {
@@ -1050,6 +1078,10 @@ class Component extends DCLogic {
       resetBody: "Tu perdras toutes tes étoiles et tes meilleurs scores ({n} niveaux). C'est définitif.",
       resetCancel: "Annuler",
       resetConfirm: "Effacer",
+      thanksBtn: "Merci aux testeurs",
+      thanksTitle: "Merci !",
+      thanksBody: "{n} personnes ont joué la première version sur leur téléphone, traqué les bugs et tout fait remonter. Ce jeu est meilleur grâce à elles.",
+      thanksClose: "Fermer",
       quitTitle: "Quitter le niveau ?",
       // "{n}" is the "6 / 12" already shown in the top bar. Counting that way
       // rather than "6 capitales" keeps one sentence for all three modes, with
@@ -1122,6 +1154,10 @@ class Component extends DCLogic {
       resetBody: "You will lose every star and best score ({n} levels). This cannot be undone.",
       resetCancel: "Cancel",
       resetConfirm: "Erase",
+      thanksBtn: "Thanks to the testers",
+      thanksTitle: "Thank you!",
+      thanksBody: "{n} people played the first version on their phones, hunted the bugs and reported everything. This game is better for it.",
+      thanksClose: "Close",
       quitTitle: "Leave the level?",
       quitBody: "You have already placed {n}. Leaving now starts this level over.",
       quitStay: "Keep playing",
@@ -1796,6 +1832,12 @@ class Component extends DCLogic {
       base.canReset = nProg > 0;
       base.resetOpen = S.resetOpen;
       base.resetBody = t.resetBody.replace('{n}', String(nProg));
+      base.thanksOpen = S.thanksOpen;
+      base.thanksBody = t.thanksBody.replace('{n}', String(this.TESTERS.length));
+      const palette = Object.keys(this.CONTINENTS).filter(id=>id!==this.WORLD_ID).map(id=>this.CONTINENTS[id]);
+      base.thanks = this.TESTERS.map((name,i)=>({ name, color: palette[i%palette.length].bg, shadow: palette[i%palette.length].shadow, delay: (i*70)+'ms' }));
+      base.onOpenThanks = ()=>this.setState({thanksOpen:true});
+      base.onCloseThanks = ()=>this.setState({thanksOpen:false});
       base.onAskReset = ()=>this.setState({resetOpen:true});
       base.onCancelReset = ()=>this.setState({resetOpen:false});
       base.onConfirmReset = ()=>this.resetProgress();

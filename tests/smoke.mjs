@@ -697,6 +697,33 @@ check(world.regionShuffled, 'a region still shuffles its chips');
 check(world.dotAt1 > 6 && Math.abs(world.dotAt1 - world.dotAtMax) <= 2,
   `an island dot keeps its on-screen size (${world.dotAt1.toFixed(1)}px at x1, ${world.dotAtMax.toFixed(1)}px at x8)`);
 
+// ---- the testers ----
+// A small button on the home screen opens the thank-you: every tester's first
+// name, alphabetically, in both languages, and it closes again.
+console.log('\nthe testers');
+const thanks = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  c.setState({ screen: 'home', continentId: null, lang: 'fr' }); await sleep(80);
+  const names = () => [...document.querySelectorAll('.g-thanks-name')].map((el) => el.textContent.trim());
+  const btn = () => [...document.querySelectorAll('button')].find((b) => /testeurs|testers/i.test(b.textContent));
+  const before = names().length;
+  btn().click(); await sleep(120);
+  const fr = { title: document.body.textContent.includes('Merci !'), names: names() };
+  c.setState({ lang: 'en' }); await sleep(80);
+  const en = { title: document.body.textContent.includes('Thank you!'), names: names() };
+  [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Close').click(); await sleep(120);
+  const after = names().length;
+  c.setState({ lang: 'fr' });
+  return { hasBtn: !!btn(), before, fr, en, after };
+});
+const alpha = (a) => a.every((n, i) => !i || a[i - 1].localeCompare(n, 'fr') < 0);
+check(thanks.hasBtn && thanks.before === 0, 'the home screen has the button, and nothing open');
+check(thanks.fr.title && thanks.fr.names.length === 13 && alpha(thanks.fr.names),
+  `it opens on ${thanks.fr.names.length} names, alphabetical (${thanks.fr.names.join(', ')})`);
+check(thanks.en.title && thanks.en.names.length === 13, 'the same names under the English title');
+check(thanks.after === 0, 'and it closes');
+
 // ---- preferences and the reset ----
 console.log('\npreferences');
 const prefs = await page.evaluate(async () => {
