@@ -1942,16 +1942,17 @@ class Component extends DCLogic {
         return { id, x:cap.x, y:cap.y, leftPct: cap.x/GEO.W*100, topPct: cap.y/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].capFr:this.C[id].capEn,
                  flag:'data:,', flagDisplay:'none' };
       });
-      // A label sits above its pin unless another label is already there: then
-      // it tries below, the sides, the diagonals, then a second row up or down,
-      // and takes the first free slot — or the least crowded one, since every
-      // answer stays readable. Oldest first, so a label already on the map
-      // never moves for a newer one.
+      // A label sits above its pin unless another label is in the way: then it
+      // moves — below, the sides, the diagonals, a second row up or down — to
+      // the first free slot, or the least crowded one, since every answer
+      // stays readable. The slots are tried in the order that points away from
+      // the neighbouring pins, so of two capitals a few pixels apart the
+      // northern one is labelled above and the southern one below, whichever
+      // was placed first; a label may therefore move when a neighbour arrives.
       // Screen space, because a label holds its on-screen size while the map
       // scales under it: zooming in frees slots, and the pass runs on every
-      // render. A moved label and its pin share a darker colour, so two
-      // capitals a few pixels apart — Kinshasa and Brazzaville are 5 km — still
-      // read as two pairs and not as one pin with two names.
+      // render. A moved label and its pin share a darker colour, so the pair
+      // still reads as a pair.
       // ponytail: width estimated from the text rather than measured — 7.5px a
       // character at this size plus the padding, the flag when there is one.
       const ppu = (this._fit ? this._fit.w/GEO.W : 1) * S.zoom;
@@ -1962,18 +1963,24 @@ class Component extends DCLogic {
       // the map grows under it.
       const up = 18/ppu, row = labelH/ppu;
       const settled = [];
-      for (const p of base.pins.slice().sort((a,b)=>placed[a.id]-placed[b.id])) {
+      for (const p of base.pins.slice().sort((a,b)=>a.y-b.y || a.x-b.x)) {
         const side = (labelW(p)/2 + 10)/ppu;
-        const slots = [[0,-up],[0,up],[side,0],[-side,0],[side,-up],[-side,-up],[side,up],[-side,up],[0,-up-row],[0,up+row]];
-        let best = 0, crowd = Infinity;
-        for (let i = 0; i < slots.length; i++) {
-          p.lx = p.x+slots[i][0]; p.ly = p.y+slots[i][1];
+        const near = base.pins.filter(q => q!==p && Math.hypot(q.x-p.x, q.y-p.y)*ppu < labelW(p));
+        const away = near.length
+          ? [p.x - near.reduce((s,q)=>s+q.x,0)/near.length, p.y - near.reduce((s,q)=>s+q.y,0)/near.length]
+          : [0,-1];
+        const slots = [[0,-up],[0,up],[side,0],[-side,0],[side,-up],[-side,-up],[side,up],[-side,up],[0,-up-row],[0,up+row]]
+          .map((d,i)=>({ d, i, score: (d[0]*away[0] + d[1]*away[1]) / Math.hypot(d[0],d[1]) }))
+          .sort((a,b)=>b.score-a.score || a.i-b.i);
+        let best = slots[0], crowd = Infinity;
+        for (const sl of slots) {
+          p.lx = p.x+sl.d[0]; p.ly = p.y+sl.d[1];
           const n = settled.filter(q=>touch(q,p)).length;
-          if (n < crowd) { best = i; crowd = n; if (!n) break; }
+          if (n < crowd) { best = sl; crowd = n; if (!n) break; }
         }
-        p.lx = p.x+slots[best][0]; p.ly = p.y+slots[best][1];
+        p.lx = p.x+best.d[0]; p.ly = p.y+best.d[1];
         p.labelLeftPct = p.lx/GEO.W*100; p.labelTopPct = p.ly/GEO.H*100;
-        if (best) p.color = this.idShadow(p.id);
+        if (best.i) p.color = this.idShadow(p.id);
         settled.push(p);
       }
 

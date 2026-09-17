@@ -618,8 +618,18 @@ const overlap = await page.evaluate(async () => {
   const gapAtMax = gap();
   c.setZoom(1); await sleep(100);
   await place('COG');
+  // Brazzaville is on the north bank, Kinshasa on the south: whichever was
+  // placed first, the northern label goes above and the southern one below.
+  const labelY = (name) => { const l = labels().find((el) => el.textContent.trim() === name).getBoundingClientRect(); return l.top + l.height / 2; };
+  const pinY = (id) => { const g = c.GEO, cap = g.caps[id], b = c.mapBoxRef.current.getBoundingClientRect(); return b.top + (cap.y / g.H) * b.height; };
+  const above = (name, id) => labelY(name) < pinY(id);
   const congo = { n: labels().length, overlaps: overlaps(),
-    colours: new Set(labels().map((el) => getComputedStyle(el).color)).size };
+    colours: new Set(labels().map((el) => getComputedStyle(el).color)).size,
+    brazzaAbove: above('Brazzaville', 'COG'), kinBelow: !above('Kinshasa', 'COD') };
+  // And the other way round.
+  await enter('afrique', 'af-centre');
+  await place('COG'); await place('COD');
+  const congoRev = { brazzaAbove: above('Brazzaville', 'COG'), kinBelow: !above('Kinshasa', 'COD') };
 
   // A region placed all but one (all would end the round).
   await enter('afrique', 'af-ouest');
@@ -633,13 +643,15 @@ const overlap = await page.evaluate(async () => {
   const westAtMax = { n: labels().length, overlaps: overlaps() };
   c.setZoom(1);
   c.setState({ screen: 'home', continentId: null, factsOn: true });
-  return { congo, westAt1, westAt2, westAtMax, total: most.length, gapAt1, gapAtMax };
+  return { congo, congoRev, westAt1, westAt2, westAtMax, total: most.length, gapAt1, gapAtMax };
 });
 check(overlap.gapAt1 > 0 && Math.abs(overlap.gapAt1 - overlap.gapAtMax) <= 1,
   `a label keeps its distance to the pin at every zoom (${overlap.gapAt1}px at x1, ${overlap.gapAtMax}px at x8)`);
 check(overlap.congo.n === 2 && overlap.congo.overlaps === 0,
   `Kinshasa and Brazzaville: two labels, not touching (saw ${overlap.congo.n}, ${overlap.congo.overlaps} overlapping)`);
 check(overlap.congo.colours === 2, `and the moved pair in its own colour (saw ${overlap.congo.colours} colour(s))`);
+check(overlap.congo.brazzaAbove && overlap.congo.kinBelow && overlap.congoRev.brazzaAbove && overlap.congoRev.kinBelow,
+  'Brazzaville labelled above and Kinshasa below, whichever was placed first');
 check(overlap.westAt1.n === overlap.total, `West Africa nearly placed: every label visible (${overlap.westAt1.n} of ${overlap.total})`);
 // Fifteen labels on one coast do not all fit at x1 — nine pairs touched before
 // this; the slots bring it to two — and from x2 there is room for every one.
