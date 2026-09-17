@@ -200,6 +200,21 @@ pendant le panoramique et le chevauchement des étiquettes à faible zoom.
    fenêtre, le bouton 📖 est masqué sur les examens. Le raisonnement complet et
    le tableau des comptes par niveau sont dans le message de la PR.
 
+**Livrés le 17 septembre en plus de la liste, sur retours de Stéphane au
+téléphone :**
+
+- **Carte du monde plus fine** (PR #14, `d3ac797`). Même source Natural Earth
+  1:50m partout ; seule la tolérance de simplification différait, 0,7 unité
+  sur 1 400 soit ~20 km contre ~2 km sur l'Europe. Passée à 0,15 (~4 km) ;
+  `world.js` 121 → 326 kB, chargé seulement quand on joue le monde. Vu par
+  moi en rendu, pas sur téléphone avant fusion — la branche servie était
+  l'autre. À regarder à l'occasion.
+- **Sur le monde, cibles à taille d'écran et bac trié** (PR #15, `f3460b8`,
+  vu sur téléphone). Les cercles des micro-pays étaient en unités de carte, un
+  pixel à ×1, un disque qui cachait un pays à ×8 : 4,5 px de rayon constant.
+  Les 172 étiquettes du monde sont triées par ordre alphabétique (capitales et
+  pays ; drapeaux mélangés faute de texte) ; les régions restent mélangées.
+
 **Après la production :** itch.io, où `dist/` se téléverse tel quel.
 
 ---
