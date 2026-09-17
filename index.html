@@ -1080,7 +1080,7 @@ class Component extends DCLogic {
       resetConfirm: "Effacer",
       thanksBtn: "Merci aux testeurs",
       thanksTitle: "Merci !",
-      thanksBody: "{n} personnes ont joué la première version sur leur téléphone, traqué les bugs et tout fait remonter. Ce jeu est meilleur grâce à elles.",
+      thanksBody: "Ils ont testé la première version et traqué les bugs.",
       thanksClose: "Fermer",
       quitTitle: "Quitter le niveau ?",
       // "{n}" is the "6 / 12" already shown in the top bar. Counting that way
@@ -1156,7 +1156,7 @@ class Component extends DCLogic {
       resetConfirm: "Erase",
       thanksBtn: "Thanks to the testers",
       thanksTitle: "Thank you!",
-      thanksBody: "{n} people played the first version on their phones, hunted the bugs and reported everything. This game is better for it.",
+      thanksBody: "They tested the first version and hunted the bugs.",
       thanksClose: "Close",
       quitTitle: "Leave the level?",
       quitBody: "You have already placed {n}. Leaving now starts this level over.",
@@ -1833,7 +1833,7 @@ class Component extends DCLogic {
       base.resetOpen = S.resetOpen;
       base.resetBody = t.resetBody.replace('{n}', String(nProg));
       base.thanksOpen = S.thanksOpen;
-      base.thanksBody = t.thanksBody.replace('{n}', String(this.TESTERS.length));
+      base.thanksBody = t.thanksBody;
       const palette = Object.keys(this.CONTINENTS).filter(id=>id!==this.WORLD_ID).map(id=>this.CONTINENTS[id]);
       base.thanks = this.TESTERS.map((name,i)=>({ name, color: palette[i%palette.length].bg, shadow: palette[i%palette.length].shadow, delay: (i*70)+'ms' }));
       base.onOpenThanks = ()=>this.setState({thanksOpen:true});
