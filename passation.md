@@ -154,15 +154,11 @@ Les quatre retours du test fermé et leurs corrections, tous livrés avant le
 Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
 pendant le panoramique et le chevauchement des étiquettes à faible zoom.
 
-**Chantiers pour la prochaine mise à jour** (le 5 est livré, il reste les quatre premiers) :
+**Chantiers pour la prochaine mise à jour** (1 et 5 livrés, restent 2, 3 et 4) :
 
-1. **L'emoji de l'Afrique.** C'est `🌍`, qui ne dit rien de l'Afrique et fait
-   doublon avec le `🌐` du Monde. **Stéphane a tranché le 4 septembre : `🦁`**,
-   contre le `🦓` qui était recommandé et le `🥁` proposé en alternative. Le
-   zèbre l'était pour son noir et blanc, qui tranche sur le terracotta `#DD7A57`
-   de la carte là où un lion est fauve sur fauve : à regarder sur le téléphone à
-   la taille d'une carte, et à lui montrer si ça passe mal — pas à remplacer de
-   son propre chef. Une ligne dans `tools/country-config.mjs`, puis `npm run data`.
+1. **Livré le 17 septembre — 🦁 pour l'Afrique** (PR #10, `dcfbb68`, vu sur
+   téléphone). La crinière sombre fait le contraste sur le terracotta ; les
+   captures du store sont refaites avec.
 2. **Le fondu pendant le panoramique.** Les étiquettes ne s'estompent pas quand
    on déplace la carte. Le panoramique écrit la transformation directement dans
    le DOM sans rendu React, délibérément, donc aucune liaison d'opacité ne se met
