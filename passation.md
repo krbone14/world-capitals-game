@@ -126,10 +126,20 @@ combien de jours ; la liste nominative n'est que dans `groups.google.com →
 Membres` ; l'onglet *Statistiques* ne sert à rien ici (agrégation quotidienne
 différée, effectifs masqués dès qu'on ventile).
 
-**Immédiat — déposer la demande de production.** Ce n'est pas une case à
-cocher mais une rédaction : Google demande comment les testeurs ont été
-recrutés, quels retours ont été recueillis et ce qui en a été fait. Les quatre
-retours et leurs corrections, tous livrés avant le 4 septembre :
+**Demande de production envoyée le 17 septembre.** En attente de la réponse
+de Google, en général quelques jours. Le formulaire, à 300 caractères par
+case, portait sur le recrutement (entourage, groupe Google de 14, coché
+« facile »), l'engagement, les retours et ce qui en a été fait, le public,
+les spécificités, les installations attendues (0 à 10 000) et ce qui a décidé
+de la mise en production. Les réponses citaient les quatre retours ci-dessous
+et annonçaient deux détails restants pour la prochaine version.
+
+L'accès, une fois accordé, vaut pour le compte : il n'oblige pas à publier la
+v25. La première version de production sera la v26 si les chantiers ci-dessous
+sont prêts à temps, sinon la v25 telle quelle.
+
+Les quatre retours du test fermé et leurs corrections, tous livrés avant le
+4 septembre :
 
 1. Zoom insuffisant pour les petits pays (São Tomé, Guinée équatoriale,
    Vatican) → `MAX_ZOOM` 5 → 8, et la tolérance de placement se resserre
