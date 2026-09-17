@@ -154,7 +154,7 @@ Les quatre retours du test fermé et leurs corrections, tous livrés avant le
 Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
 pendant le panoramique et le chevauchement des étiquettes à faible zoom.
 
-**Chantiers pour la prochaine mise à jour** (1, 2, 3 et 5 livrés, reste le 4) :
+**Chantiers pour la prochaine mise à jour** (tous livrés le 17 septembre) :
 
 1. **Livré le 17 septembre — 🦁 pour l'Afrique** (PR #10, `dcfbb68`, vu sur
    téléphone). La crinière sombre fait le contraste sur le terracotta ; les
@@ -175,23 +175,11 @@ pendant le panoramique et le chevauchement des étiquettes à faible zoom.
    texte (7,5 px par caractère), marquée `ponytail:` dans le code. Mesuré : les
    deux Congos séparés à tout zoom ; côte ouest presque complète, une paire se
    touche encore à ×1 contre neuf avant, zéro dès ×2.
-4. **Les remerciements aux testeurs, par leur prénom.** Ils ont porté le test
-   fermé et quatre d'entre eux ont fait remonter les défauts corrigés le
-   4 septembre ; la version publique devrait le dire. **Deux points à régler
-   avant d'écrire quoi que ce soit :**
-   - **Les prénoms.** Ils ne sont écrits nulle part dans le dépôt. À demander à
-     Stéphane, qui seul a la liste dans la Play Console. Prénoms seuls, jamais
-     les adresses e-mail des comptes de test.
-   - **Où les mettre.** Deux endroits possibles, de coût très différent. La
-     **fiche Play** se modifie dans la console sans release ni code, et la
-     description est déjà bilingue — c'est le chemin court. Un **écran de
-     crédits dans le jeu** n'existe pas : il n'y a aujourd'hui aucune surface
-     « à propos », donc il faudrait la créer, la traduire dans les deux langues
-     et la couvrir dans `tests/smoke.mjs`. Choix non tranché.
-
-   Leur demander leur accord avant publication : un prénom reste une donnée
-   personnelle, et l'app se vante à juste titre de n'en collecter aucune.
-
+4. **Livré le 17 septembre — les remerciements** (PR #16, `fcbd65f`, vu sur
+   téléphone). Bouton « 💛 Merci aux testeurs » en bas de l'accueil ; la carte
+   montre les 13 prénoms (`TESTERS` dans `index.html`, alphabétique) comme des
+   étiquettes aux couleurs des continents. Prénoms fournis par Stéphane, non
+   traduits.
 5. **Livré le 17 septembre — plus d'anecdotes sur un continent entier ni sur
    Le Monde** (PR #9, `3696964`, testé sur téléphone). La carte latérale qui ne
    se fermait pas a disparu entièrement, avec `FACT_MODAL_MAX` et
