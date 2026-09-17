@@ -425,6 +425,13 @@ if ('serviceWorker' in navigator) {
   @keyframes badFlash { 0%,100%{opacity:0;transform:translate(-50%,8px)} 15%,75%{opacity:1;transform:translate(-50%,0)} }
   @keyframes hintPulse { 0%{transform:scale(.5);opacity:.95} 70%{transform:scale(2.6);opacity:0} 100%{transform:scale(2.6);opacity:0} }
 
+  /* Placed labels step aside while an answer is in hand, and while the map is
+     being dragged or pinched — the two moments the map underneath matters and
+     the labels do not. The gesture writes its transform straight to the DOM
+     without a render, so its half has to be a class, not a binding. */
+  .g-placed-label { opacity: 1; transition: opacity .15s ease; }
+  .g-in-hand .g-placed-label, .g-panning .g-placed-label { opacity: .3; }
+
   /* Use dynamic viewport height on mobile so the browser URL bar doesn't hide the tray. */
   @supports (height: 100dvh) {
     .g-playroot { height: 100dvh !important; }
@@ -654,7 +661,7 @@ if ('serviceWorker' in navigator) {
       <div class="g-map" style="flex:1;position:relative;display:flex;min-width:0;padding:18px;">
        <div ref="{{ fitRefObj }}" style="flex:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;">
         <div data-map-pan="" ref="{{ vpRefObj }}" style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:16px;touch-action:none;animation:{{ shakeAnim }};cursor:{{ mapCursor }};">
-         <div ref="{{ panRefObj }}" style="position:absolute;inset:0;transform:translate({{ panX }}px,{{ panY }}px) scale({{ zoom }});transform-origin:center center;">
+         <div ref="{{ panRefObj }}" class="{{ panClass }}" style="position:absolute;inset:0;transform:translate({{ panX }}px,{{ panY }}px) scale({{ zoom }});transform-origin:center center;">
           <!-- Aspect-correct map box, centered by fitMap(); the pan viewport itself
                fills the whole available area so zooming reveals map, not margins. -->
           <div ref="{{ mapBoxRefObj }}" style="position:absolute;left:0;top:0;width:100%;height:100%;">
@@ -694,7 +701,7 @@ if ('serviceWorker' in navigator) {
               </div>
             </sc-for>
             <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
-              <div style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});opacity:{{ placedLabelOpacity }};transition:opacity .15s ease;">
+              <div class="g-placed-label" style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
                 <div style="display:flex;align-items:center;gap:5px;font-family:'Fredoka';font-weight:600;font-size:13.5px;color:{{ p.color }};background:#fff;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.16);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"><span style="display:{{ p.flagDisplay }};width:19px;height:13px;border-radius:2px;background-image:url('{{ p.flag }}');background-size:cover;background-position:center;box-shadow:0 0 0 1px #EFE0C1;"></span>{{ p.label }}</div>
               </div>
             </sc-for>
@@ -1274,7 +1281,7 @@ class Component extends DCLogic {
       this._panStart = { x:e.clientX, y:e.clientY, px:this._gest.panX, py:this._gest.panY };
     }
     this._panning = true;
-    if (this.vpRef.current) this.vpRef.current.style.cursor = 'grabbing';
+    if (this.vpRef.current) { this.vpRef.current.style.cursor = 'grabbing'; this.vpRef.current.classList.add('g-panning'); }
     if (this._mapBound) return;
     this._mapBound = true;
     this._mapMove = (ev) => {
@@ -1304,7 +1311,7 @@ class Component extends DCLogic {
         window.removeEventListener('pointerup', this._mapUp);
         window.removeEventListener('pointercancel', this._mapUp);
         this._mapBound = false; this._panning = false; this._panStart = null;
-        if (this.vpRef.current) this.vpRef.current.style.cursor = this._gest.zoom>1?'grab':'default';
+        if (this.vpRef.current) { this.vpRef.current.style.cursor = this._gest.zoom>1?'grab':'default'; this.vpRef.current.classList.remove('g-panning'); }
         this.setState({ zoom:this._gest.zoom, panX:this._gest.panX, panY:this._gest.panY });
         this._gest = null;
         // A clean tap (no movement, no pinch) with a selected chip places it
@@ -1886,7 +1893,7 @@ class Component extends DCLogic {
       // further in you go — 60px against a map 8 times wider is an eighth of the
       // ground it covered at x1 — so shrinking it with the zoom fixes nothing
       // and only makes it unreadable. Crowding is a low-zoom problem.
-      base.placedLabelOpacity = (S.dragId || S.selectedId) ? 0.3 : 1;
+      base.panClass = (S.dragId || S.selectedId) ? 'g-in-hand' : '';
       base.mapCursor = S.zoom>1 ? 'grab' : 'default';
       base.vpRefObj=this.vpRef; base.panRefObj=this.panRef; base.fitRefObj=this.fitRef; base.mapBoxRefObj=this.mapBoxRef;
       base.onZoomIn=()=>this.setZoom(this.state.zoom*1.4);
