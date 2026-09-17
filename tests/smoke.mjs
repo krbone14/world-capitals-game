@@ -574,6 +574,55 @@ const wrongSize = zoomBits.screenSizes.filter(([, s]) => Math.abs(s - 1) > 0.02)
 check(wrongSize.length === 0,
   `a label keeps its on-screen size at every zoom (${zoomBits.screenSizes.map(([z, s]) => 'x' + z + ':' + s.toFixed(2)).join(', ')})`);
 
+// ---- labels that would overlap ----
+// Two placed labels that would touch on screen: the newer keeps its label, the
+// older keeps its pin. Screen space, so zooming in pulls neighbours apart and
+// brings labels back — except Kinshasa and Brazzaville, 5 km apart, which no
+// zoom of this map separates: there the newer simply wins.
+console.log('\noverlapping labels');
+const overlap = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const place = async (id) => {
+    const g = c.GEO, cap = g.caps[id];
+    const b = c.mapBoxRef.current.getBoundingClientRect();
+    c.tryPlace(id, b.left + (cap.x / g.W) * b.width, b.top + (cap.y / g.H) * b.height);
+    await sleep(30); c._factAt = 0; c.closeFact(); await sleep(30);
+  };
+  const visible = () => [...document.querySelectorAll('.g-placed-label')]
+    .filter((el) => getComputedStyle(el).display !== 'none').map((el) => el.textContent.trim());
+  const enter = async (contId, regionId) => {
+    c.setState({ mode: 'cap', continentId: contId, screen: 'continent', factsOn: false });
+    await sleep(50); c.startLevel(regionId);
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 150)));
+  };
+
+  await enter('afrique', 'af-centre');
+  await place('COD'); await place('COG');
+  const congoAt1 = visible();
+  c.setZoom(c.MAX_ZOOM); await sleep(120);
+  const congoAtMax = visible();
+  c.setZoom(1);
+
+  // A region placed all but one (all would end the round): zooming in can
+  // only reveal labels, never hide more.
+  await enter('afrique', 'af-ouest');
+  const most = c.taskIds().slice(0, -1);
+  for (const id of most) await place(id);
+  await sleep(150);
+  const westAt1 = visible().length, westTotal = most.length;
+  c.setZoom(c.MAX_ZOOM); await sleep(120);
+  const westAtMax = visible().length;
+  c.setZoom(1);
+  c.setState({ screen: 'home', continentId: null, factsOn: true });
+  return { congoAt1, congoAtMax, westAt1, westAtMax, westTotal };
+});
+check(overlap.congoAt1.length === 1 && overlap.congoAt1[0] === 'Brazzaville',
+  `Kinshasa then Brazzaville: one label, the newer (saw ${JSON.stringify(overlap.congoAt1)})`);
+check(overlap.congoAtMax.length === 1, `and still one at x8 — 5 km apart, no zoom separates them (saw ${overlap.congoAtMax.length})`);
+check(overlap.westAt1 < overlap.westTotal, `West Africa nearly placed: some labels give way at x1 (${overlap.westAt1} of ${overlap.westTotal})`);
+check(overlap.westAtMax > overlap.westAt1, `and zooming in brings them back (${overlap.westAtMax} at x8)`);
+
 // ---- preferences and the reset ----
 console.log('\npreferences');
 const prefs = await page.evaluate(async () => {
