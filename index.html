@@ -1957,18 +1957,23 @@ class Component extends DCLogic {
       const ppu = (this._fit ? this._fit.w/GEO.W : 1) * S.zoom;
       const labelW = p => p.label.length*7.5 + 20 + (isFlag ? 24 : 0), labelH = 22;
       const touch = (a,b) => Math.abs(a.lx-b.lx)*ppu < (labelW(a)+labelW(b))/2 && Math.abs(a.ly-b.ly)*ppu < labelH;
+      // Offsets are screen pixels turned into map units, so a label stays the
+      // same distance from its pin at every zoom instead of drifting away as
+      // the map grows under it.
+      const up = 18/ppu, row = labelH/ppu;
       const settled = [];
       for (const p of base.pins.slice().sort((a,b)=>placed[a.id]-placed[b.id])) {
         const side = (labelW(p)/2 + 10)/ppu;
-        let best = null, crowd = Infinity;
-        for (const [dx,dy] of [[0,-15],[0,15],[side,0],[-side,0],[side,-15],[-side,-15],[side,15],[-side,15],[0,-15-labelH/ppu],[0,15+labelH/ppu]]) {
-          p.lx = p.x+dx; p.ly = p.y+dy;
+        const slots = [[0,-up],[0,up],[side,0],[-side,0],[side,-up],[-side,-up],[side,up],[-side,up],[0,-up-row],[0,up+row]];
+        let best = 0, crowd = Infinity;
+        for (let i = 0; i < slots.length; i++) {
+          p.lx = p.x+slots[i][0]; p.ly = p.y+slots[i][1];
           const n = settled.filter(q=>touch(q,p)).length;
-          if (n < crowd) { best = [dx,dy]; crowd = n; if (!n) break; }
+          if (n < crowd) { best = i; crowd = n; if (!n) break; }
         }
-        p.lx = p.x+best[0]; p.ly = p.y+best[1];
+        p.lx = p.x+slots[best][0]; p.ly = p.y+slots[best][1];
         p.labelLeftPct = p.lx/GEO.W*100; p.labelTopPct = p.ly/GEO.H*100;
-        if (best[1] !== -15) p.color = this.idShadow(p.id);
+        if (best) p.color = this.idShadow(p.id);
         settled.push(p);
       }
 
