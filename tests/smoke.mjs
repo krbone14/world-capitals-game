@@ -309,74 +309,84 @@ check(hint.flagged, 'the result screen is told the hint was used');
 check(hint.after && hint.after.stars === 3 && hint.after.best === hint.earned.best,
   `the hinted round banks nothing, leaving 3 stars and ${hint.earned && hint.earned.best} points`);
 
-// ---- how the anecdote is shown ----
-// Short levels keep the popup; long ones show the anecdote beside the map, and
-// the switch turns it off entirely. The structural part is that finishing used
-// to be a side effect of dismissing the last popup — these two paths have no
-// popup to dismiss, so the round has to end on its own.
+// ---- where the anecdote is shown ----
+// Regions and review rounds keep the popup; a whole continent or the whole
+// world is a final and shows none, whichever way it was entered, and hides the
+// switch for it. The criterion is the kind of level, not its size — Oceania is
+// 7 countries and still a final. The structural part is that finishing used to
+// be a side effect of dismissing the last popup — the paths without a popup
+// have to end the round on their own.
 console.log('\nanecdotes');
 const facts = await page.evaluate(async () => {
   const c = window.__dc;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const enter = async (contId, regionId) => {
+  const enter = async (contId, regionId, reviewIds) => {
     c.setState({ mode: 'cap', continentId: contId, screen: 'continent' });
     await sleep(50);
-    c.startLevel(regionId);
+    c.startLevel(regionId, reviewIds);
     await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 150)));
   };
+  const level = () => ({
+    n: c.taskIds().length, final: c.finalLevel(),
+    btn: !!document.querySelector('button[title="Anecdotes"]'),
+  });
   // Plays a whole level, never touching closeFact unless told to.
   const play = async (dismiss) => {
-    let sawPopup = false, sawCard = false;
+    let sawPopup = false;
     for (const id of c.taskIds()) {
       const g = c.GEO, cap = g.caps[id];
       const b = c.mapBoxRef.current.getBoundingClientRect();
       c.tryPlace(id, b.left + (cap.x / g.W) * b.width, b.top + (cap.y / g.H) * b.height);
       await sleep(25);
       if (c.state.factOpen) sawPopup = true;
-      if (c.state.factCardId) sawCard = true;
       if (dismiss) { c._factAt = 0; c.closeFact(); await sleep(20); }
     }
     await sleep(120);
-    return { sawPopup, sawCard, screen: c.state.screen };
+    return { sawPopup, screen: c.state.screen };
   };
 
-  // The real threshold, on the real levels.
-  await enter('amerique-sud', 'sa-cone-sud');
-  const shortLevel = { n: c.taskIds().length, long: c.longLevel() };
-  await enter('europe', 'all');
-  const europeAll = { n: c.taskIds().length, long: c.longLevel() };
-  await enter('monde', 'all');
-  const worldAll = { n: c.taskIds().length, long: c.longLevel() };
-
-  // Short level, anecdotes on: the popup, dismissed as before.
   c.setState({ factsOn: true });
+  await enter('amerique-sud', 'sa-cone-sud');
+  const region = level();
+  await enter('oceanie', 'all');
+  const oceaniaAll = level();
+  await enter('monde', 'europe');
+  const europeFromWorld = level();
+  await enter('monde', 'all');
+  const worldAll = level();
+
+  // A region: the popup, dismissed as before.
   await enter('amerique-sud', 'sa-cone-sud');
   const popup = await play(true);
 
-  // Same level forced over the threshold: the card, and nothing to dismiss.
-  const realMax = c.FACT_MODAL_MAX;
-  c.FACT_MODAL_MAX = 2;
-  await enter('amerique-sud', 'sa-cone-sud');
-  const beside = await play(false);
-  c.FACT_MODAL_MAX = realMax;
+  // A final: nothing to dismiss, and the round ends on its own.
+  await enter('oceanie', 'all');
+  const final = await play(false);
 
-  // Switched off: neither, and the round still ends.
+  // Reviewing mistakes from a final is not a final: the popup is back.
+  await enter('oceanie', 'all', c.idsOfRegion('oceanie', 'all').slice(0, 2));
+  const review = { ...level(), ...(await play(true)) };
+
+  // Switched off: no popup on a region either, and the round still ends.
   c.setState({ factsOn: false });
   await enter('amerique-sud', 'sa-cone-sud');
   const off = await play(false);
   c.setState({ factsOn: true });
 
-  return { shortLevel, europeAll, worldAll, popup, beside, off };
+  return { region, oceaniaAll, europeFromWorld, worldAll, popup, final, review, off };
 });
 
-check(!facts.shortLevel.long, `a ${facts.shortLevel.n}-country region keeps the popup`);
-check(facts.europeAll.long, `all of Europe (${facts.europeAll.n}) shows anecdotes beside the map`);
-check(facts.worldAll.long, `the whole world (${facts.worldAll.n}) shows anecdotes beside the map`);
-check(facts.popup.sawPopup && !facts.popup.sawCard, 'short level: the popup, not the card');
-check(facts.popup.screen === 'result', 'short level: dismissing the last popup still finishes it');
-check(facts.beside.sawCard && !facts.beside.sawPopup, 'long level: the card, and no popup at all');
-check(facts.beside.screen === 'result', 'long level: the round finishes with nothing to dismiss');
-check(!facts.off.sawPopup && !facts.off.sawCard, 'switched off: no anecdote of either kind');
+check(!facts.region.final && facts.region.btn, `a ${facts.region.n}-country region keeps anecdotes and their switch`);
+check(facts.oceaniaAll.final && !facts.oceaniaAll.btn, `all of Oceania (${facts.oceaniaAll.n}, under any size threshold) is a final without them`);
+check(facts.europeFromWorld.final, `a continent picked from the world tab (${facts.europeFromWorld.n}) is a final too`);
+check(facts.worldAll.final && !facts.worldAll.btn, `the whole world (${facts.worldAll.n}) is a final without them`);
+check(facts.popup.sawPopup, 'region: the popup');
+check(facts.popup.screen === 'result', 'region: dismissing the last popup still finishes it');
+check(!facts.final.sawPopup, 'final: no anecdote at all');
+check(facts.final.screen === 'result', 'final: the round finishes with nothing to dismiss');
+check(!facts.review.final && facts.review.btn && facts.review.sawPopup, 'review round of a final: anecdotes and their switch are back');
+check(facts.review.screen === 'result', 'review round: finishes as before');
+check(!facts.off.sawPopup, 'switched off: no anecdote');
 check(facts.off.screen === 'result', 'switched off: the round still finishes');
 
 // ---- micro-states, overall progress, and the lazy label points ----
