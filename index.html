@@ -701,7 +701,7 @@ if ('serviceWorker' in navigator) {
               </div>
             </sc-for>
             <sc-for list="{{ pins }}" as="p" hint-placeholder-count="0">
-              <div class="g-placed-label" style="position:absolute;left:{{ p.leftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
+              <div class="g-placed-label" style="position:absolute;left:{{ p.labelLeftPct }}%;top:{{ p.labelTopPct }}%;transform:translate(-50%,-50%) scale({{ invZoom }});">
                 <div style="display:flex;align-items:center;gap:5px;font-family:'Fredoka';font-weight:600;font-size:13.5px;color:{{ p.color }};background:#fff;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.16);animation:pinPop .45s cubic-bezier(.2,1.3,.5,1) both;"><span style="display:{{ p.flagDisplay }};width:19px;height:13px;border-radius:2px;background-image:url('{{ p.flag }}');background-size:cover;background-position:center;box-shadow:0 0 0 1px #EFE0C1;"></span>{{ p.label }}</div>
               </div>
             </sc-for>
@@ -1605,7 +1605,8 @@ class Component extends DCLogic {
   }
   resolveCorrect(id){
     this.playGood();
-    const placed={...this.state.placed, [id]:true};
+    // A sequence number, not `true`: labels take their place in placement order.
+    const placed={...this.state.placed, [id]:Object.keys(this.state.placed).length+1};
     const firstTry = !this.state.wrong[id];
     const score = this.state.score + (firstTry?10:5);
     // Pick a random anecdote for this country (index is language-independent,
@@ -1935,12 +1936,41 @@ class Component extends DCLogic {
         const cap=GEO.caps[id];
         if(isCountry || isFlag){
           const ctr = ctrOf(id);
-          return { leftPct: ctr.x/GEO.W*100, topPct: ctr.y/GEO.H*100, labelTopPct: (ctr.y-15)/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].cf:this.C[id].ce,
+          return { id, x:ctr.x, y:ctr.y, leftPct: ctr.x/GEO.W*100, topPct: ctr.y/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].cf:this.C[id].ce,
                    flag: isFlag ? this.flagUrl(id) : 'data:,', flagDisplay: isFlag ? 'inline-block' : 'none' };
         }
-        return { leftPct: cap.x/GEO.W*100, topPct: cap.y/GEO.H*100, labelTopPct: (cap.y-15)/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].capFr:this.C[id].capEn,
+        return { id, x:cap.x, y:cap.y, leftPct: cap.x/GEO.W*100, topPct: cap.y/GEO.H*100, color:this.idColor(id), label: lang==='fr'?this.C[id].capFr:this.C[id].capEn,
                  flag:'data:,', flagDisplay:'none' };
       });
+      // A label sits above its pin unless another label is already there: then
+      // it tries below, the sides, the diagonals, then a second row up or down,
+      // and takes the first free slot — or the least crowded one, since every
+      // answer stays readable. Oldest first, so a label already on the map
+      // never moves for a newer one.
+      // Screen space, because a label holds its on-screen size while the map
+      // scales under it: zooming in frees slots, and the pass runs on every
+      // render. A moved label and its pin share a darker colour, so two
+      // capitals a few pixels apart — Kinshasa and Brazzaville are 5 km — still
+      // read as two pairs and not as one pin with two names.
+      // ponytail: width estimated from the text rather than measured — 7.5px a
+      // character at this size plus the padding, the flag when there is one.
+      const ppu = (this._fit ? this._fit.w/GEO.W : 1) * S.zoom;
+      const labelW = p => p.label.length*7.5 + 20 + (isFlag ? 24 : 0), labelH = 22;
+      const touch = (a,b) => Math.abs(a.lx-b.lx)*ppu < (labelW(a)+labelW(b))/2 && Math.abs(a.ly-b.ly)*ppu < labelH;
+      const settled = [];
+      for (const p of base.pins.slice().sort((a,b)=>placed[a.id]-placed[b.id])) {
+        const side = (labelW(p)/2 + 10)/ppu;
+        let best = null, crowd = Infinity;
+        for (const [dx,dy] of [[0,-15],[0,15],[side,0],[-side,0],[side,-15],[-side,-15],[side,15],[-side,15],[0,-15-labelH/ppu],[0,15+labelH/ppu]]) {
+          p.lx = p.x+dx; p.ly = p.y+dy;
+          const n = settled.filter(q=>touch(q,p)).length;
+          if (n < crowd) { best = [dx,dy]; crowd = n; if (!n) break; }
+        }
+        p.lx = p.x+best[0]; p.ly = p.y+best[1];
+        p.labelLeftPct = p.lx/GEO.W*100; p.labelTopPct = p.ly/GEO.H*100;
+        if (best[1] !== -15) p.color = this.idShadow(p.id);
+        settled.push(p);
+      }
 
       const neutralChips = S.regionId==='all';
       base.chips = this.shuffleStable(taskIds).filter(id=>!placed[id]).map(id=>({

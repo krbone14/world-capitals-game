@@ -574,6 +574,64 @@ const wrongSize = zoomBits.screenSizes.filter(([, s]) => Math.abs(s - 1) > 0.02)
 check(wrongSize.length === 0,
   `a label keeps its on-screen size at every zoom (${zoomBits.screenSizes.map(([z, s]) => 'x' + z + ':' + s.toFixed(2)).join(', ')})`);
 
+// ---- labels that would overlap ----
+// A placed label sits above its pin unless that spot is taken; then it moves —
+// below, right, left — and keeps its pin's colour, which darkens with it so the
+// pair still reads as a pair. Every answer stays visible. Measured on the real
+// boxes, not on the estimate the game positions with.
+console.log('\noverlapping labels');
+const overlap = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const place = async (id) => {
+    const g = c.GEO, cap = g.caps[id];
+    const b = c.mapBoxRef.current.getBoundingClientRect();
+    c.tryPlace(id, b.left + (cap.x / g.W) * b.width, b.top + (cap.y / g.H) * b.height);
+    await sleep(30); c._factAt = 0; c.closeFact(); await sleep(30);
+  };
+  const labels = () => [...document.querySelectorAll('.g-placed-label > div')];
+  const overlaps = () => {
+    const r = labels().map((el) => el.getBoundingClientRect());
+    let n = 0;
+    for (let i = 0; i < r.length; i++) for (let j = i + 1; j < r.length; j++)
+      if (r[i].left < r[j].right && r[j].left < r[i].right && r[i].top < r[j].bottom && r[j].top < r[i].bottom) n++;
+    return n;
+  };
+  const enter = async (contId, regionId) => {
+    c.setState({ mode: 'cap', continentId: contId, screen: 'continent', factsOn: false });
+    await sleep(50); c.startLevel(regionId);
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 150)));
+  };
+
+  await enter('afrique', 'af-centre');
+  await place('COD'); await place('COG');
+  const congo = { n: labels().length, overlaps: overlaps(),
+    colours: new Set(labels().map((el) => getComputedStyle(el).color)).size };
+
+  // A region placed all but one (all would end the round).
+  await enter('afrique', 'af-ouest');
+  const most = c.taskIds().slice(0, -1);
+  for (const id of most) await place(id);
+  await sleep(150);
+  const westAt1 = { n: labels().length, overlaps: overlaps() };
+  c.setZoom(2); await sleep(150);
+  const westAt2 = { n: labels().length, overlaps: overlaps() };
+  c.setZoom(c.MAX_ZOOM); await sleep(150);
+  const westAtMax = { n: labels().length, overlaps: overlaps() };
+  c.setZoom(1);
+  c.setState({ screen: 'home', continentId: null, factsOn: true });
+  return { congo, westAt1, westAt2, westAtMax, total: most.length };
+});
+check(overlap.congo.n === 2 && overlap.congo.overlaps === 0,
+  `Kinshasa and Brazzaville: two labels, not touching (saw ${overlap.congo.n}, ${overlap.congo.overlaps} overlapping)`);
+check(overlap.congo.colours === 2, `and the moved pair in its own colour (saw ${overlap.congo.colours} colour(s))`);
+check(overlap.westAt1.n === overlap.total, `West Africa nearly placed: every label visible (${overlap.westAt1.n} of ${overlap.total})`);
+// Fifteen labels on one coast do not all fit at x1 — nine pairs touched before
+// this; the slots bring it to two — and from x2 there is room for every one.
+check(overlap.westAt1.overlaps <= 3, `and a crowded coast is down to a few touching at x1 (saw ${overlap.westAt1.overlaps}, was 9)`);
+check(overlap.westAt2.overlaps === 0, `none at x2 (saw ${overlap.westAt2.overlaps})`);
+check(overlap.westAtMax.overlaps === 0, `none at x8 (saw ${overlap.westAtMax.overlaps})`);
+
 // ---- preferences and the reset ----
 console.log('\npreferences');
 const prefs = await page.evaluate(async () => {
