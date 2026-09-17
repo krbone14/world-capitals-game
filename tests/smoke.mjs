@@ -659,6 +659,44 @@ check(overlap.westAt1.overlaps <= 3, `and a crowded coast is down to a few touch
 check(overlap.westAt2.overlaps === 0, `none at x2 (saw ${overlap.westAt2.overlaps})`);
 check(overlap.westAtMax.overlaps === 0, `none at x8 (saw ${overlap.westAtMax.overlaps})`);
 
+// ---- the world: dots and chip order ----
+// Island targets hold their on-screen size like pins and labels — a 4-unit
+// circle was invisible on the world at x1 and hid whole countries at x8. And
+// the world deals its 172 chips alphabetically: shuffled, finding one was a
+// search. Flags keep the shuffle, there is no text to sort.
+console.log('\nthe world');
+const world = await page.evaluate(async () => {
+  const c = window.__dc;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const enter = async (mode, contId, regionId) => {
+    c.setState({ mode, factsOn: false }); c.openContinent(contId);
+    while (!c.GEO) await sleep(30);
+    c.startLevel(regionId);
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 200)));
+  };
+  const chips = () => [...document.querySelectorAll('.g-chip')].map((el) => el.textContent.trim());
+  const sorted = (a) => a.every((t, i) => !i || a[i - 1].localeCompare(t, 'fr') <= 0);
+  const dot = () => document.querySelector('circle[stroke="#fff"]').getBoundingClientRect().width;
+
+  await enter('cap', 'monde', 'all');
+  const capsAlpha = sorted(chips()), n = chips().length;
+  const dotAt1 = dot();
+  c.setZoom(c.MAX_ZOOM); await sleep(150);
+  const dotAtMax = dot();
+  c.setZoom(1); await sleep(100);
+  await enter('flag', 'monde', 'all');
+  const flagsShuffled = !sorted([...document.querySelectorAll('.g-chip')].map((el) => el.dataset.capId));
+  await enter('cap', 'afrique', 'af-ouest');
+  const regionShuffled = !sorted(chips());
+  c.setState({ screen: 'home', continentId: null, factsOn: true });
+  return { capsAlpha, n, dotAt1, dotAtMax, flagsShuffled, regionShuffled };
+});
+check(world.capsAlpha && world.n > 100, `the world deals its ${world.n} capitals alphabetically`);
+check(world.flagsShuffled, 'flags on the world stay shuffled');
+check(world.regionShuffled, 'a region still shuffles its chips');
+check(world.dotAt1 > 6 && Math.abs(world.dotAt1 - world.dotAtMax) <= 2,
+  `an island dot keeps its on-screen size (${world.dotAt1.toFixed(1)}px at x1, ${world.dotAtMax.toFixed(1)}px at x8)`);
+
 // ---- preferences and the reset ----
 console.log('\npreferences');
 const prefs = await page.evaluate(async () => {
