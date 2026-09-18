@@ -126,7 +126,11 @@ combien de jours ; la liste nominative n'est que dans `groups.google.com →
 Membres` ; l'onglet *Statistiques* ne sert à rien ici (agrégation quotidienne
 différée, effectifs masqués dès qu'on ventile).
 
-**Accès à la production accordé le 18 septembre**, demande envoyée la veille. Le formulaire, à 300 caractères par
+**Accès à la production accordé le 18 septembre**, demande envoyée la veille.
+Le même jour : release 53 (1.0) déployée sur le canal fermé à 19:28 sans nouvel
+examen, puis **promue en production, tous pays — en cours d'examen chez
+Google** au soir du 18. Le jour d'essai de l'app empaquetée sur le canal
+fermé a été sauté, choix de Stéphane. Le formulaire, à 300 caractères par
 case, portait sur le recrutement (entourage, groupe Google de 14, coché
 « facile »), l'engagement, les retours et ce qui en a été fait, le public,
 les spécificités, les installations attendues (0 à 10 000) et ce qui a décidé
