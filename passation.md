@@ -126,17 +126,18 @@ combien de jours ; la liste nominative n'est que dans `groups.google.com →
 Membres` ; l'onglet *Statistiques* ne sert à rien ici (agrégation quotidienne
 différée, effectifs masqués dès qu'on ventile).
 
-**Demande de production envoyée le 17 septembre.** En attente de la réponse
-de Google, en général quelques jours. Le formulaire, à 300 caractères par
+**Accès à la production accordé le 18 septembre**, demande envoyée la veille. Le formulaire, à 300 caractères par
 case, portait sur le recrutement (entourage, groupe Google de 14, coché
 « facile »), l'engagement, les retours et ce qui en a été fait, le public,
 les spécificités, les installations attendues (0 à 10 000) et ce qui a décidé
 de la mise en production. Les réponses citaient les quatre retours ci-dessous
 et annonçaient deux détails restants pour la prochaine version.
 
-L'accès, une fois accordé, vaut pour le compte : il n'oblige pas à publier la
-v25. La première version de production sera la v26 si les chantiers ci-dessous
-sont prêts à temps, sinon la v25 telle quelle.
+L'accès vaut pour le compte, pas pour une version. La première version de
+production est l'AAB construit le 17 septembre depuis `8d7aa97`, `versionCode`
+53, avec tout ce qui suit — d'abord un jour sur le canal fermé, puisque les
+essais téléphone ont été faits sur le site et non sur l'app empaquetée, puis
+promotion en production.
 
 Les quatre retours du test fermé et leurs corrections, tous livrés avant le
 4 septembre :
