@@ -208,13 +208,14 @@ téléphone :**
   Les 172 étiquettes du monde sont triées par ordre alphabétique (capitales et
   pays ; drapeaux mélangés faute de texte) ; les régions restent mélangées.
 
-**itch.io — en cours (19 septembre).** Page `krbone14.itch.io/capitals-of-the-world`,
-en anglais, brouillon. Piège rencontré : un zip fait avec PowerShell
-`Compress-Archive` écrit les chemins avec des antislashs, et itch sert alors
-tout `assets/` en 404 — le jeu affiche ses gabarits `{{ }}` bruts. Faire le
-zip avec Python `zipfile` (chemins en `/`), `index.html` à la racine. Reste à
-vérifier le jeu dans le cadre, passer en Public, et ajouter le lien Google Play
-une fois l'app en production.
+**itch.io — publié le 19 septembre :** https://krbone14.itch.io/capitals-of-the-world
+(page en anglais, jeu bilingue, gratuit sans dons, embed 1024 × 720, mobile
+friendly, plein écran). Le zip est `dist/` avec `index.html` à la racine —
+**à faire avec Python `zipfile`**, pas PowerShell `Compress-Archive`, qui écrit
+des antislashs dans les chemins et fait servir tout `assets/` en 404 (le jeu
+affiche alors ses gabarits `{{ }}` bruts). Mettre à jour = re-téléverser le
+zip sur la page d'édition. Reste à ajouter le lien Google Play (*App store
+links*) quand l'app sera en production.
 
 ---
 
