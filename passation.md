@@ -142,6 +142,11 @@ point à retenir — **renvoyer ou modifier quoi que ce soit remet le compteur
 d'examen à zéro**, donc ne pas toucher à « Supprimer les modifications » tant
 que le support n'a pas répondu.
 
+**Réponse du support le 7 octobre** (dossier `2-0003000041281`) : demande
+**escaladée en examen prioritaire** auprès de l'équipe de revue, avec consigne
+formelle de n'envoyer aucune nouvelle version tant que l'examen en cours n'est
+pas terminé. Le suivi se fait dans la console, pas par e-mail.
+
 **Deux pièges de lecture, vérifiés :** `Production · Actif · 177 pays` ne veut
 dire que « une release existe sur ce canal », pas qu'elle est publique ; et la
 fiche `play.google.com/store/apps/details?id=io.github.krbone14.worldcapitals`
