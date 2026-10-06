@@ -126,10 +126,29 @@ combien de jours ; la liste nominative n'est que dans `groups.google.com →
 Membres` ; l'onglet *Statistiques* ne sert à rien ici (agrégation quotidienne
 différée, effectifs masqués dès qu'on ventile).
 
-**Accès à la production accordé le 18 septembre**, demande envoyée la veille.
-Le même jour : release 53 (1.0) déployée sur le canal fermé à 19:28 sans nouvel
-examen, puis **promue en production, tous pays — en cours d'examen chez
-Google** au soir du 18. Le jour d'essai de l'app empaquetée sur le canal
+**Accès à la production accordé le 18 septembre**, demande envoyée la veille ;
+release 53 (1.0) déployée sur le canal fermé à 19:28 sans nouvel examen, puis
+promue en production le 19, tous pays. **Toujours en examen au 28 septembre**,
+soit dix jours — la norme haute pour une première production sur un compte
+personnel neuf, mais sans aucun message de Google (notifications vides).
+
+**Ticket ouvert au support Play le 6 octobre** (17 jours d'examen), via
+`Aide → Nous contacter → Versions de l'appli → Publication d'appli → « J'ai
+envoyé une nouvelle appli ou une mise à jour, mais elle n'est pas en ligne »`.
+Le formulaire ne répond qu'en anglais, chinois, coréen ou japonais. La réponse
+automatique de l'IA récite les 7 jours sans tenir compte de la durée réelle :
+cliquer « Non, créer une demande d'assistance ». Elle confirme en revanche un
+point à retenir — **renvoyer ou modifier quoi que ce soit remet le compteur
+d'examen à zéro**, donc ne pas toucher à « Supprimer les modifications » tant
+que le support n'a pas répondu.
+
+**Deux pièges de lecture, vérifiés :** `Production · Actif · 177 pays` ne veut
+dire que « une release existe sur ce canal », pas qu'elle est publique ; et la
+fiche `play.google.com/store/apps/details?id=io.github.krbone14.worldcapitals`
+s'affiche normalement pour un compte **testeur ou développeur**, bouton
+*Installer* et compteur de téléchargements compris. Le seul test valable est
+d'ouvrir cette URL **déconnecté** : tant qu'elle répond 404, l'app n'est pas
+publique. Le vrai état est `État de la mise à jour` en haut du tableau de bord. Le jour d'essai de l'app empaquetée sur le canal
 fermé a été sauté, choix de Stéphane. Le formulaire, à 300 caractères par
 case, portait sur le recrutement (entourage, groupe Google de 14, coché
 « facile »), l'engagement, les retours et ce qui en a été fait, le public,
