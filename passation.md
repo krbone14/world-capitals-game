@@ -126,62 +126,32 @@ combien de jours ; la liste nominative n'est que dans `groups.google.com →
 Membres` ; l'onglet *Statistiques* ne sert à rien ici (agrégation quotidienne
 différée, effectifs masqués dès qu'on ventile).
 
-**Accès à la production accordé le 18 septembre**, demande envoyée la veille ;
-release 53 (1.0) déployée sur le canal fermé à 19:28 sans nouvel examen, puis
-promue en production le 19, tous pays. **Toujours en examen au 28 septembre**,
-soit dix jours — la norme haute pour une première production sur un compte
-personnel neuf, mais sans aucun message de Google (notifications vides).
+**L'application est publiée sur le Play Store** depuis le 6 octobre 2026 au
+soir — vérifié le 7 depuis la France, déconnecté : HTTP 200, fiche complète,
+PEGI 3, « aucune donnée collectée ».
 
-**Ticket ouvert au support Play le 6 octobre** (17 jours d'examen), via
-`Aide → Nous contacter → Versions de l'appli → Publication d'appli → « J'ai
-envoyé une nouvelle appli ou une mise à jour, mais elle n'est pas en ligne »`.
-Le formulaire ne répond qu'en anglais, chinois, coréen ou japonais. La réponse
-automatique de l'IA récite les 7 jours sans tenir compte de la durée réelle :
-cliquer « Non, créer une demande d'assistance ». Elle confirme en revanche un
-point à retenir — **renvoyer ou modifier quoi que ce soit remet le compteur
-d'examen à zéro**, donc ne pas toucher à « Supprimer les modifications » tant
-que le support n'a pas répondu.
+`https://play.google.com/store/apps/details?id=io.github.krbone14.worldcapitals`
 
-**Réponse du support le 7 octobre** (dossier `2-0003000041281`) : demande
-**escaladée en examen prioritaire** auprès de l'équipe de revue, avec consigne
-formelle de n'envoyer aucune nouvelle version tant que l'examen en cours n'est
-pas terminé. Le suivi se fait dans la console, pas par e-mail.
+**Le chemin, parce qu'il a coûté trois semaines :** accès production accordé le
+18 septembre, release 53 (1.0) promue le 19 à 00:07 — puis **bloquée en examen
+pendant 17 jours**, sans aucun message, avec « Conformité aux règles » et
+« Contenu de l'application » parfaitement propres. Un ticket au support
+(`Aide → Nous contacter → Versions de l'appli → Publication d'appli → « J'ai
+envoyé une nouvelle appli, mais elle n'est pas en ligne »`, dossier
+`2-0003000041281`) a été escaladé en examen prioritaire et **l'app est sortie
+le lendemain**. À refaire sans hésiter au-delà de 10 jours : le formulaire ne
+répond qu'en anglais, et sa réponse automatique récite les 7 jours sans voir la
+durée réelle — cliquer « Non, créer une demande d'assistance ».
 
-**Deux pièges de lecture, vérifiés :** `Production · Actif · 177 pays` ne veut
+**Deux pièges de lecture, vérifiés :** `Production · Actif · 178 pays` ne veut
 dire que « une release existe sur ce canal », pas qu'elle est publique ; et la
-fiche `play.google.com/store/apps/details?id=io.github.krbone14.worldcapitals`
-s'affiche normalement pour un compte **testeur ou développeur**, bouton
-*Installer* et compteur de téléchargements compris. Le seul test valable est
-d'ouvrir cette URL **déconnecté** : tant qu'elle répond 404, l'app n'est pas
-publique. Le vrai état est `État de la mise à jour` en haut du tableau de bord. Le jour d'essai de l'app empaquetée sur le canal
-fermé a été sauté, choix de Stéphane. Le formulaire, à 300 caractères par
-case, portait sur le recrutement (entourage, groupe Google de 14, coché
-« facile »), l'engagement, les retours et ce qui en a été fait, le public,
-les spécificités, les installations attendues (0 à 10 000) et ce qui a décidé
-de la mise en production. Les réponses citaient les quatre retours ci-dessous
-et annonçaient deux détails restants pour la prochaine version.
+fiche Play s'affiche normalement pour un compte **testeur ou développeur**,
+bouton *Installer* et compteur de téléchargements compris. Le seul test valable
+est d'ouvrir l'URL **déconnecté** — 404 tant que l'app n'est pas publique.
 
-L'accès vaut pour le compte, pas pour une version. La première version de
-production est l'AAB construit le 17 septembre depuis `8d7aa97`, `versionCode`
-53, avec tout ce qui suit — d'abord un jour sur le canal fermé, puisque les
-essais téléphone ont été faits sur le site et non sur l'app empaquetée, puis
-promotion en production.
-
-Les quatre retours du test fermé et leurs corrections, tous livrés avant le
-4 septembre :
-
-1. Zoom insuffisant pour les petits pays (São Tomé, Guinée équatoriale,
-   Vatican) → `MAX_ZOOM` 5 → 8, et la tolérance de placement se resserre
-   enfin avec le zoom (`af01e83`).
-2. Les étiquettes posées cachent les pays restant à trouver → fondu à 0,3
-   pendant qu'une réponse est en main (`af01e83`).
-3. Étiquettes « microscopiques » à fort zoom — retour sur la première
-   correction → rétrécissement annulé, taille d'écran constante (`5ac8829`).
-4. Carte sombre sans frontières le soir → `color-scheme: only light`, Chrome
-   n'inverse plus les couleurs (`de7d190`).
-
-Deux retours restent ouverts et sont dans la liste ci-dessous : le fondu
-pendant le panoramique et le chevauchement des étiquettes à faible zoom.
+**Et une règle :** tout nouvel envoi remet le compteur d'examen à zéro. Pendant
+une attente, ne rien republier, ne pas toucher à « Supprimer les
+modifications ».
 
 **Chantiers pour la prochaine mise à jour** (tous livrés le 17 septembre) :
 
